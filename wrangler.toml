@@ -1,0 +1,54 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "aibtcdev-services"
+main = "src/index.ts"
+compatibility_date = "2024-11-09"
+account_id = "6f54e90da6d1b280fe00a153cb394c68"
+routes = [{ pattern = "services.aibtc.dev", custom_domain = true }]
+
+# Workers Logs
+# Docs: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
+# Configuration: https://developers.cloudflare.com/workers/observability/logs/workers-logs/#enable-workers-logs
+[observability]
+enabled = true
+
+# Want to use this with `npm run cf-typegen` but it overwrites the secrets
+# Will manage manually for now
+# [vars]
+# HIRO_API_KEY = ""
+# SUPABASE_URL = ""
+# SUPABASE_SERVICE_KEY = ""
+
+# Bind a Durable Object. Durable objects are a scale-to-zero compute primitive based on the actor model.
+# Durable Objects can live for as long as needed. Use these when you need a long-running "server", such as in realtime apps.
+# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#durable-objects
+[[durable_objects.bindings]]
+name = "AUTH_DO"
+class_name = "AuthDO"
+
+[[durable_objects.bindings]]
+name = "CONTEXT_DO"
+class_name = "ContextDO"
+
+[[durable_objects.bindings]]
+name = "DATABASE_DO"
+class_name = "DatabaseDO"
+
+[[durable_objects.bindings]]
+name = "SCHEDULER_DO"
+class_name = "SchedulerDO"
+
+[[durable_objects.bindings]]
+name = "TOOLS_DO"
+class_name = "ToolsDO"
+
+# Durable Object migrations.
+# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#migrations
+[[migrations]]
+tag = "v1"
+new_classes = ["AuthDO", "ContextDO", "DatabaseDO", "SchedulerDO", "ToolsDO"]
+
+# Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
+# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
+[[kv_namespaces]]
+binding = "AIBTCDEV_SERVICES_KV"
+id = "8a1d0cb7054d462e841fc7a70f820b8c"
