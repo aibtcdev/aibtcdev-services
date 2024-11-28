@@ -11,7 +11,7 @@ export class DatabaseDO extends DurableObject<Env> {
 	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH: string = '/db';
 	private readonly CACHE_PREFIX: string = this.BASE_PATH.replaceAll('/', '');
-	private readonly SUPPORTED_ENDPOINTS: string[] = [];
+	private readonly SUPPORTED_ENDPOINTS: string[] = ['/hello'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
@@ -61,6 +61,12 @@ export class DatabaseDO extends DurableObject<Env> {
 		if (endpoint === '' || endpoint === '/') {
 			return createJsonResponse({
 				message: `Supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
+			});
+		}
+
+		if (endpoint === '/hello') {
+			return createJsonResponse({
+				message: 'hello from auth!',
 			});
 		}
 
