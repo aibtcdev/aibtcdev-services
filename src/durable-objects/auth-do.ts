@@ -23,7 +23,7 @@ export class AuthDO extends DurableObject<Env> {
 	// private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH: string = '/auth';
 	private readonly CACHE_PREFIX: string = this.BASE_PATH.replaceAll('/', '');
-	private readonly SUPPORTED_ENDPOINTS: string[] = ['/get-auth-status', '/request-auth-token'];
+	private readonly SUPPORTED_ENDPOINTS: string[] = ['/request-auth-token', '/verify-address', '/verify-session-token'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
@@ -80,48 +80,8 @@ export class AuthDO extends DurableObject<Env> {
 			});
 		}
 
-		if (endpoint === '/get-auth-status') {
-			// accepts POST with address in body
-			if (request.method !== 'POST') {
-				return createJsonResponse(
-					{
-						error: `Unsupported method: ${request.method}, supported method: POST`,
-					},
-					405
-				);
-			}
-			// get address from body
-			const body = await request.json();
-			if (!body || typeof body !== 'object' || !('address' in body)) {
-				return createJsonResponse(
-					{
-						error: 'Missing or invalid "address" in request body',
-					},
-					400
-				);
-			}
-			const address = String(body.address);
-			// get session key from kv key list
-			const sessionKey = await this.env.AIBTCDEV_SERVICES_KV.get(address);
-			if (sessionKey === null) {
-				return createJsonResponse(
-					{
-						error: `Address ${address} not found in key list`,
-					},
-					401
-				);
-			}
-			// return 200 with session token
-
-			// check if user is in kv key list
-			// if not, return 401
-			// if yes, return 200
-			return createJsonResponse({
-				message: 'auth status',
-			});
-		}
-
 		if (endpoint === '/request-auth-token') {
+			// TODO: can restrict to shared secret as auth bearer token
 			// accepts POST with signedMessage in body
 			if (request.method !== 'POST') {
 				return createJsonResponse(
@@ -204,6 +164,87 @@ export class AuthDO extends DurableObject<Env> {
 					401
 				);
 			}
+		}
+
+		if (endpoint === '/verify-address') {
+			// TODO: can restrict to shared secret as auth bearer token
+			// accepts POST with address in body
+			if (request.method !== 'POST') {
+				return createJsonResponse(
+					{
+						error: `Unsupported method: ${request.method}, supported method: POST`,
+					},
+					405
+				);
+			}
+			// get address from body
+			const body = await request.json();
+			if (!body || typeof body !== 'object' || !('address' in body)) {
+				return createJsonResponse(
+					{
+						error: 'Missing or invalid "address" in request body',
+					},
+					400
+				);
+			}
+			const address = String(body.address);
+			// get session key from kv key list
+			const sessionKey = await this.env.AIBTCDEV_SERVICES_KV.get(`address:${address}`);
+			if (sessionKey === null) {
+				return createJsonResponse(
+					{
+						error: `Address ${address} not found in key list`,
+					},
+					401
+				);
+			}
+			// return 200 with session info
+			return createJsonResponse({
+				message: 'address successfully verified',
+				address,
+				sessionKey,
+			});
+		}
+
+		if (endpoint === '/verify-session-token') {
+			// TODO: can restrict to shared secret as auth bearer token
+			// accepts POST with sessionKey in body
+			if (request.method !== 'POST') {
+				return createJsonResponse(
+					{
+						error: `Unsupported method: ${request.method}, supported method: POST`,
+					},
+					405
+				);
+			}
+
+			// get session key from body
+			const body = await request.json();
+			if (!body || typeof body !== 'object' || !('sessionKey' in body)) {
+				return createJsonResponse(
+					{
+						error: 'Missing or invalid "sessionKey" in request body',
+					},
+					400
+				);
+			}
+			const sessionKey = String(body.sessionKey);
+			// get address from kv key list
+			const address = await this.env.AIBTCDEV_SERVICES_KV.get(`session:${sessionKey}`);
+			if (address === null) {
+				return createJsonResponse(
+					{
+						error: `Session key ${sessionKey} not found in key list`,
+					},
+					401
+				);
+			}
+			// return 200 with session info
+			return createJsonResponse({
+				message: 'session token successfully verified',
+				address,
+				sessionKey,
+			});
 		}
 
 		return createJsonResponse(
