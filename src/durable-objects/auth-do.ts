@@ -1,4 +1,16 @@
 import { DurableObject } from 'cloudflare:workers';
+import { sha256 } from '@noble/hashes/sha256';
+import { bytesToHex } from '@stacks/common';
+import { verifyMessageSignatureRsv } from '@stacks/encryption';
+import {
+	encodeStructuredData,
+	getAddressFromPublicKey,
+	publicKeyFromSignatureRsv,
+	stringAsciiCV,
+	tupleCV,
+	uintCV,
+	validateStacksAddress,
+} from '@stacks/transactions';
 import { Env } from '../../worker-configuration';
 // import { AppConfig } from '../config';
 import { createJsonResponse } from '../utils/requests-responses';
@@ -69,21 +81,129 @@ export class AuthDO extends DurableObject<Env> {
 		}
 
 		if (endpoint === '/get-auth-status') {
+			// accepts POST with address in body
+			if (request.method !== 'POST') {
+				return createJsonResponse(
+					{
+						error: `Unsupported method: ${request.method}, supported method: POST`,
+					},
+					405
+				);
+			}
+			// get address from body
+			const body = await request.json();
+			if (!body || typeof body !== 'object' || !('address' in body)) {
+				return createJsonResponse(
+					{
+						error: 'Missing or invalid "address" in request body',
+					},
+					400
+				);
+			}
+			const address = String(body.address);
+			// get session key from kv key list
+			const sessionKey = await this.env.AIBTCDEV_SERVICES_KV.get(address);
+			if (sessionKey === null) {
+				return createJsonResponse(
+					{
+						error: `Address ${address} not found in key list`,
+					},
+					401
+				);
+			}
+			// return 200 with session token
+
+			// check if user is in kv key list
+			// if not, return 401
+			// if yes, return 200
 			return createJsonResponse({
 				message: 'auth status',
 			});
 		}
 
 		if (endpoint === '/request-auth-token') {
-			return createJsonResponse({
-				message: 'auth token',
-			});
-		}
-
-		if (endpoint === '/hello') {
-			return createJsonResponse({
-				message: 'hello from auth!',
-			});
+			// accepts POST with signedMessage in body
+			if (request.method !== 'POST') {
+				return createJsonResponse(
+					{
+						error: `Unsupported method: ${request.method}, supported method: POST`,
+					},
+					405
+				);
+			}
+			// get signature from body
+			const body = await request.json();
+			if (!body || typeof body !== 'object' || !('signedMessage' in body)) {
+				return createJsonResponse(
+					{
+						error: 'Missing or invalid "signedMessage" in request body',
+					},
+					400
+				);
+			}
+			const signedMessage = String(body.signedMessage);
+			// try to verify signature
+			try {
+				// TODO: this needs a home, corresponds with front-end settings
+				// might fail signature check if it does not match
+				const expectedDomain = tupleCV({
+					name: stringAsciiCV('sprint.aibtc.dev'),
+					version: stringAsciiCV('0.0.1'),
+					'chain-id': uintCV(1), // hardcoded mainnet, testnet is u2147483648
+				});
+				// same here this has to match front-end
+				const expectedMessage = stringAsciiCV('Welcome to aibtcdev!');
+				const encodedMessage = encodeStructuredData({ message: expectedMessage, domain: expectedDomain });
+				const encodedMessageHashed = sha256(encodedMessage);
+				// get public key from signature
+				const publicKey = publicKeyFromSignatureRsv(bytesToHex(encodedMessageHashed), signedMessage);
+				// verify signature
+				const isSignatureVerified = verifyMessageSignatureRsv({
+					signature: signedMessage, // what they sent us
+					message: encodedMessageHashed, // what we expect
+					publicKey: publicKey, // public key from signature
+				});
+				if (!isSignatureVerified) {
+					return createJsonResponse(
+						{
+							error: `Failed to verify signature ${signedMessage}`,
+						},
+						401
+					);
+				}
+				// get address from public key
+				const addressFromPublicKey = getAddressFromPublicKey(publicKey, 'mainnet');
+				// verify valid stacks address returned
+				if (!validateStacksAddress(addressFromPublicKey)) {
+					return createJsonResponse(
+						{
+							error: `Failed to get address from public key ${publicKey}`,
+						},
+						401
+					);
+				}
+				// add address to kv key list with unique session key
+				// expires after 30 days and requires new signature from user
+				// signing before expiration extends the expiration
+				const sessionKey = crypto.randomUUID();
+				// first key allows us to filter by address
+				this.env.AIBTCDEV_SERVICES_KV.put(`address:${addressFromPublicKey}`, sessionKey, { expirationTtl: this.CACHE_TTL });
+				// second key allows us to filter by session key
+				this.env.AIBTCDEV_SERVICES_KV.put(`session:${sessionKey}`, addressFromPublicKey, { expirationTtl: this.CACHE_TTL });
+				// return 200 with session token
+				return createJsonResponse({
+					message: 'auth token successfully created',
+					address: addressFromPublicKey,
+					sessionKey,
+				});
+			} catch (error) {
+				return createJsonResponse(
+					{
+						error: `Failed to verify signature ${signedMessage}: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					401
+				);
+			}
 		}
 
 		return createJsonResponse(
