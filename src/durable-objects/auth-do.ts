@@ -1,17 +1,17 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
-import { AppConfig } from '../config';
+// import { AppConfig } from '../config';
 import { createJsonResponse } from '../utils/requests-responses';
 
 /**
  * Durable Object class for authentication
  */
 export class AuthDO extends DurableObject<Env> {
-	private readonly CACHE_TTL: number;
-	private readonly ALARM_INTERVAL_MS: number;
+	private readonly CACHE_TTL = 43200; // 30 days, in seconds
+	// private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH: string = '/auth';
 	private readonly CACHE_PREFIX: string = this.BASE_PATH.replaceAll('/', '');
-	private readonly SUPPORTED_ENDPOINTS: string[] = ['/hello'];
+	private readonly SUPPORTED_ENDPOINTS: string[] = ['/get-auth-status', '/request-auth-token'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
@@ -19,13 +19,15 @@ export class AuthDO extends DurableObject<Env> {
 		this.env = env;
 
 		// Initialize AppConfig with environment
-		const config = AppConfig.getInstance(env).getConfig();
-		this.CACHE_TTL = config.CACHE_TTL;
-		this.ALARM_INTERVAL_MS = config.ALARM_INTERVAL_MS;
+		// const config = AppConfig.getInstance(env).getConfig();
+		// this.CACHE_TTL = config.CACHE_TTL;
+		// this.ALARM_INTERVAL_MS = config.ALARM_INTERVAL_MS;
 
 		// Set up alarm to run at configured interval
-		ctx.storage.setAlarm(Date.now() + this.ALARM_INTERVAL_MS);
+		// ctx.storage.setAlarm(Date.now() + this.ALARM_INTERVAL_MS);
 	}
+
+	/* Uncomment with setAlarm above to enable alarm that fires off on interval from config or custom value
 
 	async alarm(): Promise<void> {
 		try {
@@ -40,6 +42,8 @@ export class AuthDO extends DurableObject<Env> {
 			}
 		}
 	}
+
+	*/
 
 	async fetch(request: Request): Promise<Response> {
 		const url = new URL(request.url);
@@ -61,6 +65,18 @@ export class AuthDO extends DurableObject<Env> {
 		if (endpoint === '' || endpoint === '/') {
 			return createJsonResponse({
 				message: `Supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
+			});
+		}
+
+		if (endpoint === '/get-auth-status') {
+			return createJsonResponse({
+				message: 'auth status',
+			});
+		}
+
+		if (endpoint === '/request-auth-token') {
+			return createJsonResponse({
+				message: 'auth token',
 			});
 		}
 
