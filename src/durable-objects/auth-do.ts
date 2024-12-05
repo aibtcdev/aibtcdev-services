@@ -93,15 +93,15 @@ export class AuthDO extends DurableObject<Env> {
 			}
 			// get signature from body
 			const body = await request.json();
-			if (!body || typeof body !== 'object' || !('signedMessage' in body)) {
+			if (!body || typeof body !== 'object' || !('data' in body)) {
 				return createJsonResponse(
 					{
-						error: 'Missing or invalid "signedMessage" in request body',
+						error: 'Missing or invalid "data" in request body',
 					},
 					400
 				);
 			}
-			const signedMessage = String(body.signedMessage);
+			const signedMessage = String(body.data);
 			// try to verify signature
 			try {
 				// TODO: this needs a home, corresponds with front-end settings
@@ -145,16 +145,16 @@ export class AuthDO extends DurableObject<Env> {
 				// add address to kv key list with unique session key
 				// expires after 30 days and requires new signature from user
 				// signing before expiration extends the expiration
-				const sessionKey = crypto.randomUUID();
+				const sessionToken = crypto.randomUUID();
 				// first key allows us to filter by address
-				this.env.AIBTCDEV_SERVICES_KV.put(`address:${addressFromPublicKey}`, sessionKey, { expirationTtl: this.CACHE_TTL });
+				this.env.AIBTCDEV_SERVICES_KV.put(`address:${addressFromPublicKey}`, sessionToken, { expirationTtl: this.CACHE_TTL });
 				// second key allows us to filter by session key
-				this.env.AIBTCDEV_SERVICES_KV.put(`session:${sessionKey}`, addressFromPublicKey, { expirationTtl: this.CACHE_TTL });
+				this.env.AIBTCDEV_SERVICES_KV.put(`session:${sessionToken}`, addressFromPublicKey, { expirationTtl: this.CACHE_TTL });
 				// return 200 with session token
 				return createJsonResponse({
 					message: 'auth token successfully created',
 					address: addressFromPublicKey,
-					sessionKey,
+					sessionToken,
 				});
 			} catch (error) {
 				return createJsonResponse(
@@ -179,15 +179,16 @@ export class AuthDO extends DurableObject<Env> {
 			}
 			// get address from body
 			const body = await request.json();
-			if (!body || typeof body !== 'object' || !('address' in body)) {
+			if (!body || typeof body !== 'object' || !('data' in body)) {
 				return createJsonResponse(
 					{
-						error: 'Missing or invalid "address" in request body',
+						error: 'Missing or invalid "data" in request body',
 					},
 					400
 				);
 			}
-			const address = String(body.address);
+			const address = String(body.data);
+			// TODO: verify address is valid here
 			// get session key from kv key list
 			const sessionKey = await this.env.AIBTCDEV_SERVICES_KV.get(`address:${address}`);
 			if (sessionKey === null) {
@@ -208,7 +209,7 @@ export class AuthDO extends DurableObject<Env> {
 
 		if (endpoint === '/verify-session-token') {
 			// TODO: can restrict to shared secret as auth bearer token
-			// accepts POST with sessionKey in body
+			// accepts POST with sessionToken in body
 			if (request.method !== 'POST') {
 				return createJsonResponse(
 					{
@@ -220,21 +221,21 @@ export class AuthDO extends DurableObject<Env> {
 
 			// get session key from body
 			const body = await request.json();
-			if (!body || typeof body !== 'object' || !('sessionKey' in body)) {
+			if (!body || typeof body !== 'object' || !('data' in body)) {
 				return createJsonResponse(
 					{
-						error: 'Missing or invalid "sessionKey" in request body',
+						error: 'Missing or invalid "data" in request body',
 					},
 					400
 				);
 			}
-			const sessionKey = String(body.sessionKey);
+			const sessionToken = String(body.data);
 			// get address from kv key list
-			const address = await this.env.AIBTCDEV_SERVICES_KV.get(`session:${sessionKey}`);
+			const address = await this.env.AIBTCDEV_SERVICES_KV.get(`session:${sessionToken}`);
 			if (address === null) {
 				return createJsonResponse(
 					{
-						error: `Session key ${sessionKey} not found in key list`,
+						error: `Session key ${sessionToken} not found in key list`,
 					},
 					401
 				);
@@ -243,9 +244,11 @@ export class AuthDO extends DurableObject<Env> {
 			return createJsonResponse({
 				message: 'session token successfully verified',
 				address,
-				sessionKey,
+				sessionToken,
 			});
 		}
+
+		// TODO: endpoint to revoke a session token
 
 		return createJsonResponse(
 			{
