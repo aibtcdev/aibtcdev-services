@@ -80,17 +80,20 @@ export class AuthDO extends DurableObject<Env> {
 			});
 		}
 
+		// TODO: all methods from this point forward require a shared key
+		// frontend and backend each have their own stored as secrets
+
+		// all methods from this point forward are POST
+		if (request.method !== 'POST') {
+			return createJsonResponse(
+				{
+					error: `Unsupported method: ${request.method}, supported method: POST`,
+				},
+				405
+			);
+		}
+
 		if (endpoint === '/request-auth-token') {
-			// TODO: can restrict to shared secret as auth bearer token
-			// accepts POST with signedMessage in body
-			if (request.method !== 'POST') {
-				return createJsonResponse(
-					{
-						error: `Unsupported method: ${request.method}, supported method: POST`,
-					},
-					405
-				);
-			}
 			// get signature from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('data' in body)) {
@@ -168,15 +171,6 @@ export class AuthDO extends DurableObject<Env> {
 
 		if (endpoint === '/verify-address') {
 			// TODO: can restrict to shared secret as auth bearer token
-			// accepts POST with address in body
-			if (request.method !== 'POST') {
-				return createJsonResponse(
-					{
-						error: `Unsupported method: ${request.method}, supported method: POST`,
-					},
-					405
-				);
-			}
 			// get address from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('data' in body)) {
@@ -209,16 +203,6 @@ export class AuthDO extends DurableObject<Env> {
 
 		if (endpoint === '/verify-session-token') {
 			// TODO: can restrict to shared secret as auth bearer token
-			// accepts POST with sessionToken in body
-			if (request.method !== 'POST') {
-				return createJsonResponse(
-					{
-						error: `Unsupported method: ${request.method}, supported method: POST`,
-					},
-					405
-				);
-			}
-
 			// get session key from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('data' in body)) {
