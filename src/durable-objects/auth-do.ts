@@ -182,7 +182,15 @@ export class AuthDO extends DurableObject<Env> {
 				);
 			}
 			const address = String(body.data);
-			// TODO: verify address is valid here
+			const validAddress = validateStacksAddress(address);
+			if (!validAddress) {
+				return createJsonResponse(
+					{
+						error: `Invalid address ${address}`,
+					},
+					400
+				);
+			}
 			// get session key from kv key list
 			const sessionKey = await this.env.AIBTCDEV_SERVICES_KV.get(`address:${address}`);
 			if (sessionKey === null) {
