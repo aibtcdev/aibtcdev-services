@@ -80,8 +80,37 @@ export class AuthDO extends DurableObject<Env> {
 			});
 		}
 
-		// TODO: all methods from this point forward require a shared key
-		// frontend and backend each have their own stored as secrets
+		// all methods from this point forward require a shared key
+		// frontend and backend each have their own stored in KV
+		// and implemented as env vars in each project
+		if (!request.headers.has('Authorization')) {
+			return createJsonResponse(
+				{
+					error: 'Missing Authorization header',
+				},
+				401
+			);
+		}
+		const frontendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-frontend');
+		const backendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-backend');
+		if (frontendKey === null || backendKey == null) {
+			return createJsonResponse(
+				{
+					error: 'Unable to load shared keys for frontend/backend',
+				},
+				401
+			);
+		}
+		const validKeys = [frontendKey, backendKey];
+		const requestKey = request.headers.get('Authorization');
+		if (requestKey === null || !validKeys.includes(requestKey)) {
+			return createJsonResponse(
+				{
+					error: 'Invalid Authorization key',
+				},
+				401
+			);
+		}
 
 		// all methods from this point forward are POST
 		if (request.method !== 'POST') {
@@ -170,7 +199,6 @@ export class AuthDO extends DurableObject<Env> {
 		}
 
 		if (endpoint === '/verify-address') {
-			// TODO: can restrict to shared secret as auth bearer token
 			// get address from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('data' in body)) {
@@ -210,7 +238,6 @@ export class AuthDO extends DurableObject<Env> {
 		}
 
 		if (endpoint === '/verify-session-token') {
-			// TODO: can restrict to shared secret as auth bearer token
 			// get session key from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('data' in body)) {
