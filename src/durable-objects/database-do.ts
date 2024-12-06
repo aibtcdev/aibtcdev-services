@@ -7,7 +7,6 @@ import { createJsonResponse } from '../utils/requests-responses';
  * Durable Object class for backend database calls
  */
 export class DatabaseDO extends DurableObject<Env> {
-	private readonly CACHE_TTL: number;
 	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH: string = '/db';
 	private readonly CACHE_PREFIX: string = this.BASE_PATH.replaceAll('/', '');
@@ -20,7 +19,6 @@ export class DatabaseDO extends DurableObject<Env> {
 
 		// Initialize AppConfig with environment
 		const config = AppConfig.getInstance(env).getConfig();
-		this.CACHE_TTL = config.CACHE_TTL;
 		this.ALARM_INTERVAL_MS = config.ALARM_INTERVAL_MS;
 
 		// Set up alarm to run at configured interval

@@ -20,7 +20,7 @@ import { createJsonResponse } from '../utils/requests-responses';
  */
 export class AuthDO extends DurableObject<Env> {
 	private readonly CACHE_TTL = 43200; // 30 days, in seconds
-	// private readonly ALARM_INTERVAL_MS: number;
+	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH: string = '/auth';
 	private readonly CACHE_PREFIX: string = this.BASE_PATH.replaceAll('/', '');
 	private readonly SUPPORTED_ENDPOINTS: string[] = ['/request-auth-token', '/verify-address', '/verify-session-token'];
@@ -31,12 +31,11 @@ export class AuthDO extends DurableObject<Env> {
 		this.env = env;
 
 		// Initialize AppConfig with environment
-		// const config = AppConfig.getInstance(env).getConfig();
-		// this.CACHE_TTL = config.CACHE_TTL;
-		// this.ALARM_INTERVAL_MS = config.ALARM_INTERVAL_MS;
+		const config = AppConfig.getInstance(env).getConfig();
+		this.ALARM_INTERVAL_MS = config.ALARM_INTERVAL_MS;
 
 		// Set up alarm to run at configured interval
-		// ctx.storage.setAlarm(Date.now() + this.ALARM_INTERVAL_MS);
+		ctx.storage.setAlarm(Date.now() + this.ALARM_INTERVAL_MS);
 	}
 
 	/* Uncomment with setAlarm above to enable alarm that fires off on interval from config or custom value

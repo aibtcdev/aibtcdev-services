@@ -7,7 +7,6 @@ import { createJsonResponse } from '../utils/requests-responses';
  * Durable Object class for providing transformed data as API endpoints
  */
 export class ContextDO extends DurableObject<Env> {
-	private readonly CACHE_TTL: number;
 	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH: string = '/context';
 	private readonly CACHE_PREFIX: string = this.BASE_PATH.replaceAll('/', '');
@@ -20,7 +19,6 @@ export class ContextDO extends DurableObject<Env> {
 
 		// Initialize AppConfig with environment
 		const config = AppConfig.getInstance(env).getConfig();
-		this.CACHE_TTL = config.CACHE_TTL;
 		this.ALARM_INTERVAL_MS = config.ALARM_INTERVAL_MS;
 
 		// Set up alarm to run at configured interval
