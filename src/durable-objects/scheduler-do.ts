@@ -7,10 +7,8 @@ import { createJsonResponse } from '../utils/requests-responses';
  * Durable Object class for scheduling and executing backend jobs
  */
 export class SchedulerDO extends DurableObject<Env> {
-	private readonly CACHE_TTL: number;
 	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH: string = '/scheduler';
-	private readonly CACHE_PREFIX: string = this.BASE_PATH.replaceAll('/', '');
 	private readonly SUPPORTED_ENDPOINTS: string[] = ['/hello'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -20,7 +18,6 @@ export class SchedulerDO extends DurableObject<Env> {
 
 		// Initialize AppConfig with environment
 		const config = AppConfig.getInstance(env).getConfig();
-		this.CACHE_TTL = config.CACHE_TTL;
 		this.ALARM_INTERVAL_MS = config.ALARM_INTERVAL_MS;
 
 		// Set up alarm to run at configured interval
@@ -66,7 +63,7 @@ export class SchedulerDO extends DurableObject<Env> {
 
 		if (endpoint === '/hello') {
 			return createJsonResponse({
-				message: 'hello from auth!',
+				message: 'hello from scheduler!',
 			});
 		}
 
