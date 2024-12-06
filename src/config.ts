@@ -22,7 +22,9 @@ export class AppConfig {
 			// supported services for API endpoints
 			SUPPORTED_SERVICES: ['/auth', '/context', '/database', '/scheduler', '/tools'],
 			// default interval for DO alarms
-			ALARM_INTERVAL_MS: 300000, // 5 minutes
+			// set really high until we start using it
+			// can override in the durable object too
+			ALARM_INTERVAL_MS: 28800000, // 8 hours
 		};
 	}
 }

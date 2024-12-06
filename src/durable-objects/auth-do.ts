@@ -37,8 +37,6 @@ export class AuthDO extends DurableObject<Env> {
 		ctx.storage.setAlarm(Date.now() + this.ALARM_INTERVAL_MS);
 	}
 
-	/* Uncomment with setAlarm above to enable alarm that fires off on interval from config or custom value
-
 	async alarm(): Promise<void> {
 		try {
 			console.log(`AuthDO: alarm activated`);
@@ -52,8 +50,6 @@ export class AuthDO extends DurableObject<Env> {
 			}
 		}
 	}
-
-	*/
 
 	async fetch(request: Request): Promise<Response> {
 		const url = new URL(request.url);

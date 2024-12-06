@@ -63,7 +63,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 		if (endpoint === '/hello') {
 			return createJsonResponse({
-				message: 'hello from auth!',
+				message: 'hello from database!',
 			});
 		}
 

@@ -34,38 +34,38 @@ export default {
 
 		if (path === '/') {
 			return createJsonResponse({
-				message: `Welcome to the aibtcdev-api-cache! Supported services: ${config.SUPPORTED_SERVICES.join(', ')}`,
+				message: `Welcome to aibtcdev-services! Supported services: ${config.SUPPORTED_SERVICES.join(', ')}`,
 			});
 		}
 
 		// For the Durable Object responses, the CORS headers will be added by the DO handlers
 
 		if (path.startsWith('/auth')) {
-			const id: DurableObjectId = env.AUTH_DO.idFromName('bns-do'); // create the instance
+			const id: DurableObjectId = env.AUTH_DO.idFromName('auth-do'); // create the instance
 			const stub = env.AUTH_DO.get(id); // get the stub for communication
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
 
 		if (path.startsWith('/context')) {
-			const id: DurableObjectId = env.CONTEXT_DO.idFromName('hiro-api-do'); // create the instance
+			const id: DurableObjectId = env.CONTEXT_DO.idFromName('context-do'); // create the instance
 			const stub = env.CONTEXT_DO.get(id); // get the stub for communication
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
 
 		if (path.startsWith('/database')) {
-			const id: DurableObjectId = env.DATABASE_DO.idFromName('stx-city-do'); // create the instance
+			const id: DurableObjectId = env.DATABASE_DO.idFromName('database-do'); // create the instance
 			const stub = env.DATABASE_DO.get(id); // get the stub for communication
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
 
 		if (path.startsWith('/scheduler')) {
-			let id: DurableObjectId = env.SCHEDULER_DO.idFromName('supabase-do'); // create the instance
+			let id: DurableObjectId = env.SCHEDULER_DO.idFromName('scheduler-do'); // create the instance
 			let stub = env.SCHEDULER_DO.get(id); // get the stub for communication
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
 
 		if (path.startsWith('/tools')) {
-			let id: DurableObjectId = env.TOOLS_DO.idFromName('supabase-do'); // create the instance
+			let id: DurableObjectId = env.TOOLS_DO.idFromName('tools-do'); // create the instance
 			let stub = env.TOOLS_DO.get(id); // get the stub for communication
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
