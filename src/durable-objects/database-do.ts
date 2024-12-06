@@ -8,8 +8,7 @@ import { createJsonResponse } from '../utils/requests-responses';
  */
 export class DatabaseDO extends DurableObject<Env> {
 	private readonly ALARM_INTERVAL_MS: number;
-	private readonly BASE_PATH: string = '/db';
-	private readonly CACHE_PREFIX: string = this.BASE_PATH.replaceAll('/', '');
+	private readonly BASE_PATH: string = '/database';
 	private readonly SUPPORTED_ENDPOINTS: string[] = ['/hello'];
 
 	constructor(ctx: DurableObjectState, env: Env) {

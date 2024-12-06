@@ -9,7 +9,6 @@ import { createJsonResponse } from '../utils/requests-responses';
 export class ContextDO extends DurableObject<Env> {
 	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH: string = '/context';
-	private readonly CACHE_PREFIX: string = this.BASE_PATH.replaceAll('/', '');
 	private readonly SUPPORTED_ENDPOINTS: string[] = ['/hello'];
 
 	constructor(ctx: DurableObjectState, env: Env) {

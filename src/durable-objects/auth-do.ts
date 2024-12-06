@@ -12,7 +12,7 @@ import {
 	validateStacksAddress,
 } from '@stacks/transactions';
 import { Env } from '../../worker-configuration';
-// import { AppConfig } from '../config';
+import { AppConfig } from '../config';
 import { createJsonResponse } from '../utils/requests-responses';
 
 /**
@@ -22,7 +22,6 @@ export class AuthDO extends DurableObject<Env> {
 	private readonly CACHE_TTL = 43200; // 30 days, in seconds
 	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH: string = '/auth';
-	private readonly CACHE_PREFIX: string = this.BASE_PATH.replaceAll('/', '');
 	private readonly SUPPORTED_ENDPOINTS: string[] = ['/request-auth-token', '/verify-address', '/verify-session-token'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
