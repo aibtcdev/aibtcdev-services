@@ -2,20 +2,65 @@
 
 /**
  * Create a new crew run for a profile. _(previously: "job")_
- * @param address The Stacks address for the user's profile.
+ * @param db The D1 database instance
+ * @param address The Stacks address for the user's profile
+ * @param crewId The ID of the crew being executed
+ * @param conversationId The ID of the conversation this execution belongs to
+ * @param input Optional user input for the execution
  */
-export function addCrewExecution(address: string) {}
+export async function addCrewExecution(
+  db: D1Database,
+  address: string,
+  crewId: number,
+  conversationId: number,
+  input?: string
+) {
+  const userCrewExecutions = new UserCrewExecutions(db);
+  const execution = await userCrewExecutions.create({
+    profile_id: address,
+    crew_id: crewId,
+    conversation_id: conversationId,
+    user_input: input,
+    total_tokens: 0,
+    successful_requests: 0
+  });
+  return execution;
+}
 
 /**
  * Get all executed crew runs for a profile. _(previously: "job")_
- * @param address The Stacks address for the user's profile.
+ * @param db The D1 database instance
+ * @param address The Stacks address for the user's profile
  */
-export function getCrewExecutions(address: string) {}
+export async function getCrewExecutions(db: D1Database, address: string) {
+  const userCrewExecutions = new UserCrewExecutions(db);
+  const executions = await userCrewExecutions.findMany({
+    where: {
+      profile_id: address
+    },
+    orderBy: {
+      created_at: 'desc'
+    }
+  });
+  return executions;
+}
 
 /**
  * Get all public crew configurations.
+ * @param db The D1 database instance
  */
-export function getPublicCrews() {}
+export async function getPublicCrews(db: D1Database) {
+  const userCrews = new UserCrews(db);
+  const crews = await userCrews.findMany({
+    where: {
+      crew_is_public: 1
+    },
+    orderBy: {
+      created_at: 'desc'
+    }
+  });
+  return crews;
+}
 
 /** CRON MANAGEMENT */
 
