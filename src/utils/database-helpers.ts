@@ -36,7 +36,14 @@ export function getEnabledCronsWithCrews() {}
  * @param address The Stacks address for the user's profile.
  * @param name The name of the conversation (optional).
  */
-export function addConversation(address: string, name?: string) {}
+export async function addConversation(db: D1Database, address: string, name: string = 'New Conversation') {
+  const userConversations = new UserConversations(db);
+  const conversation = await userConversations.create({
+    profile_id: address,
+    conversation_name: name
+  });
+  return conversation;
+}
 
 /**
  * Update or create a conversation with new messages.
@@ -47,8 +54,19 @@ export function updateConversation(address: string, messages: any[]) {}
 
 /**
  * Delete a specific conversation.
+ * @param address The Stacks address for the user's profile.
+ * @param conversationId The ID of the conversation to delete.
  */
-export function deleteConversation(address: string, conversationId: string) {}
+export async function deleteConversation(db: D1Database, address: string, conversationId: number) {
+  const userConversations = new UserConversations(db);
+  const result = await userConversations.delete({
+    where: {
+      id: conversationId,
+      profile_id: address
+    }
+  });
+  return result;
+}
 
 /**
  * Get a conversation.
@@ -66,7 +84,18 @@ export function getConversationWithJobs(conversationId: string) {}
  * Get all conversations for a profile.
  * @param address The Stacks address for the user's profile.
  */
-export function getConversations(address: string) {}
+export async function getConversations(db: D1Database, address: string) {
+  const userConversations = new UserConversations(db);
+  const conversations = await userConversations.findMany({
+    where: {
+      profile_id: address
+    },
+    orderBy: {
+      created_at: 'desc'
+    }
+  });
+  return conversations;
+}
 
 /**
  * Get all conversations with their associated jobs for a profile.
@@ -78,7 +107,18 @@ export function getConversationsWithJobs(address: string) {}
  * Get the most recent conversation for a profile.
  * @param address The Stacks address for the user's profile.
  */
-export function getLatestConversation(address: string) {}
+export async function getLatestConversation(db: D1Database, address: string) {
+  const userConversations = new UserConversations(db);
+  const conversation = await userConversations.findOne({
+    where: {
+      profile_id: address
+    },
+    orderBy: {
+      created_at: 'desc'
+    }
+  });
+  return conversation;
+}
 
 /**
  * Get the ID of the most recent conversation for a profile.
