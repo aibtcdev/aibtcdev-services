@@ -13,7 +13,7 @@ export interface IUserAgents {
 	agent_tools?: string; // Stored as JSON string
 }
 
-export class UserAgents extends Model<IUserAgents> {
+export class UserAgents extends Model<typeof UserAgents.prototype.schema> {
 	constructor(db: D1Database) {
 		super(db, 'user_agents');
 	}

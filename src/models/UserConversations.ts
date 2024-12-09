@@ -8,7 +8,7 @@ export interface IUserConversations {
   conversation_name: string;
 }
 
-export class UserConversations extends Model<IUserConversations> {
+export class UserConversations extends Model<typeof UserConversations.prototype.schema> {
   constructor(db: D1Database) {
     super(db, 'user_conversations');
   }

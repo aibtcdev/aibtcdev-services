@@ -13,7 +13,7 @@ export interface IUserCrewExecutions {
   successful_requests?: number;
 }
 
-export class UserCrewExecutions extends Model<IUserCrewExecutions> {
+export class UserCrewExecutions extends Model<typeof UserCrewExecutions.prototype.schema> {
   constructor(db: D1Database) {
     super(db, 'user_crew_executions');
   }
