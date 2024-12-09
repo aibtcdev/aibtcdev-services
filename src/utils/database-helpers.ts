@@ -35,7 +35,7 @@ export async function addCrewExecution(
   input?: string
 ) {
   const userCrewExecutions = getUserCrewExecutionsModel(env);
-  const execution = await userCrewExecutions.create({
+  const execution = await userCrewExecutions.InsertOne({
     profile_id: address,
     crew_id: crewId,
     conversation_id: conversationId,
@@ -53,13 +53,14 @@ export async function addCrewExecution(
  */
 export async function getCrewExecutions(env: Env, address: string) {
   const userCrewExecutions = getUserCrewExecutionsModel(env);
-  const executions = await userCrewExecutions.findMany({
+  const executions = await userCrewExecutions.All({
     where: {
       profile_id: address
     },
-    orderBy: {
-      created_at: 'desc'
-    }
+    orderBy: [{
+      column: 'created_at',
+      descending: true
+    }]
   });
   return executions;
 }
@@ -70,13 +71,14 @@ export async function getCrewExecutions(env: Env, address: string) {
  */
 export async function getPublicCrews(env: Env) {
   const userCrews = getUserCrewsModel(env);
-  const crews = await userCrews.findMany({
+  const crews = await userCrews.All({
     where: {
       crew_is_public: 1
     },
-    orderBy: {
-      created_at: 'desc'
-    }
+    orderBy: [{
+      column: 'created_at',
+      descending: true
+    }]
   });
   return crews;
 }
@@ -96,14 +98,15 @@ export async function getPublicCrews(env: Env) {
  */
 export async function getEnabledCrons(env: Env) {
   const userCrews = getUserCrewsModel(env);
-  const crews = await userCrews.findMany({
+  const crews = await userCrews.All({
     where: {
       crew_is_cron: 1,
       crew_is_enabled: 1
     },
-    orderBy: {
-      created_at: 'desc'
-    }
+    orderBy: [{
+      column: 'created_at',
+      descending: true
+    }]
   });
   return crews;
 }
@@ -123,14 +126,14 @@ export async function getEnabledCronsWithCrews(env: Env) {
 
   for (const crew of crews) {
     // Get the profile
-    const profile = await userProfile.findOne({
+    const profile = await userProfile.First({
       where: {
         stx_address: crew.profile_id
       }
     });
 
     // Get all agents for this crew
-    const agents = await userAgents.findMany({
+    const agents = await userAgents.All({
       where: {
         crew_id: crew.id
       }
@@ -138,7 +141,7 @@ export async function getEnabledCronsWithCrews(env: Env) {
 
     // Get all tasks for each agent
     for (const agent of agents) {
-      const tasks = await userTasks.findMany({
+      const tasks = await userTasks.All({
         where: {
           crew_id: crew.id,
           agent_id: agent.id
@@ -166,7 +169,7 @@ export async function getEnabledCronsWithCrews(env: Env) {
  */
 export async function addConversation(env: Env, address: string, name: string = 'New Conversation') {
   const userConversations = getUserConversationsModel(env);
-  const conversation = await userConversations.create({
+  const conversation = await userConversations.InsertOne({
     profile_id: address,
     conversation_name: name
   });
@@ -187,12 +190,13 @@ export async function updateConversation(
   name?: string
 ) {
   const userConversations = getUserConversationsModel(env);
-  const result = await userConversations.update({
-    conversation_name: name
-  }, {
+  const result = await userConversations.Update({
     where: {
       id: conversationId,
       profile_id: address
+    },
+    data: {
+      conversation_name: name
     }
   });
   return result;
@@ -205,7 +209,7 @@ export async function updateConversation(
  */
 export async function deleteConversation(env: Env, address: string, conversationId: number) {
   const userConversations = getUserConversationsModel(env);
-  const result = await userConversations.delete({
+  const result = await userConversations.Delete({
     where: {
       id: conversationId,
       profile_id: address
@@ -221,7 +225,7 @@ export async function deleteConversation(env: Env, address: string, conversation
  */
 export async function getConversation(env: Env, conversationId: number) {
   const userConversations = getUserConversationsModel(env);
-  const conversation = await userConversations.findOne({
+  const conversation = await userConversations.First({
     where: {
       id: conversationId
     }
@@ -248,13 +252,14 @@ export async function getConversationWithJobs(env: Env, conversationId: number) 
     return null;
   }
 
-  const executions = await userCrewExecutions.findMany({
+  const executions = await userCrewExecutions.All({
     where: {
       conversation_id: conversationId
     },
-    orderBy: {
-      created_at: 'desc'
-    }
+    orderBy: [{
+      column: 'created_at',
+      descending: true
+    }]
   });
 
   return {
@@ -269,13 +274,14 @@ export async function getConversationWithJobs(env: Env, conversationId: number) 
  */
 export async function getConversations(env: Env, address: string) {
   const userConversations = getUserConversationsModel(env);
-  const conversations = await userConversations.findMany({
+  const conversations = await userConversations.All({
     where: {
       profile_id: address
     },
-    orderBy: {
-      created_at: 'desc'
-    }
+    orderBy: [{
+      column: 'created_at',
+      descending: true
+    }]
   });
   return conversations;
 }
@@ -300,14 +306,15 @@ export async function getConversationsWithJobs(env: Env, address: string) {
 
   const result = [];
   for (const conversation of conversations) {
-    const executions = await userCrewExecutions.findMany({
+    const executions = await userCrewExecutions.All({
       where: {
         conversation_id: conversation.id,
         profile_id: address
       },
-      orderBy: {
-        created_at: 'desc'
-      }
+      orderBy: [{
+        column: 'created_at',
+        descending: true
+      }]
     });
 
     result.push({
@@ -325,13 +332,14 @@ export async function getConversationsWithJobs(env: Env, address: string) {
  */
 export async function getLatestConversation(env: Env, address: string) {
   const userConversations = getUserConversationsModel(env);
-  const conversation = await userConversations.findOne({
+  const conversation = await userConversations.First({
     where: {
       profile_id: address
     },
-    orderBy: {
-      created_at: 'desc'
-    }
+    orderBy: [{
+      column: 'created_at',
+      descending: true
+    }]
   });
   return conversation;
 }
@@ -356,25 +364,27 @@ export async function getConversationHistory(env: Env, conversationId: number) {
   const userCrewExecutionSteps = getUserCrewExecutionStepsModel(env);
 
   // Get all executions for this conversation
-  const executions = await userCrewExecutions.findMany({
+  const executions = await userCrewExecutions.All({
     where: {
       conversation_id: conversationId
     },
-    orderBy: {
-      created_at: 'asc'
-    }
+    orderBy: [{
+      column: 'created_at',
+      descending: false
+    }]
   });
 
   const history = [];
   for (const execution of executions) {
     // Get all steps for this execution
-    const steps = await userCrewExecutionSteps.findMany({
+    const steps = await userCrewExecutionSteps.All({
       where: {
         execution_id: execution.id
       },
-      orderBy: {
-        created_at: 'asc'
-      }
+      orderBy: [{
+        column: 'created_at',
+        descending: false
+      }]
     });
 
     history.push({
