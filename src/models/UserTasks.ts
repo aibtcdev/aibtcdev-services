@@ -1,24 +1,9 @@
-import { Model, DataTypes } from 'd1-orm';
+import { Model, DataTypes, type Infer } from 'd1-orm';
+import { getOrm } from './orm-config';
+import type { Env } from '../../worker-configuration';
 
-export interface IUserTasks {
-  id?: number;
-  created_at?: string;
-  updated_at?: string;
-  profile_id: string;
-  crew_id: number;
-  agent_id: number;
-  task_name: string;
-  task_description: string;
-  task_expected_output: string;
-}
-
-export class UserTasks extends Model<typeof UserTasks.prototype.schema> {
-  constructor(db: D1Database) {
-    super(db, 'user_tasks');
-  }
-
-  schema = {
-    id: { type: DataTypes.INTEGER, primary: true },
+const schema = {
+    id: { type: DataTypes.INTEGER, notNull: true },
     created_at: { type: DataTypes.STRING },
     updated_at: { type: DataTypes.STRING },
     profile_id: { type: DataTypes.STRING, notNull: true },
@@ -27,5 +12,20 @@ export class UserTasks extends Model<typeof UserTasks.prototype.schema> {
     task_name: { type: DataTypes.STRING, notNull: true },
     task_description: { type: DataTypes.STRING, notNull: true },
     task_expected_output: { type: DataTypes.STRING, notNull: true }
-  };
+};
+
+const schemaType = { columns: schema };
+
+export type IUserTasks = Infer<typeof schemaType>;
+
+export function getUserTasksModel(env: Env) {
+    return new Model(
+        {
+            D1Orm: getOrm(env),
+            tableName: 'user_tasks',
+            primaryKeys: 'id',
+            autoIncrement: 'id',
+        },
+        schema
+    );
 }
