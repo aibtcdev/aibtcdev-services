@@ -8,7 +8,8 @@ import { createJsonResponse } from '../utils/requests-responses';
  */
 export class DatabaseDO extends DurableObject<Env> {
 	private readonly ALARM_INTERVAL_MS: number;
-	private readonly BASE_PATH: string = '/database';
+	private readonly BASE_PATH = '/database';
+	private readonly KEY_PREFIX = 'db';
 	private readonly SUPPORTED_ENDPOINTS: string[] = ['/hello'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -65,6 +66,39 @@ export class DatabaseDO extends DurableObject<Env> {
 			return createJsonResponse({
 				message: 'hello from database!',
 			});
+		}
+
+		// all methods from this point forward require a shared key
+		// frontend and backend each have their own stored in KV
+		// and implemented as env vars in each project
+		// TODO: consolidate into a helper fn
+		if (!request.headers.has('Authorization')) {
+			return createJsonResponse(
+				{
+					error: 'Missing Authorization header',
+				},
+				401
+			);
+		}
+		const frontendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-frontend');
+		const backendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-backend');
+		if (frontendKey === null || backendKey == null) {
+			return createJsonResponse(
+				{
+					error: 'Unable to load shared keys for frontend/backend',
+				},
+				401
+			);
+		}
+		const validKeys = [frontendKey, backendKey];
+		const requestKey = request.headers.get('Authorization');
+		if (requestKey === null || !validKeys.includes(requestKey)) {
+			return createJsonResponse(
+				{
+					error: 'Invalid Authorization key',
+				},
+				401
+			);
 		}
 
 		return createJsonResponse(
