@@ -1,3 +1,15 @@
+import type { D1Database } from '@cloudflare/workers-types';
+import type { Env } from '../../worker-configuration';
+import {
+  getUserCrewExecutionsModel,
+  getUserCrewsModel,
+  getUserAgentsModel,
+  getUserTasksModel,
+  getUserProfileModel,
+  getUserConversationsModel,
+  getUserCrewExecutionStepsModel
+} from '../models';
+
 /** CREW EXECUTIONS */
 
 /**
@@ -9,13 +21,13 @@
  * @param input Optional user input for the execution
  */
 export async function addCrewExecution(
-  db: D1Database,
+  env: Env,
   address: string,
   crewId: number,
   conversationId: number,
   input?: string
 ) {
-  const userCrewExecutions = new UserCrewExecutions(db);
+  const userCrewExecutions = getUserCrewExecutionsModel(env);
   const execution = await userCrewExecutions.create({
     profile_id: address,
     crew_id: crewId,
@@ -29,11 +41,11 @@ export async function addCrewExecution(
 
 /**
  * Get all executed crew runs for a profile. _(previously: "job")_
- * @param db The D1 database instance
+ * @param env The environment object containing D1 database
  * @param address The Stacks address for the user's profile
  */
-export async function getCrewExecutions(db: D1Database, address: string) {
-  const userCrewExecutions = new UserCrewExecutions(db);
+export async function getCrewExecutions(env: Env, address: string) {
+  const userCrewExecutions = getUserCrewExecutionsModel(env);
   const executions = await userCrewExecutions.findMany({
     where: {
       profile_id: address
@@ -47,10 +59,10 @@ export async function getCrewExecutions(db: D1Database, address: string) {
 
 /**
  * Get all public crew configurations.
- * @param db The D1 database instance
+ * @param env The environment object containing D1 database
  */
-export async function getPublicCrews(db: D1Database) {
-  const userCrews = new UserCrews(db);
+export async function getPublicCrews(env: Env) {
+  const userCrews = getUserCrewsModel(env);
   const crews = await userCrews.findMany({
     where: {
       crew_is_public: 1
@@ -75,8 +87,8 @@ export async function getPublicCrews(db: D1Database) {
  * Get all enabled cron jobs.
  * @param db The D1 database instance
  */
-export async function getEnabledCrons(db: D1Database) {
-  const userCrews = new UserCrews(db);
+export async function getEnabledCrons(env: Env) {
+  const userCrews = getUserCrewsModel(env);
   const crews = await userCrews.findMany({
     where: {
       crew_is_cron: 1,
@@ -91,15 +103,15 @@ export async function getEnabledCrons(db: D1Database) {
 
 /**
  * Get all enabled cron jobs with expanded crew information.
- * @param db The D1 database instance
+ * @param env The environment object containing D1 database
  */
-export async function getEnabledCronsWithCrews(db: D1Database) {
-  const userCrews = new UserCrews(db);
-  const userAgents = new UserAgents(db);
-  const userTasks = new UserTasks(db);
-  const userProfile = new UserProfile(db);
+export async function getEnabledCronsWithCrews(env: Env) {
+  const userCrews = getUserCrewsModel(env);
+  const userAgents = getUserAgentsModel(env);
+  const userTasks = getUserTasksModel(env);
+  const userProfile = getUserProfileModel(env);
 
-  const crews = await getEnabledCrons(db);
+  const crews = await getEnabledCrons(env);
   const result = [];
 
   for (const crew of crews) {
@@ -145,8 +157,8 @@ export async function getEnabledCronsWithCrews(db: D1Database) {
  * @param address The Stacks address for the user's profile.
  * @param name The name of the conversation (optional).
  */
-export async function addConversation(db: D1Database, address: string, name: string = 'New Conversation') {
-  const userConversations = new UserConversations(db);
+export async function addConversation(env: Env, address: string, name: string = 'New Conversation') {
+  const userConversations = getUserConversationsModel(env);
   const conversation = await userConversations.create({
     profile_id: address,
     conversation_name: name
@@ -156,18 +168,18 @@ export async function addConversation(db: D1Database, address: string, name: str
 
 /**
  * Update or create a conversation with new messages.
- * @param db The D1 database instance
+ * @param env The environment object containing D1 database
  * @param address The Stacks address for the user's profile
  * @param conversationId The ID of the conversation to update
  * @param name Optional new name for the conversation
  */
 export async function updateConversation(
-  db: D1Database,
+  env: Env,
   address: string,
   conversationId: number,
   name?: string
 ) {
-  const userConversations = new UserConversations(db);
+  const userConversations = getUserConversationsModel(env);
   const result = await userConversations.update({
     conversation_name: name
   }, {
@@ -184,8 +196,8 @@ export async function updateConversation(
  * @param address The Stacks address for the user's profile.
  * @param conversationId The ID of the conversation to delete.
  */
-export async function deleteConversation(db: D1Database, address: string, conversationId: number) {
-  const userConversations = new UserConversations(db);
+export async function deleteConversation(env: Env, address: string, conversationId: number) {
+  const userConversations = getUserConversationsModel(env);
   const result = await userConversations.delete({
     where: {
       id: conversationId,
@@ -197,11 +209,11 @@ export async function deleteConversation(db: D1Database, address: string, conver
 
 /**
  * Get a conversation.
- * @param db The D1 database instance
+ * @param env The environment object containing D1 database
  * @param conversationId The ID of the conversation
  */
-export async function getConversation(db: D1Database, conversationId: number) {
-  const userConversations = new UserConversations(db);
+export async function getConversation(env: Env, conversationId: number) {
+  const userConversations = getUserConversationsModel(env);
   const conversation = await userConversations.findOne({
     where: {
       id: conversationId
@@ -332,9 +344,9 @@ export async function getLatestConversationId(db: D1Database, address: string) {
  * @param db The D1 database instance
  * @param conversationId The ID of the conversation
  */
-export async function getConversationHistory(db: D1Database, conversationId: number) {
-  const userCrewExecutions = new UserCrewExecutions(db);
-  const userCrewExecutionSteps = new UserCrewExecutionSteps(db);
+export async function getConversationHistory(env: Env, conversationId: number) {
+  const userCrewExecutions = getUserCrewExecutionsModel(env);
+  const userCrewExecutionSteps = getUserCrewExecutionStepsModel(env);
 
   // Get all executions for this conversation
   const executions = await userCrewExecutions.findMany({
