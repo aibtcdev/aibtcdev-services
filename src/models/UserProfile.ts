@@ -1,21 +1,7 @@
-import { Model, DataTypes } from 'd1-orm';
-
-export interface IUserProfile {
-	id?: number;
-	created_at?: string;
-	updated_at?: string;
-	user_role: string;
-	account_index?: number;
-	stx_address: string;
-	bns_address?: string;
-}
+import { Model, DataTypes, type Infer } from 'd1-orm';
 
 export class UserProfile extends Model<typeof UserProfile.prototype.schema> {
-	constructor(db: D1Database) {
-		super(db, 'user_profiles');
-	}
-
-	schema = {
+	static schema = {
 		id: { type: DataTypes.INTEGER, primary: true },
 		created_at: { type: DataTypes.STRING },
 		updated_at: { type: DataTypes.STRING },
@@ -24,4 +10,11 @@ export class UserProfile extends Model<typeof UserProfile.prototype.schema> {
 		stx_address: { type: DataTypes.STRING, notNull: true, unique: true },
 		bns_address: { type: DataTypes.STRING },
 	};
+	constructor(db: D1Database) {
+		super(db, 'user_profiles');
+	}
+
+	schema = UserProfile.schema;
 }
+
+export type IUserProfile = Infer<typeof UserProfile.schema>;
