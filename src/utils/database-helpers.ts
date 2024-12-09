@@ -64,6 +64,13 @@ export async function getPublicCrews(db: D1Database) {
 
 /** CRON MANAGEMENT */
 
+// TODO: Add columns to user_crews table for cron functionality:
+// - crew_is_cron: INTEGER DEFAULT 0
+// - crew_is_enabled: INTEGER DEFAULT 0
+// - crew_cron_schedule: TEXT
+// - crew_last_run: DATETIME
+// - crew_next_run: DATETIME
+
 /**
  * Get all enabled cron jobs.
  * @param db The D1 database instance
