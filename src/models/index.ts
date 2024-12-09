@@ -5,3 +5,4 @@ export * from './UserAgents';
 export * from './UserTasks';
 export * from './UserConversations';
 export * from './UserCrewExecutions';
+export * from './UserCrewExecutionSteps';
