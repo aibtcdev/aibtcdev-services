@@ -1,22 +1,14 @@
+import { D1Orm } from 'd1-orm';
 import type { Env } from '../../worker-configuration';
-import { DatabaseService } from '../services/DatabaseService';
-import {
-  getUserConversationsModel,
-  getUserCrewExecutionsModel,
-  getUserCrewExecutionStepsModel,
-  getUserCrewsModel,
-  getUserAgentsModel,
-  getUserTasksModel,
-  getUserProfileModel
-} from '../models';
 
-let dbService: DatabaseService;
+let orm: D1Orm | null = null;
 
-export function getDatabaseService(env: Env): DatabaseService {
-  if (!dbService) {
-    dbService = new DatabaseService(env);
-  }
-  return dbService;
+// Initialize D1Orm with env when needed
+export function initializeD1Orm(env: Env) {
+	if (!orm) {
+		return new D1Orm(env.AIBTCDEV_SERVICES_DB);
+	}
+	return orm;
 }
 
 /**
@@ -27,23 +19,16 @@ export function getDatabaseService(env: Env): DatabaseService {
  * @param conversationId The ID of the conversation this execution belongs to
  * @param input Optional user input for the execution
  */
-export async function addCrewExecution(
-  env: Env,
-  address: string,
-  crewId: number,
-  conversationId: number,
-  input?: string
-) {
-  const userCrewExecutions = getUserCrewExecutionsModel(env);
-  const execution = await userCrewExecutions.InsertOne({
-    profile_id: address,
-    crew_id: crewId,
-    conversation_id: conversationId,
-    user_input: input,
-    total_tokens: 0,
-    successful_requests: 0
-  });
-  return execution;
+export async function addCrewExecution(env: Env, address: string, crewId: number, conversationId: number, input?: string) {
+	const execution = await userCrewExecutions.InsertOne({
+		profile_id: address,
+		crew_id: crewId,
+		conversation_id: conversationId,
+		user_input: input,
+		total_tokens: 0,
+		successful_requests: 0,
+	});
+	return execution;
 }
 
 /**
@@ -52,17 +37,19 @@ export async function addCrewExecution(
  * @param address The Stacks address for the user's profile
  */
 export async function getCrewExecutions(env: Env, address: string) {
-  const userCrewExecutions = getUserCrewExecutionsModel(env);
-  const executions = await userCrewExecutions.All({
-    where: {
-      profile_id: address
-    },
-    orderBy: [{
-      column: 'created_at',
-      descending: true
-    }]
-  });
-  return executions;
+	const userCrewExecutions = getUserCrewExecutionsModel(env);
+	const executions = await userCrewExecutions.All({
+		where: {
+			profile_id: address,
+		},
+		orderBy: [
+			{
+				column: 'created_at',
+				descending: true,
+			},
+		],
+	});
+	return executions;
 }
 
 /**
@@ -70,17 +57,19 @@ export async function getCrewExecutions(env: Env, address: string) {
  * @param env The environment object containing D1 database
  */
 export async function getPublicCrews(env: Env) {
-  const userCrews = getUserCrewsModel(env);
-  const crews = await userCrews.All({
-    where: {
-      crew_is_public: 1
-    },
-    orderBy: [{
-      column: 'created_at',
-      descending: true
-    }]
-  });
-  return crews;
+	const userCrews = getUserCrewsModel(env);
+	const crews = await userCrews.All({
+		where: {
+			crew_is_public: 1,
+		},
+		orderBy: [
+			{
+				column: 'created_at',
+				descending: true,
+			},
+		],
+	});
+	return crews;
 }
 
 /** CRON MANAGEMENT */
@@ -97,18 +86,20 @@ export async function getPublicCrews(env: Env) {
  * @param db The D1 database instance
  */
 export async function getEnabledCrons(env: Env) {
-  const userCrews = getUserCrewsModel(env);
-  const crews = await userCrews.All({
-    where: {
-      crew_is_cron: 1,
-      crew_is_enabled: 1
-    },
-    orderBy: [{
-      column: 'created_at',
-      descending: true
-    }]
-  });
-  return crews;
+	const userCrews = getUserCrewsModel(env);
+	const crews = await userCrews.All({
+		where: {
+			crew_is_cron: 1,
+			crew_is_enabled: 1,
+		},
+		orderBy: [
+			{
+				column: 'created_at',
+				descending: true,
+			},
+		],
+	});
+	return crews;
 }
 
 /**
@@ -116,48 +107,48 @@ export async function getEnabledCrons(env: Env) {
  * @param env The environment object containing D1 database
  */
 export async function getEnabledCronsWithCrews(env: Env) {
-  const userCrews = getUserCrewsModel(env);
-  const userAgents = getUserAgentsModel(env);
-  const userTasks = getUserTasksModel(env);
-  const userProfile = getUserProfileModel(env);
+	const userCrews = getUserCrewsModel(env);
+	const userAgents = getUserAgentsModel(env);
+	const userTasks = getUserTasksModel(env);
+	const userProfile = getUserProfileModel(env);
 
-  const crews = await getEnabledCrons(env);
-  const result = [];
+	const crews = await getEnabledCrons(env);
+	const result = [];
 
-  for (const crew of crews) {
-    // Get the profile
-    const profile = await userProfile.First({
-      where: {
-        stx_address: crew.profile_id
-      }
-    });
+	for (const crew of crews) {
+		// Get the profile
+		const profile = await userProfile.First({
+			where: {
+				stx_address: crew.profile_id,
+			},
+		});
 
-    // Get all agents for this crew
-    const agents = await userAgents.All({
-      where: {
-        crew_id: crew.id
-      }
-    });
+		// Get all agents for this crew
+		const agents = await userAgents.All({
+			where: {
+				crew_id: crew.id,
+			},
+		});
 
-    // Get all tasks for each agent
-    for (const agent of agents) {
-      const tasks = await userTasks.All({
-        where: {
-          crew_id: crew.id,
-          agent_id: agent.id
-        }
-      });
-      Object.assign(agent, { tasks });
-    }
+		// Get all tasks for each agent
+		for (const agent of agents) {
+			const tasks = await userTasks.All({
+				where: {
+					crew_id: crew.id,
+					agent_id: agent.id,
+				},
+			});
+			Object.assign(agent, { tasks });
+		}
 
-    result.push({
-      ...crew,
-      profile,
-      agents
-    });
-  }
+		result.push({
+			...crew,
+			profile,
+			agents,
+		});
+	}
 
-  return result;
+	return result;
 }
 
 /** CONVERSATION MANAGEMENT */
@@ -168,12 +159,12 @@ export async function getEnabledCronsWithCrews(env: Env) {
  * @param name The name of the conversation (optional).
  */
 export async function addConversation(env: Env, address: string, name: string = 'New Conversation') {
-  const userConversations = getUserConversationsModel(env);
-  const conversation = await userConversations.InsertOne({
-    profile_id: address,
-    conversation_name: name
-  });
-  return conversation;
+	const userConversations = getUserConversationsModel(env);
+	const conversation = await userConversations.InsertOne({
+		profile_id: address,
+		conversation_name: name,
+	});
+	return conversation;
 }
 
 /**
@@ -183,23 +174,18 @@ export async function addConversation(env: Env, address: string, name: string = 
  * @param conversationId The ID of the conversation to update
  * @param name Optional new name for the conversation
  */
-export async function updateConversation(
-  env: Env,
-  address: string,
-  conversationId: number,
-  name?: string
-) {
-  const userConversations = getUserConversationsModel(env);
-  const result = await userConversations.Update({
-    where: {
-      id: conversationId,
-      profile_id: address
-    },
-    data: {
-      conversation_name: name
-    }
-  });
-  return result;
+export async function updateConversation(env: Env, address: string, conversationId: number, name?: string) {
+	const userConversations = getUserConversationsModel(env);
+	const result = await userConversations.Update({
+		where: {
+			id: conversationId,
+			profile_id: address,
+		},
+		data: {
+			conversation_name: name,
+		},
+	});
+	return result;
 }
 
 /**
@@ -208,14 +194,14 @@ export async function updateConversation(
  * @param conversationId The ID of the conversation to delete.
  */
 export async function deleteConversation(env: Env, address: string, conversationId: number) {
-  const userConversations = getUserConversationsModel(env);
-  const result = await userConversations.Delete({
-    where: {
-      id: conversationId,
-      profile_id: address
-    }
-  });
-  return result;
+	const userConversations = getUserConversationsModel(env);
+	const result = await userConversations.Delete({
+		where: {
+			id: conversationId,
+			profile_id: address,
+		},
+	});
+	return result;
 }
 
 /**
@@ -224,13 +210,13 @@ export async function deleteConversation(env: Env, address: string, conversation
  * @param conversationId The ID of the conversation
  */
 export async function getConversation(env: Env, conversationId: number) {
-  const userConversations = getUserConversationsModel(env);
-  const conversation = await userConversations.First({
-    where: {
-      id: conversationId
-    }
-  });
-  return conversation;
+	const userConversations = getUserConversationsModel(env);
+	const conversation = await userConversations.First({
+		where: {
+			id: conversationId,
+		},
+	});
+	return conversation;
 }
 
 /**
@@ -239,33 +225,35 @@ export async function getConversation(env: Env, conversationId: number) {
  * @param conversationId The ID of the conversation
  */
 export async function getConversationWithJobs(env: Env, conversationId: number) {
-  const userConversations = getUserConversationsModel(env);
-  const userCrewExecutions = getUserCrewExecutionsModel(env);
+	const userConversations = getUserConversationsModel(env);
+	const userCrewExecutions = getUserCrewExecutionsModel(env);
 
-  const conversation = await userConversations.findOne({
-    where: {
-      id: conversationId
-    }
-  });
+	const conversation = await userConversations.findOne({
+		where: {
+			id: conversationId,
+		},
+	});
 
-  if (!conversation) {
-    return null;
-  }
+	if (!conversation) {
+		return null;
+	}
 
-  const executions = await userCrewExecutions.All({
-    where: {
-      conversation_id: conversationId
-    },
-    orderBy: [{
-      column: 'created_at',
-      descending: true
-    }]
-  });
+	const executions = await userCrewExecutions.All({
+		where: {
+			conversation_id: conversationId,
+		},
+		orderBy: [
+			{
+				column: 'created_at',
+				descending: true,
+			},
+		],
+	});
 
-  return {
-    conversation,
-    executions
-  };
+	return {
+		conversation,
+		executions,
+	};
 }
 
 /**
@@ -273,17 +261,19 @@ export async function getConversationWithJobs(env: Env, conversationId: number) 
  * @param address The Stacks address for the user's profile.
  */
 export async function getConversations(env: Env, address: string) {
-  const userConversations = getUserConversationsModel(env);
-  const conversations = await userConversations.All({
-    where: {
-      profile_id: address
-    },
-    orderBy: [{
-      column: 'created_at',
-      descending: true
-    }]
-  });
-  return conversations;
+	const userConversations = getUserConversationsModel(env);
+	const conversations = await userConversations.All({
+		where: {
+			profile_id: address,
+		},
+		orderBy: [
+			{
+				column: 'created_at',
+				descending: true,
+			},
+		],
+	});
+	return conversations;
 }
 
 /**
@@ -292,38 +282,40 @@ export async function getConversations(env: Env, address: string) {
  * @param address The Stacks address for the user's profile
  */
 export async function getConversationsWithJobs(env: Env, address: string) {
-  const userConversations = getUserConversationsModel(env);
-  const userCrewExecutions = getUserCrewExecutionsModel(env);
+	const userConversations = getUserConversationsModel(env);
+	const userCrewExecutions = getUserCrewExecutionsModel(env);
 
-  const conversations = await userConversations.findMany({
-    where: {
-      profile_id: address
-    },
-    orderBy: {
-      created_at: 'desc'
-    }
-  });
+	const conversations = await userConversations.findMany({
+		where: {
+			profile_id: address,
+		},
+		orderBy: {
+			created_at: 'desc',
+		},
+	});
 
-  const result = [];
-  for (const conversation of conversations) {
-    const executions = await userCrewExecutions.All({
-      where: {
-        conversation_id: conversation.id,
-        profile_id: address
-      },
-      orderBy: [{
-        column: 'created_at',
-        descending: true
-      }]
-    });
+	const result = [];
+	for (const conversation of conversations) {
+		const executions = await userCrewExecutions.All({
+			where: {
+				conversation_id: conversation.id,
+				profile_id: address,
+			},
+			orderBy: [
+				{
+					column: 'created_at',
+					descending: true,
+				},
+			],
+		});
 
-    result.push({
-      conversation,
-      executions
-    });
-  }
+		result.push({
+			conversation,
+			executions,
+		});
+	}
 
-  return result;
+	return result;
 }
 
 /**
@@ -331,17 +323,19 @@ export async function getConversationsWithJobs(env: Env, address: string) {
  * @param address The Stacks address for the user's profile.
  */
 export async function getLatestConversation(env: Env, address: string) {
-  const userConversations = getUserConversationsModel(env);
-  const conversation = await userConversations.First({
-    where: {
-      profile_id: address
-    },
-    orderBy: [{
-      column: 'created_at',
-      descending: true
-    }]
-  });
-  return conversation;
+	const userConversations = getUserConversationsModel(env);
+	const conversation = await userConversations.First({
+		where: {
+			profile_id: address,
+		},
+		orderBy: [
+			{
+				column: 'created_at',
+				descending: true,
+			},
+		],
+	});
+	return conversation;
 }
 
 /**
@@ -350,8 +344,8 @@ export async function getLatestConversation(env: Env, address: string) {
  * @param address The Stacks address for the user's profile
  */
 export async function getLatestConversationId(env: Env, address: string) {
-  const conversation = await getLatestConversation(db, address);
-  return conversation?.id;
+	const conversation = await getLatestConversation(db, address);
+	return conversation?.id;
 }
 
 /**
@@ -360,40 +354,44 @@ export async function getLatestConversationId(env: Env, address: string) {
  * @param conversationId The ID of the conversation
  */
 export async function getConversationHistory(env: Env, conversationId: number) {
-  const userCrewExecutions = getUserCrewExecutionsModel(env);
-  const userCrewExecutionSteps = getUserCrewExecutionStepsModel(env);
+	const userCrewExecutions = getUserCrewExecutionsModel(env);
+	const userCrewExecutionSteps = getUserCrewExecutionStepsModel(env);
 
-  // Get all executions for this conversation
-  const executions = await userCrewExecutions.All({
-    where: {
-      conversation_id: conversationId
-    },
-    orderBy: [{
-      column: 'created_at',
-      descending: false
-    }]
-  });
+	// Get all executions for this conversation
+	const executions = await userCrewExecutions.All({
+		where: {
+			conversation_id: conversationId,
+		},
+		orderBy: [
+			{
+				column: 'created_at',
+				descending: false,
+			},
+		],
+	});
 
-  const history = [];
-  for (const execution of executions) {
-    // Get all steps for this execution
-    const steps = await userCrewExecutionSteps.All({
-      where: {
-        execution_id: execution.id
-      },
-      orderBy: [{
-        column: 'created_at',
-        descending: false
-      }]
-    });
+	const history = [];
+	for (const execution of executions) {
+		// Get all steps for this execution
+		const steps = await userCrewExecutionSteps.All({
+			where: {
+				execution_id: execution.id,
+			},
+			orderBy: [
+				{
+					column: 'created_at',
+					descending: false,
+				},
+			],
+		});
 
-    history.push({
-      execution,
-      steps
-    });
-  }
+		history.push({
+			execution,
+			steps,
+		});
+	}
 
-  return history;
+	return history;
 }
 
 /** DB HELPERS FROM OLD CODE */
