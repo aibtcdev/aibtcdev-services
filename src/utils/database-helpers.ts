@@ -1,16 +1,14 @@
-import type { D1Database } from '@cloudflare/workers-types';
 import type { Env } from '../../worker-configuration';
-import {
-  getUserCrewExecutionsModel,
-  getUserCrewsModel,
-  getUserAgentsModel,
-  getUserTasksModel,
-  getUserProfileModel,
-  getUserConversationsModel,
-  getUserCrewExecutionStepsModel
-} from '../models';
+import { DatabaseService } from '../services/DatabaseService';
 
-/** CREW EXECUTIONS */
+let dbService: DatabaseService;
+
+export function getDatabaseService(env: Env): DatabaseService {
+  if (!dbService) {
+    dbService = new DatabaseService(env);
+  }
+  return dbService;
+}
 
 /**
  * Create a new crew run for a profile. _(previously: "job")_
