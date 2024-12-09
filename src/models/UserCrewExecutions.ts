@@ -1,4 +1,4 @@
-import { Model } from 'd1-orm';
+import { Model, DataTypes } from 'd1-orm';
 
 export interface IUserCrewExecutions {
   id?: number;
@@ -19,15 +19,15 @@ export class UserCrewExecutions extends Model<typeof UserCrewExecutions.prototyp
   }
 
   schema = {
-    id: { type: 'number', primary: true },
-    created_at: { type: 'string' },
-    updated_at: { type: 'string' },
-    profile_id: { type: 'string', notNull: true },
-    crew_id: { type: 'number', notNull: true },
-    conversation_id: { type: 'number', notNull: true },
-    user_input: { type: 'string' },
-    final_result: { type: 'string' },
-    total_tokens: { type: 'number' },
-    successful_requests: { type: 'number' }
+    id: { type: DataTypes.INTEGER, primary: true },
+    created_at: { type: DataTypes.STRING },
+    updated_at: { type: DataTypes.STRING },
+    profile_id: { type: DataTypes.STRING, notNull: true },
+    crew_id: { type: DataTypes.INTEGER, notNull: true },
+    conversation_id: { type: DataTypes.INTEGER, notNull: true },
+    user_input: { type: DataTypes.STRING },
+    final_result: { type: DataTypes.STRING },
+    total_tokens: { type: DataTypes.INTEGER },
+    successful_requests: { type: DataTypes.INTEGER }
   };
 }

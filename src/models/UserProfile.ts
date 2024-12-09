@@ -1,4 +1,4 @@
-import { Model } from 'd1-orm';
+import { Model, DataTypes } from 'd1-orm';
 
 export interface IUserProfile {
 	id?: number;
@@ -16,12 +16,12 @@ export class UserProfile extends Model<typeof UserProfile.prototype.schema> {
 	}
 
 	schema = {
-		id: { type: 'number', primary: true },
-		created_at: { type: 'string' },
-		updated_at: { type: 'string' },
-		user_role: { type: 'string', notNull: true },
-		account_index: { type: 'number' },
-		stx_address: { type: 'string', notNull: true, unique: true },
-		bns_address: { type: 'string' },
+		id: { type: DataTypes.INTEGER, primary: true },
+		created_at: { type: DataTypes.STRING },
+		updated_at: { type: DataTypes.STRING },
+		user_role: { type: DataTypes.STRING, notNull: true },
+		account_index: { type: DataTypes.INTEGER },
+		stx_address: { type: DataTypes.STRING, notNull: true, unique: true },
+		bns_address: { type: DataTypes.STRING },
 	};
 }

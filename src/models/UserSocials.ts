@@ -1,4 +1,4 @@
-import { Model } from 'd1-orm';
+import { Model, DataTypes } from 'd1-orm';
 
 export interface IUserSocials {
   id?: number;
@@ -15,11 +15,11 @@ export class UserSocials extends Model<typeof UserSocials.prototype.schema> {
   }
 
   schema = {
-    id: { type: 'number', primary: true },
-    created_at: { type: 'string' },
-    updated_at: { type: 'string' },
-    profile_id: { type: 'string', notNull: true },
-    platform: { type: 'string', notNull: true },
-    platform_id: { type: 'string', notNull: true }
+    id: { type: DataTypes.INTEGER, primary: true },
+    created_at: { type: DataTypes.STRING },
+    updated_at: { type: DataTypes.STRING },
+    profile_id: { type: DataTypes.STRING, notNull: true },
+    platform: { type: DataTypes.STRING, notNull: true },
+    platform_id: { type: DataTypes.STRING, notNull: true }
   };
 }

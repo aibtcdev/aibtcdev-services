@@ -1,4 +1,4 @@
-import { Model } from 'd1-orm';
+import { Model, DataTypes } from 'd1-orm';
 
 export interface IUserTasks {
   id?: number;
@@ -18,14 +18,14 @@ export class UserTasks extends Model<typeof UserTasks.prototype.schema> {
   }
 
   schema = {
-    id: { type: 'number', primary: true },
-    created_at: { type: 'string' },
-    updated_at: { type: 'string' },
-    profile_id: { type: 'string', notNull: true },
-    crew_id: { type: 'number', notNull: true },
-    agent_id: { type: 'number', notNull: true },
-    task_name: { type: 'string', notNull: true },
-    task_description: { type: 'string', notNull: true },
-    task_expected_output: { type: 'string', notNull: true }
+    id: { type: DataTypes.INTEGER, primary: true },
+    created_at: { type: DataTypes.STRING },
+    updated_at: { type: DataTypes.STRING },
+    profile_id: { type: DataTypes.STRING, notNull: true },
+    crew_id: { type: DataTypes.INTEGER, notNull: true },
+    agent_id: { type: DataTypes.INTEGER, notNull: true },
+    task_name: { type: DataTypes.STRING, notNull: true },
+    task_description: { type: DataTypes.STRING, notNull: true },
+    task_expected_output: { type: DataTypes.STRING, notNull: true }
   };
 }

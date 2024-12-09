@@ -1,4 +1,4 @@
-import { Model } from 'd1-orm';
+import { Model, DataTypes } from 'd1-orm';
 
 export interface IUserAgents {
 	id?: number;
@@ -19,15 +19,15 @@ export class UserAgents extends Model<typeof UserAgents.prototype.schema> {
 	}
 
 	schema = {
-		id: { type: 'number', primary: true },
-		created_at: { type: 'string' },
-		updated_at: { type: 'string' },
-		profile_id: { type: 'string', notNull: true },
-		crew_id: { type: 'number', notNull: true },
-		agent_name: { type: 'string', notNull: true },
-		agent_role: { type: 'string', notNull: true },
-		agent_goal: { type: 'string', notNull: true },
-		agent_backstory: { type: 'string', notNull: true },
-		agent_tools: { type: 'string' }, // Will store JSON string of tools array
+		id: { type: DataTypes.INTEGER, primary: true },
+		created_at: { type: DataTypes.STRING },
+		updated_at: { type: DataTypes.STRING },
+		profile_id: { type: DataTypes.STRING, notNull: true },
+		crew_id: { type: DataTypes.INTEGER, notNull: true },
+		agent_name: { type: DataTypes.STRING, notNull: true },
+		agent_role: { type: DataTypes.STRING, notNull: true },
+		agent_goal: { type: DataTypes.STRING, notNull: true },
+		agent_backstory: { type: DataTypes.STRING, notNull: true },
+		agent_tools: { type: DataTypes.STRING }, // Will store JSON string of tools array
 	};
 }

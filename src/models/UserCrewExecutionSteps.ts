@@ -1,4 +1,4 @@
-import { Model } from 'd1-orm';
+import { Model, DataTypes } from 'd1-orm';
 
 export interface IUserCrewExecutionSteps {
   id?: number;
@@ -15,11 +15,11 @@ export class UserCrewExecutionSteps extends Model<typeof UserCrewExecutionSteps.
   }
 
   schema = {
-    id: { type: 'number', primary: true },
-    created_at: { type: 'string' },
-    crew_id: { type: 'number', notNull: true },
-    execution_id: { type: 'number', notNull: true },
-    step_type: { type: 'string', notNull: true },
-    step_data: { type: 'string', notNull: true }
+    id: { type: DataTypes.INTEGER, primary: true },
+    created_at: { type: DataTypes.STRING },
+    crew_id: { type: DataTypes.INTEGER, notNull: true },
+    execution_id: { type: DataTypes.INTEGER, notNull: true },
+    step_type: { type: DataTypes.STRING, notNull: true },
+    step_data: { type: DataTypes.STRING, notNull: true }
   };
 }
