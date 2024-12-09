@@ -21,7 +21,8 @@ import { createJsonResponse } from '../utils/requests-responses';
 export class AuthDO extends DurableObject<Env> {
 	private readonly CACHE_TTL = 43200; // 30 days, in seconds
 	private readonly ALARM_INTERVAL_MS: number;
-	private readonly BASE_PATH: string = '/auth';
+	private readonly BASE_PATH = '/auth';
+	private readonly KEY_PREFIX = 'auth';
 	private readonly SUPPORTED_ENDPOINTS: string[] = ['/request-auth-token', '/verify-address', '/verify-session-token'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -77,6 +78,7 @@ export class AuthDO extends DurableObject<Env> {
 		// all methods from this point forward require a shared key
 		// frontend and backend each have their own stored in KV
 		// and implemented as env vars in each project
+		// TODO: consolidate into a helper fn
 		if (!request.headers.has('Authorization')) {
 			return createJsonResponse(
 				{
@@ -173,9 +175,13 @@ export class AuthDO extends DurableObject<Env> {
 				// signing before expiration extends the expiration
 				const sessionToken = crypto.randomUUID();
 				// first key allows us to filter by address
-				this.env.AIBTCDEV_SERVICES_KV.put(`address:${addressFromPublicKey}`, sessionToken, { expirationTtl: this.CACHE_TTL });
+				this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:address:${addressFromPublicKey}`, sessionToken, {
+					expirationTtl: this.CACHE_TTL,
+				});
 				// second key allows us to filter by session key
-				this.env.AIBTCDEV_SERVICES_KV.put(`session:${sessionToken}`, addressFromPublicKey, { expirationTtl: this.CACHE_TTL });
+				this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:session:${sessionToken}`, addressFromPublicKey, {
+					expirationTtl: this.CACHE_TTL,
+				});
 				// return 200 with session token
 				return createJsonResponse({
 					message: 'auth token successfully created',
@@ -214,7 +220,7 @@ export class AuthDO extends DurableObject<Env> {
 				);
 			}
 			// get session key from kv key list
-			const sessionKey = await this.env.AIBTCDEV_SERVICES_KV.get(`address:${address}`);
+			const sessionKey = await this.env.AIBTCDEV_SERVICES_KV.get(`${this.KEY_PREFIX}:address:${address}`);
 			if (sessionKey === null) {
 				return createJsonResponse(
 					{
@@ -244,7 +250,7 @@ export class AuthDO extends DurableObject<Env> {
 			}
 			const sessionToken = String(body.data);
 			// get address from kv key list
-			const address = await this.env.AIBTCDEV_SERVICES_KV.get(`session:${sessionToken}`);
+			const address = await this.env.AIBTCDEV_SERVICES_KV.get(`${this.KEY_PREFIX}:session:${sessionToken}`);
 			if (address === null) {
 				return createJsonResponse(
 					{
