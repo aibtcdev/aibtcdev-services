@@ -1,29 +1,30 @@
-import { Model, DataTypes } from 'd1-orm';
+import { Model, DataTypes, type Infer } from 'd1-orm';
+import { getOrm } from './orm-config';
+import type { Env } from '../../worker-configuration';
 
-export interface IUserCrews {
-  id?: number;
-  created_at?: string;
-  updated_at?: string;
-  profile_id: string;
-  crew_name: string;
-  crew_description?: string;
-  crew_executions?: number;
-  crew_is_public?: number;
-}
-
-export class UserCrews extends Model<typeof UserCrews.prototype.schema> {
-  constructor(db: D1Database) {
-    super(db, 'user_crews');
-  }
-
-  schema = {
-    id: { type: DataTypes.INTEGER, primary: true },
+const schema = {
+    id: { type: DataTypes.INTEGER, notNull: true },
     created_at: { type: DataTypes.STRING },
     updated_at: { type: DataTypes.STRING },
     profile_id: { type: DataTypes.STRING, notNull: true },
     crew_name: { type: DataTypes.STRING, notNull: true },
     crew_description: { type: DataTypes.STRING },
-    crew_executions: { type: DataTypes.INTEGER, default: 0 },
-    crew_is_public: { type: DataTypes.INTEGER, default: 0 }
-  };
+    crew_executions: { type: DataTypes.INTEGER },
+    crew_is_public: { type: DataTypes.INTEGER }
+};
+
+const schemaType = { columns: schema };
+
+export type IUserCrews = Infer<typeof schemaType>;
+
+export function getUserCrewsModel(env: Env) {
+    return new Model(
+        {
+            D1Orm: getOrm(env),
+            tableName: 'user_crews',
+            primaryKeys: 'id',
+            autoIncrement: 'id',
+        },
+        schema
+    );
 }
