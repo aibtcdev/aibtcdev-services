@@ -198,10 +198,43 @@ export async function getConversations(db: D1Database, address: string) {
 }
 
 /**
- * Get all conversations with their associated jobs for a profile.
- * @param address The Stacks address for the user's profile.
+ * Get all conversations with their associated crew executions for a profile.
+ * @param db The D1 database instance
+ * @param address The Stacks address for the user's profile
  */
-export function getConversationsWithJobs(address: string) {}
+export async function getConversationsWithJobs(db: D1Database, address: string) {
+  const userConversations = new UserConversations(db);
+  const userCrewExecutions = new UserCrewExecutions(db);
+
+  const conversations = await userConversations.findMany({
+    where: {
+      profile_id: address
+    },
+    orderBy: {
+      created_at: 'desc'
+    }
+  });
+
+  const result = [];
+  for (const conversation of conversations) {
+    const executions = await userCrewExecutions.findMany({
+      where: {
+        conversation_id: conversation.id,
+        profile_id: address
+      },
+      orderBy: {
+        created_at: 'desc'
+      }
+    });
+
+    result.push({
+      conversation,
+      executions
+    });
+  }
+
+  return result;
+}
 
 /**
  * Get the most recent conversation for a profile.
@@ -222,9 +255,13 @@ export async function getLatestConversation(db: D1Database, address: string) {
 
 /**
  * Get the ID of the most recent conversation for a profile.
- * @param address The Stacks address for the user's profile.
+ * @param db The D1 database instance
+ * @param address The Stacks address for the user's profile
  */
-export function getLatestConversationId(address: string) {}
+export async function getLatestConversationId(db: D1Database, address: string) {
+  const conversation = await getLatestConversation(db, address);
+  return conversation?.id;
+}
 
 /**
  * Get conversation history in chronological order.
