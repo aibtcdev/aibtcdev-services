@@ -92,10 +92,28 @@ export async function addConversation(db: D1Database, address: string, name: str
 
 /**
  * Update or create a conversation with new messages.
- * @param address The Stacks address for the user's profile.
- * @param messages The messages to add to the conversation.
+ * @param db The D1 database instance
+ * @param address The Stacks address for the user's profile
+ * @param conversationId The ID of the conversation to update
+ * @param name Optional new name for the conversation
  */
-export function updateConversation(address: string, messages: any[]) {}
+export async function updateConversation(
+  db: D1Database,
+  address: string,
+  conversationId: number,
+  name?: string
+) {
+  const userConversations = new UserConversations(db);
+  const result = await userConversations.update({
+    conversation_name: name
+  }, {
+    where: {
+      id: conversationId,
+      profile_id: address
+    }
+  });
+  return result;
+}
 
 /**
  * Delete a specific conversation.
@@ -115,15 +133,52 @@ export async function deleteConversation(db: D1Database, address: string, conver
 
 /**
  * Get a conversation.
- * @param conversationId The ID of the conversation.
+ * @param db The D1 database instance
+ * @param conversationId The ID of the conversation
  */
-export function getConversation(conversationId: string) {}
+export async function getConversation(db: D1Database, conversationId: number) {
+  const userConversations = new UserConversations(db);
+  const conversation = await userConversations.findOne({
+    where: {
+      id: conversationId
+    }
+  });
+  return conversation;
+}
 
 /**
- * Get a conversation with associated jobs.
- * @param conversationId The ID of the conversation.
+ * Get a conversation with associated crew executions.
+ * @param db The D1 database instance
+ * @param conversationId The ID of the conversation
  */
-export function getConversationWithJobs(conversationId: string) {}
+export async function getConversationWithJobs(db: D1Database, conversationId: number) {
+  const userConversations = new UserConversations(db);
+  const userCrewExecutions = new UserCrewExecutions(db);
+
+  const conversation = await userConversations.findOne({
+    where: {
+      id: conversationId
+    }
+  });
+
+  if (!conversation) {
+    return null;
+  }
+
+  const executions = await userCrewExecutions.findMany({
+    where: {
+      conversation_id: conversationId
+    },
+    orderBy: {
+      created_at: 'desc'
+    }
+  });
+
+  return {
+    conversation,
+    executions
+  };
+}
 
 /**
  * Get all conversations for a profile.
