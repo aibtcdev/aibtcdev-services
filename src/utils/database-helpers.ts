@@ -66,13 +66,70 @@ export async function getPublicCrews(db: D1Database) {
 
 /**
  * Get all enabled cron jobs.
+ * @param db The D1 database instance
  */
-export function getEnabledCrons() {}
+export async function getEnabledCrons(db: D1Database) {
+  const userCrews = new UserCrews(db);
+  const crews = await userCrews.findMany({
+    where: {
+      crew_is_cron: 1,
+      crew_is_enabled: 1
+    },
+    orderBy: {
+      created_at: 'desc'
+    }
+  });
+  return crews;
+}
 
 /**
  * Get all enabled cron jobs with expanded crew information.
+ * @param db The D1 database instance
  */
-export function getEnabledCronsWithCrews() {}
+export async function getEnabledCronsWithCrews(db: D1Database) {
+  const userCrews = new UserCrews(db);
+  const userAgents = new UserAgents(db);
+  const userTasks = new UserTasks(db);
+  const userProfile = new UserProfile(db);
+
+  const crews = await getEnabledCrons(db);
+  const result = [];
+
+  for (const crew of crews) {
+    // Get the profile
+    const profile = await userProfile.findOne({
+      where: {
+        stx_address: crew.profile_id
+      }
+    });
+
+    // Get all agents for this crew
+    const agents = await userAgents.findMany({
+      where: {
+        crew_id: crew.id
+      }
+    });
+
+    // Get all tasks for each agent
+    for (const agent of agents) {
+      const tasks = await userTasks.findMany({
+        where: {
+          crew_id: crew.id,
+          agent_id: agent.id
+        }
+      });
+      Object.assign(agent, { tasks });
+    }
+
+    result.push({
+      ...crew,
+      profile,
+      agents
+    });
+  }
+
+  return result;
+}
 
 /** CONVERSATION MANAGEMENT */
 
@@ -265,9 +322,43 @@ export async function getLatestConversationId(db: D1Database, address: string) {
 
 /**
  * Get conversation history in chronological order.
- * @param conversationId The ID of the conversation.
+ * @param db The D1 database instance
+ * @param conversationId The ID of the conversation
  */
-export function getConversationHistory(conversationId: string) {}
+export async function getConversationHistory(db: D1Database, conversationId: number) {
+  const userCrewExecutions = new UserCrewExecutions(db);
+  const userCrewExecutionSteps = new UserCrewExecutionSteps(db);
+
+  // Get all executions for this conversation
+  const executions = await userCrewExecutions.findMany({
+    where: {
+      conversation_id: conversationId
+    },
+    orderBy: {
+      created_at: 'asc'
+    }
+  });
+
+  const history = [];
+  for (const execution of executions) {
+    // Get all steps for this execution
+    const steps = await userCrewExecutionSteps.findMany({
+      where: {
+        execution_id: execution.id
+      },
+      orderBy: {
+        created_at: 'asc'
+      }
+    });
+
+    history.push({
+      execution,
+      steps
+    });
+  }
+
+  return history;
+}
 
 /** DB HELPERS FROM OLD CODE */
 
