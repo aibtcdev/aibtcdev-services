@@ -12,7 +12,7 @@ export interface IUserTasks {
   task_expected_output: string;
 }
 
-export class UserTasks extends Model {
+export class UserTasks extends Model<IUserTasks> {
   constructor(db: D1Database) {
     super(db, 'user_tasks');
   }

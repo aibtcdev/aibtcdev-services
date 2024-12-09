@@ -11,7 +11,7 @@ export interface IUserCrews {
   crew_is_public?: number;
 }
 
-export class UserCrews extends Model {
+export class UserCrews extends Model<IUserCrews> {
   constructor(db: D1Database) {
     super(db, 'user_crews');
   }

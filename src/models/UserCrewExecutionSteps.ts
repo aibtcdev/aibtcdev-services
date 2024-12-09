@@ -9,7 +9,7 @@ export interface IUserCrewExecutionSteps {
   step_data: string;
 }
 
-export class UserCrewExecutionSteps extends Model {
+export class UserCrewExecutionSteps extends Model<IUserCrewExecutionSteps> {
   constructor(db: D1Database) {
     super(db, 'user_crew_execution_steps');
   }

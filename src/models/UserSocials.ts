@@ -9,7 +9,7 @@ export interface IUserSocials {
   platform_id: string;
 }
 
-export class UserSocials extends Model {
+export class UserSocials extends Model<IUserSocials> {
   constructor(db: D1Database) {
     super(db, 'user_socials');
   }

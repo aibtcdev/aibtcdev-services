@@ -10,7 +10,7 @@ export interface IUserProfile {
 	bns_address?: string;
 }
 
-export class UserProfile extends Model {
+export class UserProfile extends Model<IUserProfile> {
 	constructor(db: D1Database) {
 		super(db, 'user_profiles');
 	}
