@@ -1,5 +1,14 @@
 import type { Env } from '../../worker-configuration';
 import { DatabaseService } from '../services/DatabaseService';
+import {
+  getUserConversationsModel,
+  getUserCrewExecutionsModel,
+  getUserCrewExecutionStepsModel,
+  getUserCrewsModel,
+  getUserAgentsModel,
+  getUserTasksModel,
+  getUserProfileModel
+} from '../models';
 
 let dbService: DatabaseService;
 
@@ -225,9 +234,9 @@ export async function getConversation(env: Env, conversationId: number) {
  * @param db The D1 database instance
  * @param conversationId The ID of the conversation
  */
-export async function getConversationWithJobs(db: D1Database, conversationId: number) {
-  const userConversations = new UserConversations(db);
-  const userCrewExecutions = new UserCrewExecutions(db);
+export async function getConversationWithJobs(env: Env, conversationId: number) {
+  const userConversations = getUserConversationsModel(env);
+  const userCrewExecutions = getUserCrewExecutionsModel(env);
 
   const conversation = await userConversations.findOne({
     where: {
@@ -258,8 +267,8 @@ export async function getConversationWithJobs(db: D1Database, conversationId: nu
  * Get all conversations for a profile.
  * @param address The Stacks address for the user's profile.
  */
-export async function getConversations(db: D1Database, address: string) {
-  const userConversations = new UserConversations(db);
+export async function getConversations(env: Env, address: string) {
+  const userConversations = getUserConversationsModel(env);
   const conversations = await userConversations.findMany({
     where: {
       profile_id: address
@@ -276,9 +285,9 @@ export async function getConversations(db: D1Database, address: string) {
  * @param db The D1 database instance
  * @param address The Stacks address for the user's profile
  */
-export async function getConversationsWithJobs(db: D1Database, address: string) {
-  const userConversations = new UserConversations(db);
-  const userCrewExecutions = new UserCrewExecutions(db);
+export async function getConversationsWithJobs(env: Env, address: string) {
+  const userConversations = getUserConversationsModel(env);
+  const userCrewExecutions = getUserCrewExecutionsModel(env);
 
   const conversations = await userConversations.findMany({
     where: {
@@ -314,8 +323,8 @@ export async function getConversationsWithJobs(db: D1Database, address: string) 
  * Get the most recent conversation for a profile.
  * @param address The Stacks address for the user's profile.
  */
-export async function getLatestConversation(db: D1Database, address: string) {
-  const userConversations = new UserConversations(db);
+export async function getLatestConversation(env: Env, address: string) {
+  const userConversations = getUserConversationsModel(env);
   const conversation = await userConversations.findOne({
     where: {
       profile_id: address
@@ -332,7 +341,7 @@ export async function getLatestConversation(db: D1Database, address: string) {
  * @param db The D1 database instance
  * @param address The Stacks address for the user's profile
  */
-export async function getLatestConversationId(db: D1Database, address: string) {
+export async function getLatestConversationId(env: Env, address: string) {
   const conversation = await getLatestConversation(db, address);
   return conversation?.id;
 }
