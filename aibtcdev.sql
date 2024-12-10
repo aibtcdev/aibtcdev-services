@@ -25,11 +25,8 @@ CREATE TABLE user_profiles (
 
 -- Define indexes for faster lookups on data we expect to query
 CREATE INDEX idx_profiles_user_role ON user_profiles(user_role);
-
 CREATE INDEX idx_profiles_account_index ON user_profiles(account_index);
-
 CREATE INDEX idx_profiles_stx_address ON user_profiles(stx_address);
-
 CREATE INDEX idx_profiles_bns_address ON user_profiles(bns_address);
 
 -- ============================================================================
@@ -54,9 +51,7 @@ CREATE TABLE user_socials (
 
 -- Define indexes
 CREATE INDEX idx_socials_profile_id ON user_socials(profile_id);
-
 CREATE INDEX idx_socials_platform ON user_socials(platform);
-
 CREATE INDEX idx_socials_platform_id ON user_socials(platform_id);
 
 
@@ -85,7 +80,6 @@ CREATE TABLE user_crews (
 
 -- Define indexes
 CREATE INDEX idx_crews_profile_id ON user_crews(profile_id);
-
 CREATE INDEX idx_crews_crew_name ON user_crews(crew_name);
 
 -- ============================================================================
@@ -115,7 +109,6 @@ CREATE TABLE user_agents (
 
 -- Define indexes
 CREATE INDEX idx_agents_profile_id ON user_agents(profile_id);
-
 CREATE INDEX idx_agents_crew_id ON user_agents(crew_id);
 
 -- ============================================================================
@@ -146,9 +139,7 @@ CREATE TABLE user_tasks (
 
 -- Define indexes
 CREATE INDEX idx_tasks_profile_id ON user_tasks(profile_id);
-
 CREATE INDEX idx_tasks_crew_id ON user_tasks(crew_id);
-
 CREATE INDEX idx_tasks_agent_id ON user_tasks(agent_id);
 
 -- ============================================================================
@@ -200,10 +191,18 @@ CREATE TABLE user_crew_executions (
 
 -- Define indexes
 CREATE INDEX idx_executions_profile_id ON user_crew_executions(profile_id);
-
 CREATE INDEX idx_executions_crew_id ON user_crew_executions(crew_id);
-
 CREATE INDEX idx_executions_conversation_id ON user_crew_executions(conversation_id);
+
+-- Trigger to increment execution count on user_crews
+CREATE TRIGGER increment_execution_count
+AFTER INSERT ON user_crew_executions BEGIN
+  UPDATE user_crews
+  SET 
+    crew_executions = crew_executions + 1,
+    updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.crew_id;
+END;
 
 -- ============================================================================
 -- Crew Execution Steps
@@ -232,16 +231,6 @@ CREATE TABLE user_crew_execution_steps (
 CREATE INDEX idx_execution_steps_crew_id ON user_crew_execution_steps(crew_id);
 CREATE INDEX idx_execution_steps_execution_id ON user_crew_execution_steps(execution_id);
 CREATE INDEX idx_execution_steps_type ON user_crew_execution_steps(step_type);
-
--- Trigger to increment execution count on user_crews
-CREATE TRIGGER increment_execution_count
-AFTER INSERT ON user_crew_executions BEGIN
-  UPDATE user_crews
-  SET 
-    crew_executions = crew_executions + 1,
-    updated_at = CURRENT_TIMESTAMP
-  WHERE id = NEW.crew_id;
-END;
 
 -- ============================================================================
 -- User Crons
