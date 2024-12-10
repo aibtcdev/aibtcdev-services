@@ -140,6 +140,7 @@ CREATE INDEX idx_conversations_profile_id ON user_conversations(profile_id);
 CREATE TABLE user_crew_executions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   profile_id TEXT NOT NULL,
   -- link to user_profiles
   crew_id INTEGER NOT NULL,
