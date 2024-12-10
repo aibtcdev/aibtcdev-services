@@ -62,7 +62,7 @@ CREATE TABLE user_crews (
   -- handled by trigger
   crew_is_public INTEGER DEFAULT 0,
   crew_is_cron INTEGER DEFAULT 0,
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(user_stx_address) ON DELETE CASCADE
+  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE
 );
 
 -- Define indexes
@@ -85,7 +85,7 @@ CREATE TABLE user_agents (
   agent_goal TEXT NOT NULL,
   agent_backstory TEXT NOT NULL,
   agent_tools TEXT,
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(user_stx_address) ON DELETE CASCADE,
+  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
   FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE
 );
 
@@ -109,7 +109,7 @@ CREATE TABLE user_tasks (
   task_name TEXT NOT NULL,
   task_description TEXT NOT NULL,
   task_expected_output TEXT NOT NULL,
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(user_stx_address) ON DELETE CASCADE,
+  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
   FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE,
   FOREIGN KEY (agent_id) REFERENCES user_agents(id) ON DELETE CASCADE
 );
@@ -150,7 +150,7 @@ CREATE TABLE user_crew_executions (
   final_result TEXT,
   total_tokens INTEGER,
   successful_requests INTEGER,
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(user_stx_address) ON DELETE CASCADE,
+  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
   FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE,
   FOREIGN KEY (conversation_id) REFERENCES user_conversations(id) ON DELETE CASCADE
 );
