@@ -12,7 +12,12 @@ export class DatabaseDO extends DurableObject<Env> {
 	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH = '/database';
 	private readonly KEY_PREFIX = 'db';
-	private readonly SUPPORTED_ENDPOINTS: string[] = ['/hello'];
+	private readonly SUPPORTED_ENDPOINTS: string[] = [
+		'/hello',
+		'/conversations',
+		'/conversations/latest',
+		'/conversations/history'
+	];
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
@@ -43,6 +48,32 @@ export class DatabaseDO extends DurableObject<Env> {
 		}
 	}
 
+	private async validateAuth(request: Request): Promise<{ success: boolean; error?: string; status?: number }> {
+		if (!request.headers.has('Authorization')) {
+			return { success: false, error: 'Missing Authorization header', status: 401 };
+		}
+
+		const frontendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-frontend');
+		const backendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-backend');
+		
+		if (frontendKey === null || backendKey === null) {
+			return { 
+				success: false, 
+				error: 'Unable to load shared keys for frontend/backend',
+				status: 401 
+			};
+		}
+
+		const validKeys = [frontendKey, backendKey];
+		const requestKey = request.headers.get('Authorization');
+		
+		if (requestKey === null || !validKeys.includes(requestKey)) {
+			return { success: false, error: 'Invalid Authorization key', status: 401 };
+		}
+
+		return { success: true };
+	}
+
 	async fetch(request: Request): Promise<Response> {
 		const url = new URL(request.url);
 		const path = url.pathname;
@@ -70,6 +101,46 @@ export class DatabaseDO extends DurableObject<Env> {
 			return createJsonResponse({
 				message: 'hello from database!',
 			});
+		}
+
+		// all methods from this point forward require a shared key
+		// frontend and backend each have their own stored in KV
+		const authResult = await this.validateAuth(request);
+		if (!authResult.success) {
+			return createJsonResponse({ error: authResult.error }, authResult.status);
+		}
+
+		try {
+			// Conversation endpoints
+			if (endpoint === '/conversations') {
+				const address = url.searchParams.get('address');
+				if (!address) {
+					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+				}
+				const conversations = await getConversations(this.orm, address);
+				return createJsonResponse({ conversations });
+			}
+
+			if (endpoint === '/conversations/latest') {
+				const address = url.searchParams.get('address');
+				if (!address) {
+					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+				}
+				const conversation = await getLatestConversation(this.orm, address);
+				return createJsonResponse({ conversation });
+			}
+
+			if (endpoint === '/conversations/history') {
+				const conversationId = url.searchParams.get('id');
+				if (!conversationId) {
+					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+				}
+				const history = await getConversationHistory(this.orm, parseInt(conversationId));
+				return createJsonResponse({ history });
+			}
+		} catch (error) {
+			console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
+			return createJsonResponse({ error: 'Internal server error' }, 500);
 		}
 
 		// all methods from this point forward require a shared key
