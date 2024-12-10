@@ -9,7 +9,6 @@ import {
 	userProfilesModel,
 	userSocialsModel,
 	userTasksModel,
-	UserCrewExecutionsTable,
 } from '../models';
 import { userCronsModel } from '../models/UserCrons';
 
@@ -163,9 +162,9 @@ export async function getEnabledCronsDetailed(orm: D1Orm) {
 
 		result.push({
 			crew,
-			profile,
 			agents,
 			tasks,
+			profile,
 		});
 	}
 
@@ -180,9 +179,9 @@ export async function getEnabledCronsDetailed(orm: D1Orm) {
  * @param address The Stacks address for the user's profile.
  * @param name The name of the conversation (optional).
  */
-export async function addConversation(env: Env, address: string, name: string = 'New Conversation') {
-	const userConversations = getUserConversationsModel(env);
-	const conversation = await userConversations.InsertOne({
+export async function addConversation(orm: D1Orm, address: string, name: string = 'New Conversation') {
+	userConversationsModel.SetOrm(orm);
+	const conversation = await userConversationsModel.InsertOne({
 		profile_id: address,
 		conversation_name: name,
 	});
@@ -196,9 +195,9 @@ export async function addConversation(env: Env, address: string, name: string = 
  * @param conversationId The ID of the conversation to update
  * @param name Optional new name for the conversation
  */
-export async function updateConversation(env: Env, address: string, conversationId: number, name?: string) {
-	const userConversations = getUserConversationsModel(env);
-	const result = await userConversations.Update({
+export async function updateConversation(orm: D1Orm, address: string, conversationId: number, name?: string) {
+	userConversationsModel.SetOrm(orm);
+	const result = await userConversationsModel.Update({
 		where: {
 			id: conversationId,
 			profile_id: address,
@@ -216,9 +215,9 @@ export async function updateConversation(env: Env, address: string, conversation
  * @param address The Stacks address for the user's profile.
  * @param conversationId The ID of the conversation to delete.
  */
-export async function deleteConversation(env: Env, address: string, conversationId: number) {
-	const userConversations = getUserConversationsModel(env);
-	const result = await userConversations.Delete({
+export async function deleteConversation(orm: D1Orm, address: string, conversationId: number) {
+	userConversationsModel.SetOrm(orm);
+	const result = await userConversationsModel.Delete({
 		where: {
 			id: conversationId,
 			profile_id: address,
@@ -232,9 +231,9 @@ export async function deleteConversation(env: Env, address: string, conversation
  * @param orm The orm instance from durable object class
  * @param conversationId The ID of the conversation
  */
-export async function getConversation(env: Env, conversationId: number) {
-	const userConversations = getUserConversationsModel(env);
-	const conversation = await userConversations.First({
+export async function getConversation(orm: D1Orm, conversationId: number) {
+	userConversationsModel.SetOrm(orm);
+	const conversation = await userConversationsModel.First({
 		where: {
 			id: conversationId,
 		},
@@ -247,11 +246,11 @@ export async function getConversation(env: Env, conversationId: number) {
  * @param orm The orm instance from durable object class
  * @param conversationId The ID of the conversation
  */
-export async function getConversationWithJobs(env: Env, conversationId: number) {
-	const userConversations = getUserConversationsModel(env);
-	const userCrewExecutions = getUserCrewExecutionsModel(env);
+export async function getConversationWithExecutions(orm: D1Orm, conversationId: number) {
+	userConversationsModel.SetOrm(orm);
+	userCrewExecutionsModel.SetOrm(orm);
 
-	const conversation = await userConversations.findOne({
+	const conversation = await userConversationsModel.First({
 		where: {
 			id: conversationId,
 		},
@@ -261,7 +260,7 @@ export async function getConversationWithJobs(env: Env, conversationId: number) 
 		return null;
 	}
 
-	const executions = await userCrewExecutions.All({
+	const executions = await userCrewExecutionsModel.All({
 		where: {
 			conversation_id: conversationId,
 		},
@@ -284,9 +283,9 @@ export async function getConversationWithJobs(env: Env, conversationId: number) 
  * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile.
  */
-export async function getConversations(env: Env, address: string) {
-	const userConversations = getUserConversationsModel(env);
-	const conversations = await userConversations.All({
+export async function getConversations(orm: D1Orm, address: string) {
+	userConversationsModel.SetOrm(orm);
+	const conversations = await userConversationsModel.All({
 		where: {
 			profile_id: address,
 		},
@@ -305,22 +304,25 @@ export async function getConversations(env: Env, address: string) {
  * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile
  */
-export async function getConversationsWithJobs(env: Env, address: string) {
-	const userConversations = getUserConversationsModel(env);
-	const userCrewExecutions = getUserCrewExecutionsModel(env);
+export async function getConversationsWithExecutions(orm: D1Orm, address: string) {
+	userConversationsModel.SetOrm(orm);
+	userCrewExecutionsModel.SetOrm(orm);
 
-	const conversations = await userConversations.findMany({
+	const conversations = await userConversationsModel.All({
 		where: {
 			profile_id: address,
 		},
-		orderBy: {
-			created_at: 'desc',
-		},
+		orderBy: [
+			{
+				column: 'created_at',
+				descending: true,
+			},
+		],
 	});
 
 	const result = [];
-	for (const conversation of conversations) {
-		const executions = await userCrewExecutions.All({
+	for (const conversation of conversations.results) {
+		const executions = await userCrewExecutionsModel.All({
 			where: {
 				conversation_id: conversation.id,
 				profile_id: address,
@@ -347,9 +349,9 @@ export async function getConversationsWithJobs(env: Env, address: string) {
  * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile.
  */
-export async function getLatestConversation(env: Env, address: string) {
-	const userConversations = getUserConversationsModel(env);
-	const conversation = await userConversations.First({
+export async function getLatestConversation(orm: D1Orm, address: string) {
+	userConversationsModel.SetOrm(orm);
+	const conversation = await userConversationsModel.All({
 		where: {
 			profile_id: address,
 		},
@@ -359,8 +361,10 @@ export async function getLatestConversation(env: Env, address: string) {
 				descending: true,
 			},
 		],
+		limit: 1,
 	});
-	return conversation;
+	// return first array entry because of limit 1
+	return conversation.results[0];
 }
 
 /**
@@ -368,9 +372,9 @@ export async function getLatestConversation(env: Env, address: string) {
  * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile
  */
-export async function getLatestConversationId(env: Env, address: string) {
-	const conversation = await getLatestConversation(db, address);
-	return conversation?.id;
+export async function getLatestConversationId(orm: D1Orm, address: string) {
+	const conversation = await getLatestConversation(orm, address);
+	return conversation.id;
 }
 
 /**
@@ -378,12 +382,13 @@ export async function getLatestConversationId(env: Env, address: string) {
  * @param orm The orm instance from durable object class
  * @param conversationId The ID of the conversation
  */
-export async function getConversationHistory(env: Env, conversationId: number) {
-	const userCrewExecutions = getUserCrewExecutionsModel(env);
-	const userCrewExecutionSteps = getUserCrewExecutionStepsModel(env);
+export async function getConversationHistory(orm: D1Orm, conversationId: number) {
+	userConversationsModel.SetOrm(orm);
+	userCrewExecutionsModel.SetOrm(orm);
+	userCrewExecutionStepsModel.SetOrm(orm);
 
 	// Get all executions for this conversation
-	const executions = await userCrewExecutions.All({
+	const executions = await userCrewExecutionsModel.All({
 		where: {
 			conversation_id: conversationId,
 		},
@@ -396,9 +401,9 @@ export async function getConversationHistory(env: Env, conversationId: number) {
 	});
 
 	const history = [];
-	for (const execution of executions) {
+	for (const execution of executions.results) {
 		// Get all steps for this execution
-		const steps = await userCrewExecutionSteps.All({
+		const steps = await userCrewExecutionStepsModel.All({
 			where: {
 				execution_id: execution.id,
 			},
