@@ -16,7 +16,10 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/hello',
 		'/conversations',
 		'/conversations/latest',
-		'/conversations/history'
+		'/conversations/history',
+		'/crews/public',
+		'/crews/executions',
+		'/crews/executions/add'
 	];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -137,6 +140,45 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 				const history = await getConversationHistory(this.orm, parseInt(conversationId));
 				return createJsonResponse({ history });
+			}
+
+			// Crew endpoints
+			if (endpoint === '/crews/public') {
+				const crews = await getPublicCrews(this.orm);
+				return createJsonResponse({ crews });
+			}
+
+			if (endpoint === '/crews/executions') {
+				const address = url.searchParams.get('address');
+				if (!address) {
+					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+				}
+				const executions = await getCrewExecutions(this.orm, address);
+				return createJsonResponse({ executions });
+			}
+
+			if (endpoint === '/crews/executions/add') {
+				if (request.method !== 'POST') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+
+				const body = await request.json();
+				const { address, crewId, conversationId, input } = body;
+
+				if (!address || !crewId || !conversationId) {
+					return createJsonResponse({ 
+						error: 'Missing required parameters: address, crewId, conversationId' 
+					}, 400);
+				}
+
+				const execution = await addCrewExecution(
+					this.orm, 
+					address, 
+					parseInt(crewId), 
+					parseInt(conversationId), 
+					input
+				);
+				return createJsonResponse({ execution });
 			}
 		} catch (error) {
 			console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
