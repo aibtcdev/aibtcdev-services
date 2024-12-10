@@ -19,7 +19,9 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/conversations/history',
 		'/crews/public',
 		'/crews/executions',
-		'/crews/executions/add'
+		'/crews/executions/add',
+		'/crons/enabled',
+		'/crons/enabled/detailed'
 	];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -179,6 +181,17 @@ export class DatabaseDO extends DurableObject<Env> {
 					input
 				);
 				return createJsonResponse({ execution });
+			}
+
+			// Cron endpoints
+			if (endpoint === '/crons/enabled') {
+				const crons = await getEnabledCrons(this.orm);
+				return createJsonResponse({ crons });
+			}
+
+			if (endpoint === '/crons/enabled/detailed') {
+				const crons = await getEnabledCronsDetailed(this.orm);
+				return createJsonResponse({ crons });
 			}
 		} catch (error) {
 			console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
