@@ -3,6 +3,16 @@ import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
 import { createJsonResponse } from '../utils/requests-responses';
 import { D1Orm } from 'd1-orm';
+import {
+	addCrewExecution,
+	getConversationHistory,
+	getConversations,
+	getCrewExecutions,
+	getEnabledCrons,
+	getEnabledCronsDetailed,
+	getLatestConversation,
+	getPublicCrews,
+} from '../database/database-helpers';
 
 /**
  * Durable Object class for backend database calls
@@ -21,7 +31,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/crews/executions',
 		'/crews/executions/add',
 		'/crons/enabled',
-		'/crons/enabled/detailed'
+		'/crons/enabled/detailed',
 	];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -60,18 +70,18 @@ export class DatabaseDO extends DurableObject<Env> {
 
 		const frontendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-frontend');
 		const backendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-backend');
-		
+
 		if (frontendKey === null || backendKey === null) {
-			return { 
-				success: false, 
+			return {
+				success: false,
 				error: 'Unable to load shared keys for frontend/backend',
-				status: 401 
+				status: 401,
 			};
 		}
 
 		const validKeys = [frontendKey, backendKey];
 		const requestKey = request.headers.get('Authorization');
-		
+
 		if (requestKey === null || !validKeys.includes(requestKey)) {
 			return { success: false, error: 'Invalid Authorization key', status: 401 };
 		}
@@ -164,22 +174,26 @@ export class DatabaseDO extends DurableObject<Env> {
 					return createJsonResponse({ error: 'Method not allowed' }, 405);
 				}
 
-				const body = await request.json();
+				type AddCrewExecutionRequest = {
+					address: string;
+					crewId: number;
+					conversationId: number;
+					input: string;
+				};
+
+				const body: AddCrewExecutionRequest = await request.json();
 				const { address, crewId, conversationId, input } = body;
 
-				if (!address || !crewId || !conversationId) {
-					return createJsonResponse({ 
-						error: 'Missing required parameters: address, crewId, conversationId' 
-					}, 400);
+				if (!address || !crewId || !conversationId || !input) {
+					return createJsonResponse(
+						{
+							error: 'Missing required parameters: address, crewId, conversationId, input',
+						},
+						400
+					);
 				}
 
-				const execution = await addCrewExecution(
-					this.orm, 
-					address, 
-					parseInt(crewId), 
-					parseInt(conversationId), 
-					input
-				);
+				const execution = await addCrewExecution(this.orm, address, crewId, conversationId, input);
 				return createJsonResponse({ execution });
 			}
 
