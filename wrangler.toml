@@ -52,3 +52,8 @@ new_classes = ["AuthDO", "ContextDO", "DatabaseDO", "SchedulerDO", "ToolsDO"]
 [[kv_namespaces]]
 binding = "AIBTCDEV_SERVICES_KV"
 id = "8a1d0cb7054d462e841fc7a70f820b8c"
+
+[[d1_databases]]
+binding = "AIBTCDEV_SERVICES_DB"
+database_name = "aibtcdev-d1"
+database_id = "3b6d3694-0bb2-4c94-bca6-c62b62c1ec6f"

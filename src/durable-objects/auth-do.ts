@@ -21,7 +21,8 @@ import { createJsonResponse } from '../utils/requests-responses';
 export class AuthDO extends DurableObject<Env> {
 	private readonly CACHE_TTL = 43200; // 30 days, in seconds
 	private readonly ALARM_INTERVAL_MS: number;
-	private readonly BASE_PATH: string = '/auth';
+	private readonly BASE_PATH = '/auth';
+	private readonly KEY_PREFIX = 'auth';
 	private readonly SUPPORTED_ENDPOINTS: string[] = ['/request-auth-token', '/verify-address', '/verify-session-token'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -51,6 +52,32 @@ export class AuthDO extends DurableObject<Env> {
 		}
 	}
 
+	private async validateAuth(request: Request): Promise<{ success: boolean; error?: string; status?: number }> {
+		if (!request.headers.has('Authorization')) {
+			return { success: false, error: 'Missing Authorization header', status: 401 };
+		}
+
+		const frontendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-frontend');
+		const backendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-backend');
+
+		if (frontendKey === null || backendKey === null) {
+			return {
+				success: false,
+				error: 'Unable to load shared keys for frontend/backend',
+				status: 401,
+			};
+		}
+
+		const validKeys = [frontendKey, backendKey];
+		const requestKey = request.headers.get('Authorization');
+
+		if (requestKey === null || !validKeys.includes(requestKey)) {
+			return { success: false, error: 'Invalid Authorization key', status: 401 };
+		}
+
+		return { success: true };
+	}
+
 	async fetch(request: Request): Promise<Response> {
 		const url = new URL(request.url);
 		const path = url.pathname;
@@ -76,34 +103,9 @@ export class AuthDO extends DurableObject<Env> {
 
 		// all methods from this point forward require a shared key
 		// frontend and backend each have their own stored in KV
-		// and implemented as env vars in each project
-		if (!request.headers.has('Authorization')) {
-			return createJsonResponse(
-				{
-					error: 'Missing Authorization header',
-				},
-				401
-			);
-		}
-		const frontendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-frontend');
-		const backendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-backend');
-		if (frontendKey === null || backendKey == null) {
-			return createJsonResponse(
-				{
-					error: 'Unable to load shared keys for frontend/backend',
-				},
-				401
-			);
-		}
-		const validKeys = [frontendKey, backendKey];
-		const requestKey = request.headers.get('Authorization');
-		if (requestKey === null || !validKeys.includes(requestKey)) {
-			return createJsonResponse(
-				{
-					error: 'Invalid Authorization key',
-				},
-				401
-			);
+		const authResult = await this.validateAuth(request);
+		if (!authResult.success) {
+			return createJsonResponse({ error: authResult.error }, authResult.status);
 		}
 
 		// all methods from this point forward are POST
@@ -173,9 +175,13 @@ export class AuthDO extends DurableObject<Env> {
 				// signing before expiration extends the expiration
 				const sessionToken = crypto.randomUUID();
 				// first key allows us to filter by address
-				this.env.AIBTCDEV_SERVICES_KV.put(`address:${addressFromPublicKey}`, sessionToken, { expirationTtl: this.CACHE_TTL });
+				this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:address:${addressFromPublicKey}`, sessionToken, {
+					expirationTtl: this.CACHE_TTL,
+				});
 				// second key allows us to filter by session key
-				this.env.AIBTCDEV_SERVICES_KV.put(`session:${sessionToken}`, addressFromPublicKey, { expirationTtl: this.CACHE_TTL });
+				this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:session:${sessionToken}`, addressFromPublicKey, {
+					expirationTtl: this.CACHE_TTL,
+				});
 				// return 200 with session token
 				return createJsonResponse({
 					message: 'auth token successfully created',
@@ -214,7 +220,7 @@ export class AuthDO extends DurableObject<Env> {
 				);
 			}
 			// get session key from kv key list
-			const sessionKey = await this.env.AIBTCDEV_SERVICES_KV.get(`address:${address}`);
+			const sessionKey = await this.env.AIBTCDEV_SERVICES_KV.get(`${this.KEY_PREFIX}:address:${address}`);
 			if (sessionKey === null) {
 				return createJsonResponse(
 					{
@@ -244,7 +250,7 @@ export class AuthDO extends DurableObject<Env> {
 			}
 			const sessionToken = String(body.data);
 			// get address from kv key list
-			const address = await this.env.AIBTCDEV_SERVICES_KV.get(`session:${sessionToken}`);
+			const address = await this.env.AIBTCDEV_SERVICES_KV.get(`${this.KEY_PREFIX}:session:${sessionToken}`);
 			if (address === null) {
 				return createJsonResponse(
 					{
