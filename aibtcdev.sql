@@ -37,7 +37,7 @@ CREATE TABLE user_socials (
   -- Twitter, Telegram, Discord, etc
   platform_id TEXT NOT NULL,
   -- ID on the platform
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(user_stx_address) ON DELETE CASCADE
+  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE
 );
 
 -- Define indexes
@@ -47,7 +47,6 @@ CREATE INDEX idx_socials_platform ON user_socials(platform);
 
 CREATE INDEX idx_socials_platform_id ON user_socials(platform_id);
 
-CREATE INDEX idx_socials_user_email ON user_socials(user_email);
 
 -- Create user crews table
 CREATE TABLE user_crews (
@@ -62,6 +61,7 @@ CREATE TABLE user_crews (
   crew_executions INTEGER DEFAULT 0,
   -- handled by trigger
   crew_is_public INTEGER DEFAULT 0,
+  crew_is_cron INTEGER DEFAULT 0,
   FOREIGN KEY (profile_id) REFERENCES user_profiles(user_stx_address) ON DELETE CASCADE
 );
 
@@ -156,11 +156,11 @@ CREATE TABLE user_crew_executions (
 );
 
 -- Define indexes
-CREATE INDEX idx_executions_profile_id ON user_executions(profile_id);
+CREATE INDEX idx_executions_profile_id ON user_crew_executions(profile_id);
 
-CREATE INDEX idx_executions_crew_id ON user_executions(crew_id);
+CREATE INDEX idx_executions_crew_id ON user_crew_executions(crew_id);
 
-CREATE INDEX idx_executions_conversation_id ON user_executions(conversation_id);
+CREATE INDEX idx_executions_conversation_id ON user_crew_executions(conversation_id);
 
 -- Create crew steps table
 CREATE TABLE user_crew_execution_steps (
@@ -174,20 +174,48 @@ CREATE TABLE user_crew_execution_steps (
   -- Thought, Action, Tool Output, Final Answer, etc
   step_data TEXT NOT NULL,
   -- Actual output to parse
-  FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE FOREIGN KEY (execution_id) REFERENCES user_crew_executions(id) ON DELETE CASCADE
-) -- Trigger to increment execution count on user_crews
+  FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE,
+  FOREIGN KEY (execution_id) REFERENCES user_crew_executions(id) ON DELETE CASCADE
+);
+
+-- Trigger to increment execution count on user_crews
 CREATE TRIGGER increment_execution_count
-AFTER
-INSERT
-  ON user_executions BEGIN
-UPDATE
-  user_crews
-SET
-  execution_count = execution_count + 1,
+AFTER INSERT ON user_crew_executions 
+BEGIN
+  UPDATE user_crews
+  SET crew_executions = crew_executions + 1,
   updated_at = CURRENT_TIMESTAMP
 WHERE
   id = NEW.crew_id;
 
+END;
+
+-- Create user crons table
+CREATE TABLE user_crons (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  profile_id TEXT NOT NULL,
+  crew_id INTEGER NOT NULL,
+  cron_enabled INTEGER NOT NULL DEFAULT 0,
+  cron_interval TEXT NOT NULL,
+  cron_input TEXT NOT NULL,
+  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
+  FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE
+);
+
+-- Define indexes for crons
+CREATE INDEX idx_crons_profile_id ON user_crons(profile_id);
+CREATE INDEX idx_crons_crew_id ON user_crons(crew_id);
+CREATE INDEX idx_crons_enabled ON user_crons(cron_enabled);
+
+-- Create trigger for crons timestamp
+CREATE TRIGGER update_crons_timestamp
+AFTER UPDATE ON user_crons
+BEGIN
+  UPDATE user_crons
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
 END;
 
 -- Triggers for updating timestamps
