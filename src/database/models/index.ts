@@ -1,5 +1,6 @@
 export * from './UserProfile';
 export * from './UserSocials';
+export * from './UserCrons';
 export * from './UserCrews';
 export * from './UserAgents';
 export * from './UserTasks';

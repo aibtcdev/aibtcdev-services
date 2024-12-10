@@ -19,4 +19,4 @@ export const userCronsModel = new Model(
 	}
 );
 
-export type UserAgentsTable = Infer<typeof userCronsModel>;
+export type UserCronsTable = Infer<typeof userCronsModel>;

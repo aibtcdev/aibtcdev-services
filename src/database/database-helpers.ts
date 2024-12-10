@@ -5,11 +5,11 @@ import {
 	userConversationsModel,
 	userCrewExecutionStepsModel,
 	userCrewsModel,
+	userCronsModel, // fold into crews per comment?
 	userProfilesModel,
 	// userSocialsModel, TBD
 	userTasksModel,
-} from '../models';
-import { userCronsModel } from '../models/UserCrons';
+} from './models';
 
 /**
  * Create a new crew run for a profile. _(previously: "job")_
