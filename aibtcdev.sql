@@ -180,16 +180,19 @@ CREATE TABLE user_crew_execution_steps (
   FOREIGN KEY (execution_id) REFERENCES user_crew_executions(id) ON DELETE CASCADE
 );
 
+-- Define indexes for execution steps
+CREATE INDEX idx_execution_steps_crew_id ON user_crew_execution_steps(crew_id);
+CREATE INDEX idx_execution_steps_execution_id ON user_crew_execution_steps(execution_id);
+CREATE INDEX idx_execution_steps_type ON user_crew_execution_steps(step_type);
+
 -- Trigger to increment execution count on user_crews
 CREATE TRIGGER increment_execution_count
-AFTER INSERT ON user_crew_executions 
-BEGIN
+AFTER INSERT ON user_crew_executions BEGIN
   UPDATE user_crews
-  SET crew_executions = crew_executions + 1,
-  updated_at = CURRENT_TIMESTAMP
-WHERE
-  id = NEW.crew_id;
-
+  SET 
+    crew_executions = crew_executions + 1,
+    updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.crew_id;
 END;
 
 -- Create user crons table
@@ -221,104 +224,59 @@ BEGIN
 END;
 
 -- Triggers for updating timestamps
+-- Triggers for updating timestamps on all tables
 CREATE TRIGGER update_profiles_timestamp
-AFTER
-UPDATE
-  ON user_profiles BEGIN
-UPDATE
-  user_profiles
-SET
-  updated_at = CURRENT_TIMESTAMP
-WHERE
-  id = NEW.id;
-
+AFTER UPDATE ON user_profiles BEGIN
+  UPDATE user_profiles
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
 END;
 
 CREATE TRIGGER update_socials_timestamp
-AFTER
-UPDATE
-  ON user_socials BEGIN
-UPDATE
-  user_socials
-SET
-  updated_at = CURRENT_TIMESTAMP
-WHERE
-  id = NEW.id;
-
+AFTER UPDATE ON user_socials BEGIN
+  UPDATE user_socials
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
 END;
 
 CREATE TRIGGER update_crews_timestamp
-AFTER
-UPDATE
-  ON user_crews BEGIN
-UPDATE
-  user_crews
-SET
-  updated_at = CURRENT_TIMESTAMP
-WHERE
-  id = NEW.id;
-
+AFTER UPDATE ON user_crews BEGIN
+  UPDATE user_crews
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
 END;
 
 CREATE TRIGGER update_agents_timestamp
-AFTER
-UPDATE
-  ON user_agents BEGIN
-UPDATE
-  user_agents
-SET
-  updated_at = CURRENT_TIMESTAMP
-WHERE
-  id = NEW.id;
-
+AFTER UPDATE ON user_agents BEGIN
+  UPDATE user_agents
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
 END;
 
 CREATE TRIGGER update_tasks_timestamp
-AFTER
-UPDATE
-  ON user_tasks BEGIN
-UPDATE
-  user_tasks
-SET
-  updated_at = CURRENT_TIMESTAMP
-WHERE
-  id = NEW.id;
-
+AFTER UPDATE ON user_tasks BEGIN
+  UPDATE user_tasks
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
 END;
 
 CREATE TRIGGER update_conversations_timestamp
-AFTER
-UPDATE
-  ON user_conversations BEGIN
-UPDATE
-  user_conversations
-SET
-  updated_at = CURRENT_TIMESTAMP
-WHERE
-  id = NEW.id;
-
+AFTER UPDATE ON user_conversations BEGIN
+  UPDATE user_conversations
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
 END;
 
 CREATE TRIGGER update_executions_timestamp
-AFTER UPDATE ON user_crew_executions 
-BEGIN
+AFTER UPDATE ON user_crew_executions BEGIN
   UPDATE user_crew_executions
-SET
-  updated_at = CURRENT_TIMESTAMP
-WHERE
-  id = NEW.id;
-
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
 END;
 
 CREATE TRIGGER update_execution_steps_timestamp
-AFTER
-UPDATE
-  ON user_crew_execution_steps BEGIN
-UPDATE
-  user_crew_execution_steps
-SET
-  updated_at = CURRENT_TIMESTAMP
-WHERE
-  id = NEW.id;
-
+AFTER UPDATE ON user_crew_execution_steps BEGIN
+  UPDATE user_crew_execution_steps
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
 END;
