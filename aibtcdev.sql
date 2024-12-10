@@ -1,5 +1,13 @@
--- Create user profile table
--- This serves as the base for everything else.
+-- AIBTCDev Database Schema
+-- This schema defines the structure for managing user profiles, crews, agents,
+-- tasks, conversations, and executions in the AIBTCDev platform.
+
+-- ============================================================================
+-- User Profiles
+-- ============================================================================
+-- The foundational table that represents each unique user in the system.
+-- All other tables reference back to user_profiles through the stx_address.
+
 CREATE TABLE user_profiles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -24,8 +32,12 @@ CREATE INDEX idx_profiles_stx_address ON user_profiles(stx_address);
 
 CREATE INDEX idx_profiles_bns_address ON user_profiles(bns_address);
 
--- Create user social accounts table
--- compare to current Telegram table, what else is needed?
+-- ============================================================================
+-- User Social Accounts
+-- ============================================================================
+-- Tracks user's connected social media accounts across different platforms.
+-- Each user can have multiple social accounts linked to their profile.
+
 CREATE TABLE user_socials (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -48,7 +60,13 @@ CREATE INDEX idx_socials_platform ON user_socials(platform);
 CREATE INDEX idx_socials_platform_id ON user_socials(platform_id);
 
 
--- Create user crews table
+-- ============================================================================
+-- User Crews
+-- ============================================================================
+-- Represents a collection of AI agents working together.
+-- Crews can be configured for one-time execution or scheduled (cron) tasks.
+-- Each crew belongs to a user and can contain multiple agents.
+
 CREATE TABLE user_crews (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -70,7 +88,13 @@ CREATE INDEX idx_crews_profile_id ON user_crews(profile_id);
 
 CREATE INDEX idx_crews_crew_name ON user_crews(crew_name);
 
--- Create user agents table
+-- ============================================================================
+-- User Agents
+-- ============================================================================
+-- Defines individual AI agents that are part of a crew.
+-- Each agent has a specific role, goal, and backstory that guides its behavior.
+-- Agents can be equipped with different tools to accomplish their tasks.
+
 CREATE TABLE user_agents (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -94,7 +118,13 @@ CREATE INDEX idx_agents_profile_id ON user_agents(profile_id);
 
 CREATE INDEX idx_agents_crew_id ON user_agents(crew_id);
 
--- Create user tasks table
+-- ============================================================================
+-- User Tasks
+-- ============================================================================
+-- Defines specific tasks assigned to agents within a crew.
+-- Tasks include clear descriptions and expected outputs to guide agent behavior.
+-- Each task is associated with a specific agent and crew.
+
 CREATE TABLE user_tasks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -121,7 +151,13 @@ CREATE INDEX idx_tasks_crew_id ON user_tasks(crew_id);
 
 CREATE INDEX idx_tasks_agent_id ON user_tasks(agent_id);
 
--- Create user conversations table
+-- ============================================================================
+-- User Conversations
+-- ============================================================================
+-- Tracks conversations/sessions between users and their crews.
+-- Each conversation can contain multiple crew executions.
+-- Provides context and history for crew interactions.
+
 CREATE TABLE user_conversations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -136,7 +172,13 @@ CREATE TABLE user_conversations (
 -- Define indexes
 CREATE INDEX idx_conversations_profile_id ON user_conversations(profile_id);
 
--- Create crew executions table (formerly jobs)
+-- ============================================================================
+-- Crew Executions
+-- ============================================================================
+-- Records individual execution instances of crews.
+-- Tracks performance metrics like token usage and success rate.
+-- Links user input to final results through conversation context.
+
 CREATE TABLE user_crew_executions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -163,7 +205,13 @@ CREATE INDEX idx_executions_crew_id ON user_crew_executions(crew_id);
 
 CREATE INDEX idx_executions_conversation_id ON user_crew_executions(conversation_id);
 
--- Create crew steps table
+-- ============================================================================
+-- Crew Execution Steps
+-- ============================================================================
+-- Tracks detailed steps taken during crew execution.
+-- Records thoughts, actions, tool usage, and final answers.
+-- Provides transparency into the AI decision-making process.
+
 CREATE TABLE user_crew_execution_steps (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -195,7 +243,13 @@ AFTER INSERT ON user_crew_executions BEGIN
   WHERE id = NEW.crew_id;
 END;
 
--- Create user crons table
+-- ============================================================================
+-- User Crons
+-- ============================================================================
+-- Manages scheduled/recurring crew executions.
+-- Allows users to automate crew tasks on a defined schedule.
+-- Controls execution frequency and input parameters.
+
 CREATE TABLE user_crons (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -223,8 +277,14 @@ BEGIN
   WHERE id = NEW.id;
 END;
 
--- Triggers for updating timestamps
--- Triggers for updating timestamps on all tables
+-- ============================================================================
+-- Database Triggers
+-- ============================================================================
+-- Automatic triggers to maintain data consistency and timestamps.
+-- Handles:
+-- 1. Updating timestamps on record modifications
+-- 2. Incrementing execution counts for crews
+-- 3. Maintaining referential integrity
 CREATE TRIGGER update_profiles_timestamp
 AFTER UPDATE ON user_profiles BEGIN
   UPDATE user_profiles
