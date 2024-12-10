@@ -1,26 +1,28 @@
 import { D1Orm } from 'd1-orm';
 import type { Env } from '../../worker-configuration';
-
-let orm: D1Orm | null = null;
-
-// Initialize D1Orm with env when needed
-export function initializeD1Orm(env: Env) {
-	if (!orm) {
-		return new D1Orm(env.AIBTCDEV_SERVICES_DB);
-	}
-	return orm;
-}
+import {
+	userAgentsModel,
+	userCrewExecutionsModel,
+	userConversationsModel,
+	userCrewExecutionStepsModel,
+	userCrewsModel,
+	userProfilesModel,
+	userSocialsModel,
+	userTasksModel,
+	UserCrewExecutionsTable,
+} from '../models';
 
 /**
  * Create a new crew run for a profile. _(previously: "job")_
- * @param db The D1 database instance
+ * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile
  * @param crewId The ID of the crew being executed
  * @param conversationId The ID of the conversation this execution belongs to
  * @param input Optional user input for the execution
  */
-export async function addCrewExecution(env: Env, address: string, crewId: number, conversationId: number, input?: string) {
-	const execution = await userCrewExecutions.InsertOne({
+export async function addCrewExecution(orm: D1Orm, address: string, crewId: number, conversationId: number, input?: string) {
+	userCrewExecutionsModel.SetOrm(orm);
+	const execution = await userCrewExecutionsModel.InsertOne({
 		profile_id: address,
 		crew_id: crewId,
 		conversation_id: conversationId,
@@ -33,12 +35,12 @@ export async function addCrewExecution(env: Env, address: string, crewId: number
 
 /**
  * Get all executed crew runs for a profile. _(previously: "job")_
- * @param env The environment object containing D1 database
+ * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile
  */
-export async function getCrewExecutions(env: Env, address: string) {
-	const userCrewExecutions = getUserCrewExecutionsModel(env);
-	const executions = await userCrewExecutions.All({
+export async function getCrewExecutions(orm: D1Orm, address: string) {
+	userCrewExecutionsModel.SetOrm(orm);
+	const executions = await userCrewExecutionsModel.All({
 		where: {
 			profile_id: address,
 		},
@@ -54,11 +56,11 @@ export async function getCrewExecutions(env: Env, address: string) {
 
 /**
  * Get all public crew configurations.
- * @param env The environment object containing D1 database
+ * @param orm The orm instance from durable object class
  */
-export async function getPublicCrews(env: Env) {
-	const userCrews = getUserCrewsModel(env);
-	const crews = await userCrews.All({
+export async function getPublicCrews(orm: D1Orm) {
+	userCrewsModel.SetOrm(orm);
+	const crews = await userCrewsModel.All({
 		where: {
 			crew_is_public: 1,
 		},
@@ -83,7 +85,7 @@ export async function getPublicCrews(env: Env) {
 
 /**
  * Get all enabled cron jobs.
- * @param db The D1 database instance
+ * @param orm The orm instance from durable object class
  */
 export async function getEnabledCrons(env: Env) {
 	const userCrews = getUserCrewsModel(env);
@@ -104,7 +106,7 @@ export async function getEnabledCrons(env: Env) {
 
 /**
  * Get all enabled cron jobs with expanded crew information.
- * @param env The environment object containing D1 database
+ * @param orm The orm instance from durable object class
  */
 export async function getEnabledCronsWithCrews(env: Env) {
 	const userCrews = getUserCrewsModel(env);
@@ -155,6 +157,7 @@ export async function getEnabledCronsWithCrews(env: Env) {
 
 /**
  * Create a new conversation for a profile.
+ * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile.
  * @param name The name of the conversation (optional).
  */
@@ -169,7 +172,7 @@ export async function addConversation(env: Env, address: string, name: string = 
 
 /**
  * Update or create a conversation with new messages.
- * @param env The environment object containing D1 database
+ * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile
  * @param conversationId The ID of the conversation to update
  * @param name Optional new name for the conversation
@@ -190,6 +193,7 @@ export async function updateConversation(env: Env, address: string, conversation
 
 /**
  * Delete a specific conversation.
+ * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile.
  * @param conversationId The ID of the conversation to delete.
  */
@@ -206,7 +210,7 @@ export async function deleteConversation(env: Env, address: string, conversation
 
 /**
  * Get a conversation.
- * @param env The environment object containing D1 database
+ * @param orm The orm instance from durable object class
  * @param conversationId The ID of the conversation
  */
 export async function getConversation(env: Env, conversationId: number) {
@@ -221,7 +225,7 @@ export async function getConversation(env: Env, conversationId: number) {
 
 /**
  * Get a conversation with associated crew executions.
- * @param db The D1 database instance
+ * @param orm The orm instance from durable object class
  * @param conversationId The ID of the conversation
  */
 export async function getConversationWithJobs(env: Env, conversationId: number) {
@@ -258,6 +262,7 @@ export async function getConversationWithJobs(env: Env, conversationId: number) 
 
 /**
  * Get all conversations for a profile.
+ * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile.
  */
 export async function getConversations(env: Env, address: string) {
@@ -278,7 +283,7 @@ export async function getConversations(env: Env, address: string) {
 
 /**
  * Get all conversations with their associated crew executions for a profile.
- * @param db The D1 database instance
+ * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile
  */
 export async function getConversationsWithJobs(env: Env, address: string) {
@@ -320,6 +325,7 @@ export async function getConversationsWithJobs(env: Env, address: string) {
 
 /**
  * Get the most recent conversation for a profile.
+ * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile.
  */
 export async function getLatestConversation(env: Env, address: string) {
@@ -340,7 +346,7 @@ export async function getLatestConversation(env: Env, address: string) {
 
 /**
  * Get the ID of the most recent conversation for a profile.
- * @param db The D1 database instance
+ * @param orm The orm instance from durable object class
  * @param address The Stacks address for the user's profile
  */
 export async function getLatestConversationId(env: Env, address: string) {
@@ -350,7 +356,7 @@ export async function getLatestConversationId(env: Env, address: string) {
 
 /**
  * Get conversation history in chronological order.
- * @param db The D1 database instance
+ * @param orm The orm instance from durable object class
  * @param conversationId The ID of the conversation
  */
 export async function getConversationHistory(env: Env, conversationId: number) {
