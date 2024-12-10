@@ -19,7 +19,7 @@ CREATE TABLE user_profiles (
   -- can auto-assign from id after migration and make NOT NULL
   stx_address TEXT NOT NULL UNIQUE,
   -- can populate from loading wallet at index
-  bns_address TEXT,
+  bns_address TEXT
   -- can populate by querying aibtcdev-cache
 );
 
@@ -28,6 +28,14 @@ CREATE INDEX idx_profiles_user_role ON user_profiles(user_role);
 CREATE INDEX idx_profiles_account_index ON user_profiles(account_index);
 CREATE INDEX idx_profiles_stx_address ON user_profiles(stx_address);
 CREATE INDEX idx_profiles_bns_address ON user_profiles(bns_address);
+
+-- Trigger for user_profiles
+CREATE TRIGGER update_profiles_timestamp
+AFTER UPDATE ON user_profiles BEGIN
+  UPDATE user_profiles
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
+END;
 
 -- ============================================================================
 -- User Social Accounts
