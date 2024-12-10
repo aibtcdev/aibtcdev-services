@@ -62,6 +62,14 @@ CREATE INDEX idx_socials_profile_id ON user_socials(profile_id);
 CREATE INDEX idx_socials_platform ON user_socials(platform);
 CREATE INDEX idx_socials_platform_id ON user_socials(platform_id);
 
+-- Trigger for user_socials
+CREATE TRIGGER update_socials_timestamp
+AFTER UPDATE ON user_socials BEGIN
+  UPDATE user_socials
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
+END;
+
 
 -- ============================================================================
 -- User Crews
@@ -89,6 +97,14 @@ CREATE TABLE user_crews (
 -- Define indexes
 CREATE INDEX idx_crews_profile_id ON user_crews(profile_id);
 CREATE INDEX idx_crews_crew_name ON user_crews(crew_name);
+
+-- Trigger for user_crews
+CREATE TRIGGER update_crews_timestamp
+AFTER UPDATE ON user_crews BEGIN
+  UPDATE user_crews
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
+END;
 
 -- ============================================================================
 -- User Agents
@@ -118,6 +134,14 @@ CREATE TABLE user_agents (
 -- Define indexes
 CREATE INDEX idx_agents_profile_id ON user_agents(profile_id);
 CREATE INDEX idx_agents_crew_id ON user_agents(crew_id);
+
+-- Trigger for user_agents
+CREATE TRIGGER update_agents_timestamp
+AFTER UPDATE ON user_agents BEGIN
+  UPDATE user_agents
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
+END;
 
 -- ============================================================================
 -- User Tasks
@@ -150,6 +174,14 @@ CREATE INDEX idx_tasks_profile_id ON user_tasks(profile_id);
 CREATE INDEX idx_tasks_crew_id ON user_tasks(crew_id);
 CREATE INDEX idx_tasks_agent_id ON user_tasks(agent_id);
 
+-- Trigger for user_tasks
+CREATE TRIGGER update_tasks_timestamp
+AFTER UPDATE ON user_tasks BEGIN
+  UPDATE user_tasks
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
+END;
+
 -- ============================================================================
 -- User Conversations
 -- ============================================================================
@@ -170,6 +202,14 @@ CREATE TABLE user_conversations (
 
 -- Define indexes
 CREATE INDEX idx_conversations_profile_id ON user_conversations(profile_id);
+
+-- Trigger for user_conversations
+CREATE TRIGGER update_conversations_timestamp
+AFTER UPDATE ON user_conversations BEGIN
+  UPDATE user_conversations
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
+END;
 
 -- ============================================================================
 -- Crew Executions
@@ -201,6 +241,14 @@ CREATE TABLE user_crew_executions (
 CREATE INDEX idx_executions_profile_id ON user_crew_executions(profile_id);
 CREATE INDEX idx_executions_crew_id ON user_crew_executions(crew_id);
 CREATE INDEX idx_executions_conversation_id ON user_crew_executions(conversation_id);
+
+-- Trigger for user_crew_executions
+CREATE TRIGGER update_executions_timestamp
+AFTER UPDATE ON user_crew_executions BEGIN
+  UPDATE user_crew_executions
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
+END;
 
 -- Trigger to increment execution count on user_crews
 CREATE TRIGGER increment_execution_count
@@ -240,6 +288,14 @@ CREATE INDEX idx_execution_steps_crew_id ON user_crew_execution_steps(crew_id);
 CREATE INDEX idx_execution_steps_execution_id ON user_crew_execution_steps(execution_id);
 CREATE INDEX idx_execution_steps_type ON user_crew_execution_steps(step_type);
 
+-- Trigger for user_crew_execution_steps
+CREATE TRIGGER update_execution_steps_timestamp
+AFTER UPDATE ON user_crew_execution_steps BEGIN
+  UPDATE user_crew_execution_steps
+  SET updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.id;
+END;
+
 -- ============================================================================
 -- User Crons
 -- ============================================================================
@@ -274,66 +330,3 @@ BEGIN
   WHERE id = NEW.id;
 END;
 
--- ============================================================================
--- Database Triggers
--- ============================================================================
--- Automatic triggers to maintain data consistency and timestamps.
--- Handles:
--- 1. Updating timestamps on record modifications
--- 2. Incrementing execution counts for crews
--- 3. Maintaining referential integrity
-CREATE TRIGGER update_profiles_timestamp
-AFTER UPDATE ON user_profiles BEGIN
-  UPDATE user_profiles
-  SET updated_at = CURRENT_TIMESTAMP
-  WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER update_socials_timestamp
-AFTER UPDATE ON user_socials BEGIN
-  UPDATE user_socials
-  SET updated_at = CURRENT_TIMESTAMP
-  WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER update_crews_timestamp
-AFTER UPDATE ON user_crews BEGIN
-  UPDATE user_crews
-  SET updated_at = CURRENT_TIMESTAMP
-  WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER update_agents_timestamp
-AFTER UPDATE ON user_agents BEGIN
-  UPDATE user_agents
-  SET updated_at = CURRENT_TIMESTAMP
-  WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER update_tasks_timestamp
-AFTER UPDATE ON user_tasks BEGIN
-  UPDATE user_tasks
-  SET updated_at = CURRENT_TIMESTAMP
-  WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER update_conversations_timestamp
-AFTER UPDATE ON user_conversations BEGIN
-  UPDATE user_conversations
-  SET updated_at = CURRENT_TIMESTAMP
-  WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER update_executions_timestamp
-AFTER UPDATE ON user_crew_executions BEGIN
-  UPDATE user_crew_executions
-  SET updated_at = CURRENT_TIMESTAMP
-  WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER update_execution_steps_timestamp
-AFTER UPDATE ON user_crew_execution_steps BEGIN
-  UPDATE user_crew_execution_steps
-  SET updated_at = CURRENT_TIMESTAMP
-  WHERE id = NEW.id;
-END;
