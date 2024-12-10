@@ -2,11 +2,13 @@ import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
 import { createJsonResponse } from '../utils/requests-responses';
+import { D1Orm } from 'd1-orm';
 
 /**
  * Durable Object class for backend database calls
  */
 export class DatabaseDO extends DurableObject<Env> {
+	private readonly orm: D1Orm;
 	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH = '/database';
 	private readonly KEY_PREFIX = 'db';
@@ -16,6 +18,8 @@ export class DatabaseDO extends DurableObject<Env> {
 		super(ctx, env);
 		this.ctx = ctx;
 		this.env = env;
+		// initialize d1-orm with cloudflare d1 database
+		this.orm = new D1Orm(env.AIBTCDEV_SERVICES_DB);
 
 		// Initialize AppConfig with environment
 		const config = AppConfig.getInstance(env).getConfig();
