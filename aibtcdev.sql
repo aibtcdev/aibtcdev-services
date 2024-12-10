@@ -130,7 +130,7 @@ CREATE TABLE user_conversations (
   profile_id TEXT NOT NULL,
   -- link to user_profiles
   conversation_name TEXT NOT NULL,
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(user_stx_address) ON DELETE CASCADE
+  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE
 );
 
 -- Define indexes
@@ -166,6 +166,7 @@ CREATE INDEX idx_executions_conversation_id ON user_crew_executions(conversation
 CREATE TABLE user_crew_execution_steps (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   crew_id INTEGER NOT NULL,
   -- link to user_crews
   execution_id INTEGER NOT NULL,
@@ -298,11 +299,9 @@ WHERE
 END;
 
 CREATE TRIGGER update_executions_timestamp
-AFTER
-UPDATE
-  ON user_executions BEGIN
-UPDATE
-  user_executions
+AFTER UPDATE ON user_crew_executions 
+BEGIN
+  UPDATE user_crew_executions
 SET
   updated_at = CURRENT_TIMESTAMP
 WHERE
