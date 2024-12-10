@@ -85,7 +85,6 @@ CREATE TABLE user_agents (
   agent_goal TEXT NOT NULL,
   agent_backstory TEXT NOT NULL,
   agent_tools TEXT,
-  -- does not support an array here, store JSON?
   FOREIGN KEY (profile_id) REFERENCES user_profiles(user_stx_address) ON DELETE CASCADE,
   FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE
 );

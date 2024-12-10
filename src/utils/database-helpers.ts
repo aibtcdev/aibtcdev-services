@@ -11,6 +11,7 @@ import {
 	userTasksModel,
 	UserCrewExecutionsTable,
 } from '../models';
+import { userCronsModel } from '../models/UserCrons';
 
 /**
  * Create a new crew run for a profile. _(previously: "job")_
@@ -87,12 +88,11 @@ export async function getPublicCrews(orm: D1Orm) {
  * Get all enabled cron jobs.
  * @param orm The orm instance from durable object class
  */
-export async function getEnabledCrons(env: Env) {
-	const userCrews = getUserCrewsModel(env);
-	const crews = await userCrews.All({
+export async function getEnabledCrons(orm: D1Orm) {
+	userCronsModel.SetOrm(orm);
+	const crons = await userCronsModel.All({
 		where: {
-			crew_is_cron: 1,
-			crew_is_enabled: 1,
+			cron_enabled: 1,
 		},
 		orderBy: [
 			{
@@ -101,52 +101,71 @@ export async function getEnabledCrons(env: Env) {
 			},
 		],
 	});
-	return crews;
+	return crons;
 }
 
 /**
  * Get all enabled cron jobs with expanded crew information.
  * @param orm The orm instance from durable object class
  */
-export async function getEnabledCronsWithCrews(env: Env) {
-	const userCrews = getUserCrewsModel(env);
-	const userAgents = getUserAgentsModel(env);
-	const userTasks = getUserTasksModel(env);
-	const userProfile = getUserProfileModel(env);
+export async function getEnabledCronsDetailed(orm: D1Orm) {
+	userCrewsModel.SetOrm(orm);
+	userAgentsModel.SetOrm(orm);
+	userTasksModel.SetOrm(orm);
+	userProfilesModel.SetOrm(orm);
 
-	const crews = await getEnabledCrons(env);
+	const crons = await userCronsModel.All({
+		where: {
+			cron_enabled: 1,
+		},
+		orderBy: [
+			{
+				column: 'created_at',
+				descending: true,
+			},
+		],
+	});
+
 	const result = [];
 
-	for (const crew of crews) {
-		// Get the profile
-		const profile = await userProfile.First({
+	// iterate through all cron entries returned
+	for (const cron of crons.results) {
+		// get the related crew info for this cron
+		const crew = await userCrewsModel.First({
 			where: {
-				stx_address: crew.profile_id,
+				id: cron.crew_id,
 			},
 		});
-
-		// Get all agents for this crew
-		const agents = await userAgents.All({
+		// get all of the agents for the crew
+		const agents = await userAgentsModel.All({
 			where: {
-				crew_id: crew.id,
+				profile_id: cron.profile_id,
+				crew_id: cron.crew_id,
 			},
 		});
-
-		// Get all tasks for each agent
-		for (const agent of agents) {
-			const tasks = await userTasks.All({
+		// get all of the tasks for each agent
+		let tasks = [];
+		for (const agent of agents.results) {
+			const agentTasks = await userTasksModel.All({
 				where: {
-					crew_id: crew.id,
+					profile_id: cron.profile_id,
+					crew_id: cron.crew_id,
 					agent_id: agent.id,
 				},
 			});
-			Object.assign(agent, { tasks });
+			tasks.push(agentTasks.results);
 		}
+		const profile = userProfilesModel.First({
+			where: {
+				stx_address: cron.profile_id,
+			},
+		});
 
 		result.push({
-			...crew,
+			crew,
 			profile,
 			agents,
+			tasks,
 		});
 	}
 

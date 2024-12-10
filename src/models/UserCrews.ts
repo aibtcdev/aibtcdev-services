@@ -16,6 +16,7 @@ export const userCrewsModel = new Model(
 		crew_description: { type: DataTypes.STRING },
 		crew_executions: { type: DataTypes.INTEGER },
 		crew_is_public: { type: DataTypes.BOOLEAN },
+		crew_is_cron: { type: DataTypes.BOOLEAN },
 	}
 );
 
