@@ -12,7 +12,7 @@ import {
 	getEnabledCronsDetailed,
 	getLatestConversation,
 	getPublicCrews,
-} from '../database/database-helpers';
+} from '../database/helpers';
 
 /**
  * Durable Object class for backend database calls
