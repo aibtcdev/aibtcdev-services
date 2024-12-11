@@ -7,3 +7,7 @@ export * from './UserTasks';
 export * from './UserConversations';
 export * from './UserCrewExecutions';
 export * from './UserCrewExecutionSteps';
+export * from './XBotAuthors';
+export * from './XBotThreads';
+export * from './XBotTweets';
+export * from './XBotLogs';
