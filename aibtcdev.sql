@@ -1,12 +1,23 @@
+-- ============================================================================
 -- AIBTCDev Database Schema
+-- ============================================================================
 -- This schema defines the structure for managing user profiles, crews, agents,
 -- tasks, conversations, and executions in the AIBTCDev platform.
+
+-- ============================================================================
+-- Basic Configuration
+-- ============================================================================
+-- All tables link back to user_profiles with stx_address as profile_id.
+-- All tables contain an auto-incrementing id, created_at, and updated_at field.
+-- All tables have indexes for commonly looked up columns.
+-- All tables have a trigger to update  the updated_at field.
+
 
 -- ============================================================================
 -- User Profiles
 -- ============================================================================
 -- The foundational table that represents each unique user in the system.
--- All other tables reference back to user_profiles through the stx_address.
+-- All other tables reference back to user_profiles with stx_address.
 
 CREATE TABLE user_profiles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -90,7 +101,6 @@ CREATE TABLE user_crews (
   crew_executions INTEGER DEFAULT 0,
   -- handled by trigger
   crew_is_public INTEGER DEFAULT 0,
-  crew_is_cron INTEGER DEFAULT 0,
   FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE
 );
 
@@ -201,6 +211,7 @@ CREATE TABLE user_conversations (
 );
 
 -- Define indexes
+CREATE INDEX idx_conversations_created_at ON user_conversations(created_at);
 CREATE INDEX idx_conversations_profile_id ON user_conversations(profile_id);
 
 -- Trigger for user_conversations
@@ -238,6 +249,7 @@ CREATE TABLE user_crew_executions (
 );
 
 -- Define indexes
+CREATE INDEX idx_executions_created_at ON user_crew_executions(created_at);
 CREATE INDEX idx_executions_profile_id ON user_crew_executions(profile_id);
 CREATE INDEX idx_executions_crew_id ON user_crew_executions(crew_id);
 CREATE INDEX idx_executions_conversation_id ON user_crew_executions(conversation_id);
@@ -287,6 +299,7 @@ CREATE TABLE user_crew_execution_steps (
 );
 
 -- Define indexes for execution steps
+CREATE INDEX idx_execution_steps_created_at ON user_crew_execution_steps(created_at); 
 CREATE INDEX idx_execution_steps_profile_id ON user_crew_execution_steps(profile_id)
 CREATE INDEX idx_execution_steps_crew_id ON user_crew_execution_steps(crew_id);
 CREATE INDEX idx_execution_steps_execution_id ON user_crew_execution_steps(execution_id);
@@ -321,6 +334,7 @@ CREATE TABLE user_crons (
 );
 
 -- Define indexes for crons
+CREATE INDEX idx_crons_created_at ON user_crons(created_at);
 CREATE INDEX idx_crons_profile_id ON user_crons(profile_id);
 CREATE INDEX idx_crons_crew_id ON user_crons(crew_id);
 CREATE INDEX idx_crons_enabled ON user_crons(cron_enabled);
