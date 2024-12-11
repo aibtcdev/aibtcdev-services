@@ -301,7 +301,7 @@ CREATE TABLE user_crew_execution_steps (
 
 -- Define indexes for execution steps
 CREATE INDEX idx_execution_steps_created_at ON user_crew_execution_steps(created_at); 
-CREATE INDEX idx_execution_steps_profile_id ON user_crew_execution_steps(profile_id)
+CREATE INDEX idx_execution_steps_profile_id ON user_crew_execution_steps(profile_id);
 CREATE INDEX idx_execution_steps_crew_id ON user_crew_execution_steps(crew_id);
 CREATE INDEX idx_execution_steps_execution_id ON user_crew_execution_steps(execution_id);
 CREATE INDEX idx_execution_steps_type ON user_crew_execution_steps(step_type);
@@ -383,8 +383,3 @@ BEGIN
     updated_at = CURRENT_TIMESTAMP
   WHERE id = OLD.crew_id;
 END;
-
--- Ask Aider how to link user_crews or user_crew_executions to user_crons,
--- then use a trigger to update last run when a valid cron is triggered.
--- Leaning toward a boolean on user_crews that references the value in
--- user_crons for cron_enabled on the same id.
