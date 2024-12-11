@@ -12,7 +12,6 @@
 -- All tables have indexes for commonly looked up columns.
 -- All tables have a trigger to update  the updated_at field.
 
-
 -- ============================================================================
 -- User Profiles
 -- ============================================================================
@@ -326,6 +325,8 @@ CREATE TABLE user_crons (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   profile_id TEXT NOT NULL,
   crew_id INTEGER NOT NULL,
+  cron_last_run DATETIME DEFAULT NULL,
+  cron_next_run DATETIME DEFAULT NULL,
   cron_enabled INTEGER NOT NULL DEFAULT 0,
   cron_interval TEXT NOT NULL,
   cron_input TEXT NOT NULL,
@@ -348,3 +349,7 @@ BEGIN
   WHERE id = NEW.id;
 END;
 
+-- Ask Aider how to link user_crews or user_crew_executions to user_crons,
+-- then use a trigger to update last run when a valid cron is triggered.
+-- Leaning toward a boolean on user_crews that references the value in
+-- user_crons for cron_enabled on the same id.
