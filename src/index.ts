@@ -6,9 +6,10 @@ import { ContextDO } from './durable-objects/context-do';
 import { DatabaseDO } from './durable-objects/database-do';
 import { SchedulerDO } from './durable-objects/scheduler-do';
 import { ToolsDO } from './durable-objects/tools-do';
+import { CdnDO } from './durable-objects/cdn-do';
 
 // export the Durable Object classes we're using
-export { AuthDO, ContextDO, DatabaseDO, SchedulerDO, ToolsDO };
+export { AuthDO, ContextDO, DatabaseDO, SchedulerDO, ToolsDO, CdnDO };
 
 export default {
 	/**
@@ -67,6 +68,12 @@ export default {
 		if (path.startsWith('/tools')) {
 			let id: DurableObjectId = env.TOOLS_DO.idFromName('tools-do'); // create the instance
 			let stub = env.TOOLS_DO.get(id); // get the stub for communication
+			return await stub.fetch(request); // forward the request to the Durable Object
+		}
+
+		if (path.startsWith('/cdn')) {
+			let id: DurableObjectId = env.CDN_DO.idFromName('cdn-do'); // create the instance
+			let stub = env.CDN_DO.get(id); // get the stub for communication
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
 

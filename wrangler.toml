@@ -44,8 +44,8 @@ class_name = "ToolsDO"
 # Durable Object migrations.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#migrations
 [[migrations]]
-tag = "v1"
-new_classes = ["AuthDO", "ContextDO", "DatabaseDO", "SchedulerDO", "ToolsDO"]
+tag = "v2"
+new_classes = ["AuthDO", "ContextDO", "DatabaseDO", "SchedulerDO", "ToolsDO", "CdnDO"]
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
@@ -57,6 +57,10 @@ id = "8a1d0cb7054d462e841fc7a70f820b8c"
 binding = "AIBTCDEV_SERVICES_DB"
 database_name = "aibtcdev-d1"
 database_id = "3b6d3694-0bb2-4c94-bca6-c62b62c1ec6f"
+
+[[durable_objects.bindings]]
+name = "CDN_DO"
+class_name = "CdnDO"
 
 [[r2_buckets]]
 binding = "AIBTCDEV_SERVICES_BUCKET"
