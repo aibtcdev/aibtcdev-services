@@ -271,6 +271,8 @@ CREATE TABLE user_crew_execution_steps (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  profile_id TEXT NOT NULL,
+  -- link to user_profiles
   crew_id INTEGER NOT NULL,
   -- link to user_crews
   execution_id INTEGER NOT NULL,
@@ -279,11 +281,13 @@ CREATE TABLE user_crew_execution_steps (
   -- Thought, Action, Tool Output, Final Answer, etc
   step_data TEXT NOT NULL,
   -- Actual output to parse
+  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
   FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE,
   FOREIGN KEY (execution_id) REFERENCES user_crew_executions(id) ON DELETE CASCADE
 );
 
 -- Define indexes for execution steps
+CREATE INDEX idx_execution_steps_profile_id ON user_crew_execution_steps(profile_id)
 CREATE INDEX idx_execution_steps_crew_id ON user_crew_execution_steps(crew_id);
 CREATE INDEX idx_execution_steps_execution_id ON user_crew_execution_steps(execution_id);
 CREATE INDEX idx_execution_steps_type ON user_crew_execution_steps(step_type);
