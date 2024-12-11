@@ -5,6 +5,7 @@ This directory contains Cloudflare Durable Object implementations that provide s
 ## Common Features
 
 All Durable Objects share these common patterns:
+
 - Constructor initializes with DurableObjectState and Env
 - Alarm handling for periodic tasks
 - Base path routing with supported endpoints
@@ -14,16 +15,17 @@ All Durable Objects share these common patterns:
 
 - **AuthDO**: Handles authentication flows and session management
 - **CdnDO**: Manages R2 bucket operations for content delivery
-- **ContextDO**: Provides transformed data as API endpoints
 - **DatabaseDO**: Manages database operations and queries
-- **SchedulerDO**: Handles scheduling and execution of backend jobs
-- **ToolsDO**: Runs TypeScript tools requested by the backend
+- - 🚧 **ContextDO**: Provides transformed data as API endpoints
+- 🚧 **SchedulerDO**: Handles scheduling and execution of backend jobs
+- 🚧 **ToolsDO**: Runs TypeScript tools requested by the backend
 
 ## Usage
 
 Each Durable Object is bound to a specific namespace in the worker configuration and can be accessed through that binding.
 
 Example:
+
 ```typescript
 // Get Auth DO stub
 const id = env.AUTH_DO.idFromName('auth');
