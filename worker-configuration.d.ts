@@ -8,4 +8,6 @@ export interface Env {
 	SCHEDULER_DO: DurableObjectNamespace<import('./src/index').SchedulerDO>;
 	TOOLS_DO: DurableObjectNamespace<import('./src/index').ToolsDO>;
 	AIBTCDEV_SERVICES_DB: D1Database;
+	CDN_DO: DurableObjectNamespace<import('./src/index').CdnDO>;
+	AIBTCDEV_SERVICES_BUCKET: R2Bucket;
 }

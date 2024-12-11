@@ -13,6 +13,7 @@ import {
 	getLatestConversation,
 	getPublicCrews,
 } from '../database/helpers';
+import { validateSharedKeyAuth } from '../utils/auth-helper';
 
 /**
  * Durable Object class for backend database calls
@@ -62,32 +63,6 @@ export class DatabaseDO extends DurableObject<Env> {
 		}
 	}
 
-	private async validateAuth(request: Request): Promise<{ success: boolean; error?: string; status?: number }> {
-		if (!request.headers.has('Authorization')) {
-			return { success: false, error: 'Missing Authorization header', status: 401 };
-		}
-
-		const frontendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-frontend');
-		const backendKey = await this.env.AIBTCDEV_SERVICES_KV.get('key:aibtcdev-backend');
-
-		if (frontendKey === null || backendKey === null) {
-			return {
-				success: false,
-				error: 'Unable to load shared keys for frontend/backend',
-				status: 401,
-			};
-		}
-
-		const validKeys = [frontendKey, backendKey];
-		const requestKey = request.headers.get('Authorization');
-
-		if (requestKey === null || !validKeys.includes(requestKey)) {
-			return { success: false, error: 'Invalid Authorization key', status: 401 };
-		}
-
-		return { success: true };
-	}
-
 	async fetch(request: Request): Promise<Response> {
 		const url = new URL(request.url);
 		const path = url.pathname;
@@ -113,7 +88,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 		// all methods from this point forward require a shared key
 		// frontend and backend each have their own stored in KV
-		const authResult = await this.validateAuth(request);
+		const authResult = await validateSharedKeyAuth(this.env, request);
 		if (!authResult.success) {
 			return createJsonResponse({ error: authResult.error }, authResult.status);
 		}
