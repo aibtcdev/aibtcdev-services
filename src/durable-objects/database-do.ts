@@ -23,7 +23,6 @@ export class DatabaseDO extends DurableObject<Env> {
 	private readonly BASE_PATH = '/database';
 	private readonly KEY_PREFIX = 'db';
 	private readonly SUPPORTED_ENDPOINTS: string[] = [
-		'/hello',
 		'/conversations',
 		'/conversations/latest',
 		'/conversations/history',
@@ -109,12 +108,6 @@ export class DatabaseDO extends DurableObject<Env> {
 		if (endpoint === '' || endpoint === '/') {
 			return createJsonResponse({
 				message: `Supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
-			});
-		}
-
-		if (endpoint === '/hello') {
-			return createJsonResponse({
-				message: 'hello from database!',
 			});
 		}
 
