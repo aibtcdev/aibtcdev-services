@@ -1,12 +1,7 @@
 import { Env } from '../worker-configuration';
 import { AppConfig } from './config';
 import { corsHeaders, createJsonResponse } from './utils/requests-responses';
-import { AuthDO } from './durable-objects/auth-do';
-import { ContextDO } from './durable-objects/context-do';
-import { DatabaseDO } from './durable-objects/database-do';
-import { SchedulerDO } from './durable-objects/scheduler-do';
-import { ToolsDO } from './durable-objects/tools-do';
-import { CdnDO } from './durable-objects/cdn-do';
+import { AuthDO, CdnDO, ContextDO, DatabaseDO, SchedulerDO, ToolsDO } from './durable-objects';
 
 // export the Durable Object classes we're using
 export { AuthDO, ContextDO, DatabaseDO, SchedulerDO, ToolsDO, CdnDO };
@@ -47,6 +42,12 @@ export default {
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
 
+		if (path.startsWith('/cdn')) {
+			let id: DurableObjectId = env.CDN_DO.idFromName('cdn-do'); // create the instance
+			let stub = env.CDN_DO.get(id); // get the stub for communication
+			return await stub.fetch(request); // forward the request to the Durable Object
+		}
+
 		if (path.startsWith('/context')) {
 			const id: DurableObjectId = env.CONTEXT_DO.idFromName('context-do'); // create the instance
 			const stub = env.CONTEXT_DO.get(id); // get the stub for communication
@@ -68,12 +69,6 @@ export default {
 		if (path.startsWith('/tools')) {
 			let id: DurableObjectId = env.TOOLS_DO.idFromName('tools-do'); // create the instance
 			let stub = env.TOOLS_DO.get(id); // get the stub for communication
-			return await stub.fetch(request); // forward the request to the Durable Object
-		}
-
-		if (path.startsWith('/cdn')) {
-			let id: DurableObjectId = env.CDN_DO.idFromName('cdn-do'); // create the instance
-			let stub = env.CDN_DO.get(id); // get the stub for communication
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
 

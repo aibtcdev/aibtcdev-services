@@ -20,7 +20,7 @@ export class AppConfig {
 	public getConfig() {
 		return {
 			// supported services for API endpoints
-			SUPPORTED_SERVICES: ['/auth', '/context', '/database', '/scheduler', '/tools'],
+			SUPPORTED_SERVICES: ['/auth', '/cdn', '/context', '/database', '/scheduler', '/tools'],
 			// default interval for DO alarms
 			// set really high until we start using it
 			// can override in the durable object too
