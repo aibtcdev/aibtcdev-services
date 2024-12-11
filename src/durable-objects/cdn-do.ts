@@ -1,6 +1,7 @@
 import { DurableObject } from '@cloudflare/workers-types';
 import { Env } from '../../worker-configuration';
 import { createJsonResponse } from '../utils/requests-responses';
+import { validateDurableObjectAuth, validateSessionToken } from '../utils/auth-helper';
 
 export class CdnDO extends DurableObject<Env> {
     private readonly BASE_PATH = '/cdn';
@@ -11,6 +12,12 @@ export class CdnDO extends DurableObject<Env> {
     async fetch(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const path = url.pathname;
+
+        // Validate DO auth for all requests
+        const authResult = await validateDurableObjectAuth(this.env, request);
+        if (!authResult.success) {
+            return createJsonResponse({ error: authResult.error }, authResult.status);
+        }
 
         if (!path.startsWith(this.BASE_PATH)) {
             return createJsonResponse(
@@ -63,8 +70,17 @@ export class CdnDO extends DurableObject<Env> {
     }
 
     private async handlePost(request: Request): Promise<Response> {
-        // TODO: Add authentication check here
-        
+        // Validate session token from Authorization header
+        const sessionToken = request.headers.get('Authorization');
+        if (!sessionToken) {
+            return createJsonResponse({ error: 'Missing Authorization header' }, 401);
+        }
+
+        const authResult = await validateSessionToken(this.env, sessionToken);
+        if (!authResult.success) {
+            return createJsonResponse({ error: authResult.error }, 401);
+        }
+
         const url = new URL(request.url);
         const key = url.pathname.replace(this.BASE_PATH + '/', '');
         
@@ -82,8 +98,17 @@ export class CdnDO extends DurableObject<Env> {
     }
 
     private async handleDelete(request: Request): Promise<Response> {
-        // TODO: Add authentication check here
-        
+        // Validate session token from Authorization header
+        const sessionToken = request.headers.get('Authorization');
+        if (!sessionToken) {
+            return createJsonResponse({ error: 'Missing Authorization header' }, 401);
+        }
+
+        const authResult = await validateSessionToken(this.env, sessionToken);
+        if (!authResult.success) {
+            return createJsonResponse({ error: authResult.error }, 401);
+        }
+
         const url = new URL(request.url);
         const key = url.pathname.replace(this.BASE_PATH + '/', '');
         
