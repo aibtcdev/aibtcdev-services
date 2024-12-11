@@ -100,6 +100,8 @@ CREATE TABLE user_crews (
   crew_executions INTEGER DEFAULT 0,
   -- handled by trigger
   crew_is_public INTEGER DEFAULT 0,
+  crew_is_cron INTEGER DEFAULT 0,
+  -- synced with user_crons.cron_enabled
   FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE
 );
 
@@ -347,6 +349,39 @@ BEGIN
   UPDATE user_crons
   SET updated_at = CURRENT_TIMESTAMP
   WHERE id = NEW.id;
+END;
+
+-- Trigger to sync crew_is_cron with cron_enabled
+CREATE TRIGGER sync_crew_cron_status
+AFTER UPDATE OF cron_enabled ON user_crons
+BEGIN
+  UPDATE user_crews
+  SET 
+    crew_is_cron = NEW.cron_enabled,
+    updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.crew_id;
+END;
+
+-- Also sync on insert
+CREATE TRIGGER sync_crew_cron_status_insert
+AFTER INSERT ON user_crons
+BEGIN
+  UPDATE user_crews
+  SET 
+    crew_is_cron = NEW.cron_enabled,
+    updated_at = CURRENT_TIMESTAMP
+  WHERE id = NEW.crew_id;
+END;
+
+-- And sync on delete (reset to 0)
+CREATE TRIGGER sync_crew_cron_status_delete
+AFTER DELETE ON user_crons
+BEGIN
+  UPDATE user_crews
+  SET 
+    crew_is_cron = 0,
+    updated_at = CURRENT_TIMESTAMP
+  WHERE id = OLD.crew_id;
 END;
 
 -- Ask Aider how to link user_crews or user_crew_executions to user_crons,
