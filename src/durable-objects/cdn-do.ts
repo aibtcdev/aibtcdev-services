@@ -7,11 +7,49 @@ export class CdnDO extends DurableObject<Env> {
     private readonly BASE_PATH = '/cdn';
     private readonly SUPPORTED_ENDPOINTS: string[] = [
         '/',  // For GET/POST/DELETE operations
+        '/list', // For listing objects
     ];
 
     async fetch(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const path = url.pathname;
+
+        // Handle list endpoint
+        if (path === `${this.BASE_PATH}/list`) {
+            // Validate session token from Authorization header
+            const sessionToken = request.headers.get('Authorization');
+            if (!sessionToken) {
+                return createJsonResponse({ error: 'Missing Authorization header' }, 401);
+            }
+
+            const authResult = await validateSessionToken(this.env, sessionToken);
+            if (!authResult.success) {
+                return createJsonResponse({ error: authResult.error }, 401);
+            }
+
+            try {
+                const options: R2ListOptions = {
+                    limit: 1000,  // Adjust as needed
+                    prefix: url.searchParams.get('prefix') || undefined,
+                    cursor: url.searchParams.get('cursor') || undefined,
+                };
+
+                const objects = await this.env.AIBTCDEV_SERVICES_BUCKET.list(options);
+                return createJsonResponse({
+                    objects: objects.objects.map(obj => ({
+                        key: obj.key,
+                        size: obj.size,
+                        uploaded: obj.uploaded,
+                        etag: obj.etag,
+                        httpEtag: obj.httpEtag,
+                    })),
+                    truncated: objects.truncated,
+                    cursor: objects.cursor,
+                });
+            } catch (error) {
+                return createJsonResponse({ error: 'Failed to list objects' }, 500);
+            }
+        }
 
         // Validate DO auth for all requests
         const authResult = await validateDurableObjectAuth(this.env, request);
@@ -36,11 +74,17 @@ export class CdnDO extends DurableObject<Env> {
                 return this.handlePost(request);
             case 'DELETE':
                 return this.handleDelete(request);
+            case 'OPTIONS':
+                return createJsonResponse(
+                    { message: 'OK' },
+                    200,
+                    { headers: { Allow: 'GET, POST, DELETE, OPTIONS' } }
+                );
             default:
                 return createJsonResponse(
                     { error: 'Method not allowed' },
                     405,
-                    { headers: { Allow: 'GET, POST, DELETE' } }
+                    { headers: { Allow: 'GET, POST, DELETE, OPTIONS' } }
                 );
         }
     }
