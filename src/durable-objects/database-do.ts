@@ -12,6 +12,11 @@ import {
 	getEnabledCronsDetailed,
 	getLatestConversation,
 	getPublicCrews,
+	getUserRole,
+	getUserProfile,
+	createUserProfile,
+	updateUserProfile,
+	deleteUserProfile,
 } from '../database/helpers';
 import { validateSharedKeyAuth } from '../utils/auth-helper';
 
@@ -32,6 +37,11 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/crews/executions/add',
 		'/crons/enabled',
 		'/crons/enabled/detailed',
+		'/profiles/role',
+		'/profiles/get',
+		'/profiles/create',
+		'/profiles/update',
+		'/profiles/delete',
 	];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -174,6 +184,62 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/crons/enabled/detailed') {
 				const crons = await getEnabledCronsDetailed(this.orm);
 				return createJsonResponse({ crons });
+			}
+
+			// Profile endpoints
+			if (endpoint === '/profiles/role') {
+				const address = url.searchParams.get('address');
+				if (!address) {
+					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+				}
+				const role = await getUserRole(this.orm, address);
+				return createJsonResponse({ role });
+			}
+
+			if (endpoint === '/profiles/get') {
+				const address = url.searchParams.get('address');
+				if (!address) {
+					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+				}
+				const profile = await getUserProfile(this.orm, address);
+				return createJsonResponse({ profile });
+			}
+
+			if (endpoint === '/profiles/create') {
+				if (request.method !== 'POST') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const profileData = await request.json();
+				if (!profileData.stx_address || !profileData.user_role) {
+					return createJsonResponse({ error: 'Missing required fields: stx_address, user_role' }, 400);
+				}
+				const profile = await createUserProfile(this.orm, profileData);
+				return createJsonResponse({ profile });
+			}
+
+			if (endpoint === '/profiles/update') {
+				if (request.method !== 'PUT') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const address = url.searchParams.get('address');
+				if (!address) {
+					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+				}
+				const profileData = await request.json();
+				const result = await updateUserProfile(this.orm, address, profileData);
+				return createJsonResponse({ result });
+			}
+
+			if (endpoint === '/profiles/delete') {
+				if (request.method !== 'DELETE') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const address = url.searchParams.get('address');
+				if (!address) {
+					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+				}
+				const result = await deleteUserProfile(this.orm, address);
+				return createJsonResponse({ result });
 			}
 		} catch (error) {
 			console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
