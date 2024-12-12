@@ -27,6 +27,72 @@ export async function getEnabledCrons(orm: D1Orm) {
  * Get all enabled cron jobs with expanded crew information.
  * @param orm The orm instance from durable object class
  */
+/**
+ * Get all crons for a specific crew
+ */
+export async function getCronsByCrew(orm: D1Orm, crewId: number) {
+    userCronsModel.SetOrm(orm);
+    const crons = await userCronsModel.All({
+        where: {
+            crew_id: crewId
+        },
+        orderBy: [
+            {
+                column: 'created_at',
+                descending: true,
+            },
+        ],
+    });
+    return crons;
+}
+
+/**
+ * Create a new cron job
+ */
+export async function createCron(orm: D1Orm, cronData: {
+    profile_id: string;
+    crew_id: number;
+    cron_enabled: number;
+    cron_interval: string;
+    cron_input: string;
+}) {
+    userCronsModel.SetOrm(orm);
+    const cron = await userCronsModel.InsertOne(cronData);
+    return cron;
+}
+
+/**
+ * Update a cron job's input
+ */
+export async function updateCronInput(orm: D1Orm, cronId: number, cronInput: string) {
+    userCronsModel.SetOrm(orm);
+    const result = await userCronsModel.Update({
+        where: {
+            id: cronId
+        },
+        data: {
+            cron_input: cronInput
+        }
+    });
+    return result;
+}
+
+/**
+ * Toggle a cron job's enabled status
+ */
+export async function toggleCronStatus(orm: D1Orm, cronId: number, enabled: number) {
+    userCronsModel.SetOrm(orm);
+    const result = await userCronsModel.Update({
+        where: {
+            id: cronId
+        },
+        data: {
+            cron_enabled: enabled
+        }
+    });
+    return result;
+}
+
 export async function getEnabledCronsDetailed(orm: D1Orm) {
 	userCrewsModel.SetOrm(orm);
 	userAgentsModel.SetOrm(orm);

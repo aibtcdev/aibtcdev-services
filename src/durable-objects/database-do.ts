@@ -41,6 +41,10 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/crews/executions/add',
 		'/crons/enabled',
 		'/crons/enabled/detailed',
+		'/crons/get',
+		'/crons/create',
+		'/crons/update',
+		'/crons/toggle',
 		'/profiles/role',
 		'/profiles/get',
 		'/profiles/create',
@@ -363,6 +367,63 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/crons/enabled/detailed') {
 				const crons = await getEnabledCronsDetailed(this.orm);
 				return createJsonResponse({ crons });
+			}
+
+			// Cron management endpoints
+			if (endpoint === '/crons/get') {
+				const crewId = url.searchParams.get('crewId');
+				if (!crewId) {
+					return createJsonResponse({ error: 'Missing crewId parameter' }, 400);
+				}
+				const crons = await getCronsByCrew(this.orm, parseInt(crewId));
+				return createJsonResponse({ crons });
+			}
+
+			if (endpoint === '/crons/create') {
+				if (request.method !== 'POST') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const cronData = await request.json();
+				if (!cronData.profile_id || !cronData.crew_id || cronData.cron_enabled === undefined) {
+					return createJsonResponse({ error: 'Missing required fields' }, 400);
+				}
+				// Set defaults if not provided
+				cronData.cron_interval = cronData.cron_interval || '0 * * * *'; // Default to hourly
+				cronData.cron_input = cronData.cron_input || '';
+				const cron = await createCron(this.orm, cronData);
+				return createJsonResponse({ cron });
+			}
+
+			if (endpoint === '/crons/update') {
+				if (request.method !== 'PUT') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const cronId = url.searchParams.get('id');
+				if (!cronId) {
+					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+				}
+				const { cron_input } = await request.json();
+				if (cron_input === undefined) {
+					return createJsonResponse({ error: 'Missing cron_input in request body' }, 400);
+				}
+				const result = await updateCronInput(this.orm, parseInt(cronId), cron_input);
+				return createJsonResponse({ result });
+			}
+
+			if (endpoint === '/crons/toggle') {
+				if (request.method !== 'PUT') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const cronId = url.searchParams.get('id');
+				if (!cronId) {
+					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+				}
+				const { enabled } = await request.json();
+				if (enabled === undefined) {
+					return createJsonResponse({ error: 'Missing enabled in request body' }, 400);
+				}
+				const result = await toggleCronStatus(this.orm, parseInt(cronId), enabled ? 1 : 0);
+				return createJsonResponse({ result });
 			}
 
 			// Profile endpoints
