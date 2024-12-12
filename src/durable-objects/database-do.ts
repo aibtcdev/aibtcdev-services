@@ -51,7 +51,13 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/agents/get',
 		'/agents/create', 
 		'/agents/update',
-		'/agents/delete'
+		'/agents/delete',
+		'/tasks/get',
+		'/tasks/list',
+		'/tasks/create',
+		'/tasks/update',
+		'/tasks/delete',
+		'/tasks/delete-all'
 	];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -239,6 +245,75 @@ export class DatabaseDO extends DurableObject<Env> {
 					return createJsonResponse({ error: 'Missing id parameter' }, 400);
 				}
 				const result = await deleteAgent(this.orm, parseInt(agentId));
+				return createJsonResponse({ result });
+			}
+
+			// Task endpoints
+			if (endpoint === '/tasks/get') {
+				const taskId = url.searchParams.get('id');
+				if (!taskId) {
+					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+				}
+				const task = await getTask(this.orm, parseInt(taskId));
+				return createJsonResponse({ task });
+			}
+
+			if (endpoint === '/tasks/list') {
+				const agentId = url.searchParams.get('agentId');
+				if (!agentId) {
+					return createJsonResponse({ error: 'Missing agentId parameter' }, 400);
+				}
+				const tasks = await getTasks(this.orm, parseInt(agentId));
+				return createJsonResponse({ tasks });
+			}
+
+			if (endpoint === '/tasks/create') {
+				if (request.method !== 'POST') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const taskData = await request.json();
+				if (!taskData.profile_id || !taskData.crew_id || !taskData.agent_id || 
+					!taskData.task_name || !taskData.task_description || !taskData.task_expected_output) {
+					return createJsonResponse({ error: 'Missing required fields' }, 400);
+				}
+				const task = await createTask(this.orm, taskData);
+				return createJsonResponse({ task });
+			}
+
+			if (endpoint === '/tasks/update') {
+				if (request.method !== 'PUT') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const taskId = url.searchParams.get('id');
+				if (!taskId) {
+					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+				}
+				const updates = await request.json();
+				const result = await updateTask(this.orm, parseInt(taskId), updates);
+				return createJsonResponse({ result });
+			}
+
+			if (endpoint === '/tasks/delete') {
+				if (request.method !== 'DELETE') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const taskId = url.searchParams.get('id');
+				if (!taskId) {
+					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+				}
+				const result = await deleteTask(this.orm, parseInt(taskId));
+				return createJsonResponse({ result });
+			}
+
+			if (endpoint === '/tasks/delete-all') {
+				if (request.method !== 'DELETE') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const agentId = url.searchParams.get('agentId');
+				if (!agentId) {
+					return createJsonResponse({ error: 'Missing agentId parameter' }, 400);
+				}
+				const result = await deleteTasks(this.orm, parseInt(agentId));
 				return createJsonResponse({ result });
 			}
 
