@@ -64,3 +64,67 @@ export async function getPublicCrews(orm: D1Orm) {
 	});
 	return crews;
 }
+
+/**
+ * Get a specific crew by ID
+ */
+export async function getCrew(orm: D1Orm, crewId: number) {
+    userCrewsModel.SetOrm(orm);
+    const crew = await userCrewsModel.First({
+        where: {
+            id: crewId
+        }
+    });
+    return crew;
+}
+
+/**
+ * Create a new crew
+ */
+export async function createCrew(orm: D1Orm, crewData: {
+    profile_id: string;
+    crew_name: string;
+    crew_description?: string;
+    crew_is_public?: number;
+}) {
+    userCrewsModel.SetOrm(orm);
+    const crew = await userCrewsModel.InsertOne(crewData);
+    return crew;
+}
+
+/**
+ * Update an existing crew
+ */
+export async function updateCrew(orm: D1Orm, crewId: number, updates: {
+    crew_name?: string;
+    crew_description?: string;
+    crew_is_public?: number;
+}) {
+    userCrewsModel.SetOrm(orm);
+    const result = await userCrewsModel.Update({
+        where: {
+            id: crewId
+        },
+        data: updates
+    });
+    return result;
+}
+
+/**
+ * Delete a crew and all associated data
+ */
+export async function deleteCrew(orm: D1Orm, crewId: number) {
+    // Due to CASCADE DELETE in schema, deleting the crew will automatically delete:
+    // - Associated agents (user_agents)
+    // - Associated tasks (user_tasks) 
+    // - Associated executions (user_crew_executions)
+    // - Associated execution steps (user_crew_execution_steps)
+    // - Associated crons (user_crons)
+    userCrewsModel.SetOrm(orm);
+    const result = await userCrewsModel.Delete({
+        where: {
+            id: crewId
+        }
+    });
+    return result;
+}

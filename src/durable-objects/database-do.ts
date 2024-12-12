@@ -33,6 +33,10 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/conversations/latest',
 		'/conversations/history',
 		'/crews/public',
+		'/crews/get',
+		'/crews/create',
+		'/crews/update',
+		'/crews/delete',
 		'/crews/executions',
 		'/crews/executions/add',
 		'/crons/enabled',
@@ -138,6 +142,52 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/crews/public') {
 				const crews = await getPublicCrews(this.orm);
 				return createJsonResponse({ crews });
+			}
+
+			if (endpoint === '/crews/get') {
+				const crewId = url.searchParams.get('id');
+				if (!crewId) {
+					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+				}
+				const crew = await getCrew(this.orm, parseInt(crewId));
+				return createJsonResponse({ crew });
+			}
+
+			if (endpoint === '/crews/create') {
+				if (request.method !== 'POST') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const crewData = await request.json();
+				if (!crewData.profile_id || !crewData.crew_name) {
+					return createJsonResponse({ error: 'Missing required fields: profile_id, crew_name' }, 400);
+				}
+				const crew = await createCrew(this.orm, crewData);
+				return createJsonResponse({ crew });
+			}
+
+			if (endpoint === '/crews/update') {
+				if (request.method !== 'PUT') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const crewId = url.searchParams.get('id');
+				if (!crewId) {
+					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+				}
+				const updates = await request.json();
+				const result = await updateCrew(this.orm, parseInt(crewId), updates);
+				return createJsonResponse({ result });
+			}
+
+			if (endpoint === '/crews/delete') {
+				if (request.method !== 'DELETE') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const crewId = url.searchParams.get('id');
+				if (!crewId) {
+					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+				}
+				const result = await deleteCrew(this.orm, parseInt(crewId));
+				return createJsonResponse({ result });
 			}
 
 			if (endpoint === '/crews/executions') {
