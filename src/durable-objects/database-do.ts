@@ -42,6 +42,8 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/profiles/create',
 		'/profiles/update',
 		'/profiles/delete',
+		'/profiles/admin/list',
+		'/profiles/admin/update',
 	];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -239,6 +241,25 @@ export class DatabaseDO extends DurableObject<Env> {
 					return createJsonResponse({ error: 'Missing address parameter' }, 400);
 				}
 				const result = await deleteUserProfile(this.orm, address);
+				return createJsonResponse({ result });
+			}
+
+			// Admin profile endpoints
+			if (endpoint === '/profiles/admin/list') {
+				const profiles = await getAllUserProfiles(this.orm);
+				return createJsonResponse({ profiles });
+			}
+
+			if (endpoint === '/profiles/admin/update') {
+				if (request.method !== 'PUT') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				const userId = url.searchParams.get('userId');
+				if (!userId) {
+					return createJsonResponse({ error: 'Missing userId parameter' }, 400);
+				}
+				const updates = await request.json();
+				const result = await updateUserProfileById(this.orm, parseInt(userId), updates);
 				return createJsonResponse({ result });
 			}
 		} catch (error) {
