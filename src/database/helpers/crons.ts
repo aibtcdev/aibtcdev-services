@@ -4,10 +4,12 @@ import { userAgentsModel, userCrewsModel, userCronsModel, userProfilesModel, use
 /** CRON MANAGEMENT */
 
 /**
- * Get all enabled cron jobs.
- * @param orm The orm instance from durable object class
+ * Get all enabled cron jobs
+ * @param orm The D1Orm instance
+ * @returns Promise containing array of enabled crons and metadata
  */
-export async function getEnabledCrons(orm: D1Orm) {
+export async function getEnabledCrons(orm: D1Orm): Promise<{results: any[]}> {
+    try {
 	userCronsModel.SetOrm(orm);
 	const crons = await userCronsModel.All({
 		where: {
@@ -20,17 +22,21 @@ export async function getEnabledCrons(orm: D1Orm) {
 			},
 		],
 	});
-	return crons;
+        return crons;
+    } catch (error) {
+        console.error(`Error in getEnabledCrons: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+    }
 }
 
 /**
- * Get all enabled cron jobs with expanded crew information.
- * @param orm The orm instance from durable object class
- */
-/**
  * Get all crons for a specific crew
+ * @param orm The D1Orm instance
+ * @param crewId The ID of the crew to get crons for
+ * @returns Promise containing array of crons and metadata
  */
-export async function getCronsByCrew(orm: D1Orm, crewId: number) {
+export async function getCronsByCrew(orm: D1Orm, crewId: number): Promise<{results: any[]}> {
+    try {
     userCronsModel.SetOrm(orm);
     const crons = await userCronsModel.All({
         where: {
@@ -43,11 +49,18 @@ export async function getCronsByCrew(orm: D1Orm, crewId: number) {
             },
         ],
     });
-    return crons;
+        return crons;
+    } catch (error) {
+        console.error(`Error in getCronsByCrew: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+    }
 }
 
 /**
  * Create a new cron job
+ * @param orm The D1Orm instance
+ * @param cronData The cron configuration data
+ * @returns Promise containing the created cron
  */
 export async function createCron(orm: D1Orm, cronData: {
     profile_id: string;
@@ -58,13 +71,22 @@ export async function createCron(orm: D1Orm, cronData: {
 }) {
     userCronsModel.SetOrm(orm);
     const cron = await userCronsModel.InsertOne(cronData);
-    return cron;
+        return cron;
+    } catch (error) {
+        console.error(`Error in createCron: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+    }
 }
 
 /**
  * Update a cron job's input
+ * @param orm The D1Orm instance
+ * @param cronId The ID of the cron to update
+ * @param cronInput The new input string for the cron
+ * @returns Promise containing the update result
  */
-export async function updateCronInput(orm: D1Orm, cronId: number, cronInput: string) {
+export async function updateCronInput(orm: D1Orm, cronId: number, cronInput: string): Promise<any> {
+    try {
     userCronsModel.SetOrm(orm);
     const result = await userCronsModel.Update({
         where: {
@@ -74,13 +96,22 @@ export async function updateCronInput(orm: D1Orm, cronId: number, cronInput: str
             cron_input: cronInput
         }
     });
-    return result;
+        return result;
+    } catch (error) {
+        console.error(`Error in updateCronInput: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+    }
 }
 
 /**
  * Toggle a cron job's enabled status
+ * @param orm The D1Orm instance
+ * @param cronId The ID of the cron to toggle
+ * @param enabled The new enabled status (1 for enabled, 0 for disabled)
+ * @returns Promise containing the update result
  */
-export async function toggleCronStatus(orm: D1Orm, cronId: number, enabled: number) {
+export async function toggleCronStatus(orm: D1Orm, cronId: number, enabled: number): Promise<any> {
+    try {
     userCronsModel.SetOrm(orm);
     const result = await userCronsModel.Update({
         where: {
@@ -90,10 +121,20 @@ export async function toggleCronStatus(orm: D1Orm, cronId: number, enabled: numb
             cron_enabled: enabled
         }
     });
-    return result;
+        return result;
+    } catch (error) {
+        console.error(`Error in toggleCronStatus: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+    }
 }
 
-export async function getEnabledCronsDetailed(orm: D1Orm) {
+/**
+ * Get all enabled cron jobs with expanded crew information
+ * @param orm The D1Orm instance
+ * @returns Promise containing array of enabled crons with detailed crew, agent, task, and profile information
+ */
+export async function getEnabledCronsDetailed(orm: D1Orm): Promise<any[]> {
+    try {
 	userCrewsModel.SetOrm(orm);
 	userAgentsModel.SetOrm(orm);
 	userTasksModel.SetOrm(orm);
@@ -154,5 +195,9 @@ export async function getEnabledCronsDetailed(orm: D1Orm) {
 		});
 	}
 
-	return result;
+        return result;
+    } catch (error) {
+        console.error(`Error in getEnabledCronsDetailed: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+    }
 }
