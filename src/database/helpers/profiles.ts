@@ -17,7 +17,7 @@ interface ProfileResult {
  * @returns Promise containing the user's role or error details
  * @throws Error if database query fails
  */
-export async function getUserRole(orm: D1Orm, address: string): Promise<ProfileResult> {
+export async function getUserRole(orm: D1Orm, address: string): Promise<{success: boolean; role?: string; error?: string}> {
     try {
         userProfilesModel.SetOrm(orm);
         const profile = await userProfilesModel.First({
@@ -26,7 +26,7 @@ export async function getUserRole(orm: D1Orm, address: string): Promise<ProfileR
             }
         });
         return {
-            profile: profile as unknown as UserProfilesTable,
+            role: profile ? profile.user_role : undefined,
             success: true
         };
     } catch (error) {
