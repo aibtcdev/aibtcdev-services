@@ -1,21 +1,11 @@
 import { D1Orm } from 'd1-orm';
-import { userProfilesModel } from '../models';
+import { userProfilesModel, UserProfilesTable } from '../models';
 
 /** PROFILE MANAGEMENT */
 
-interface ProfileData {
-    id: number;
-    created_at: string;
-    updated_at: string;
-    user_role: string;
-    account_index?: number;
-    stx_address: string;
-    bns_address?: string;
-}
-
 interface ProfileResult {
-    profile?: ProfileData;
-    profiles?: ProfileData[];
+    profile?: UserProfilesTable;
+    profiles?: UserProfilesTable[];
     success: boolean;
     error?: string;
 }
@@ -37,7 +27,7 @@ export async function getUserRole(orm: D1Orm, address: string): Promise<ProfileR
             select: ['user_role']
         });
         return {
-            profile: profile as ProfileData,
+            profile: profile as unknown as UserProfilesTable,
             success: true
         };
     } catch (error) {
@@ -65,7 +55,7 @@ export async function getUserProfile(orm: D1Orm, address: string): Promise<Profi
             }
         });
         return {
-            profile: profile as ProfileData,
+            profile: profile as unknown as UserProfilesTable,
             success: true
         };
     } catch (error) {
@@ -86,13 +76,13 @@ export async function getUserProfile(orm: D1Orm, address: string): Promise<Profi
  */
 export async function createUserProfile(
     orm: D1Orm, 
-    profileData: Omit<ProfileData, 'id' | 'created_at' | 'updated_at'>
+    profileData: Omit<UserProfilesTable, 'id' | 'created_at' | 'updated_at'>
 ): Promise<ProfileResult> {
     try {
         userProfilesModel.SetOrm(orm);
         const profile = await userProfilesModel.InsertOne(profileData);
         return {
-            profile: profile as ProfileData,
+            profile: profile as unknown as UserProfilesTable,
             success: true
         };
     } catch (error) {
@@ -115,7 +105,7 @@ export async function createUserProfile(
 export async function updateUserProfile(
     orm: D1Orm, 
     address: string, 
-    profileData: Partial<Pick<ProfileData, 'user_role' | 'account_index' | 'bns_address'>>
+    profileData: Partial<Pick<UserProfilesTable, 'user_role' | 'account_index' | 'bns_address'>>
 ): Promise<ProfileResult> {
     try {
         userProfilesModel.SetOrm(orm);
@@ -182,7 +172,7 @@ export async function getAllUserProfiles(orm: D1Orm): Promise<ProfileResult> {
             ],
         });
         return {
-            profiles: result.results as ProfileData[],
+            profiles: result.results as unknown as UserProfilesTable[],
             success: true
         };
     } catch (error) {
@@ -206,7 +196,7 @@ export async function getAllUserProfiles(orm: D1Orm): Promise<ProfileResult> {
 export async function updateUserProfileById(
     orm: D1Orm, 
     userId: number, 
-    updates: Partial<Pick<ProfileData, 'user_role' | 'account_index' | 'bns_address'>>
+    updates: Partial<Pick<UserProfilesTable, 'user_role' | 'account_index' | 'bns_address'>>
 ): Promise<ProfileResult> {
     try {
         userProfilesModel.SetOrm(orm);
