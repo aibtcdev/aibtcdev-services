@@ -37,7 +37,7 @@ export async function addConversation(
             conversation_name: name,
         });
         return {
-            conversation: conversation as UserConversationsTable,
+            conversation: conversation as unknown as UserConversationsTable,
             success: true
         };
     } catch (error) {
@@ -139,7 +139,7 @@ export async function getConversation(
             },
         });
         return {
-            conversation: conversation as UserConversationsTable,
+            conversation: conversation as unknown as UserConversationsTable,
             success: true
         };
     } catch (error) {
@@ -230,7 +230,7 @@ export async function getConversations(
             ],
         });
         return {
-            conversations: result.results as UserConversationsTable[],
+            conversations: result.results as unknown as UserConversationsTable[],
             success: true
         };
     } catch (error) {
@@ -337,7 +337,7 @@ export async function getLatestConversation(
         }
 
         return {
-            conversation: result.results[0] as UserConversationsTable,
+            conversation: result.results[0] as unknown as UserConversationsTable,
             success: true
         };
     } catch (error) {
