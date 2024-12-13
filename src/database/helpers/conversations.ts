@@ -3,72 +3,153 @@ import { userConversationsModel, userCrewExecutionsModel, userCrewExecutionSteps
 
 /** CONVERSATION MANAGEMENT */
 
-/**
- * Create a new conversation for a profile.
- * @param orm The orm instance from durable object class
- * @param address The Stacks address for the user's profile.
- * @param name The name of the conversation (optional).
- */
-export async function addConversation(orm: D1Orm, address: string, name: string = 'New Conversation') {
-	userConversationsModel.SetOrm(orm);
-	const conversation = await userConversationsModel.InsertOne({
-		profile_id: address,
-		conversation_name: name,
-	});
-	return conversation;
+interface ConversationData {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    profile_id: string;
+    conversation_name: string;
+}
+
+interface ConversationResult {
+    conversation?: ConversationData;
+    conversations?: ConversationData[];
+    success: boolean;
+    error?: string;
 }
 
 /**
- * Update or create a conversation with new messages.
- * @param orm The orm instance from durable object class
+ * Create a new conversation for a profile
+ * @param orm The D1Orm instance from durable object class
+ * @param address The Stacks address for the user's profile
+ * @param name The name of the conversation (defaults to 'New Conversation')
+ * @returns Promise containing the created conversation or error details
+ * @throws Error if database insertion fails
+ */
+export async function addConversation(
+    orm: D1Orm, 
+    address: string, 
+    name: string = 'New Conversation'
+): Promise<ConversationResult> {
+    try {
+        userConversationsModel.SetOrm(orm);
+        const conversation = await userConversationsModel.InsertOne({
+            profile_id: address,
+            conversation_name: name,
+        });
+        return {
+            conversation: conversation as ConversationData,
+            success: true
+        };
+    } catch (error) {
+        console.error(`Error in addConversation: ${error instanceof Error ? error.message : String(error)}`);
+        return {
+            success: false,
+            error: `Failed to create conversation: ${error instanceof Error ? error.message : String(error)}`
+        };
+    }
+}
+
+/**
+ * Update an existing conversation
+ * @param orm The D1Orm instance from durable object class
  * @param address The Stacks address for the user's profile
  * @param conversationId The ID of the conversation to update
  * @param name Optional new name for the conversation
+ * @returns Promise containing the update result or error details
+ * @throws Error if database update fails
  */
-export async function updateConversation(orm: D1Orm, address: string, conversationId: number, name?: string) {
-	userConversationsModel.SetOrm(orm);
-	const result = await userConversationsModel.Update({
-		where: {
-			id: conversationId,
-			profile_id: address,
-		},
-		data: {
-			conversation_name: name,
-		},
-	});
-	return result;
+export async function updateConversation(
+    orm: D1Orm, 
+    address: string, 
+    conversationId: number, 
+    name?: string
+): Promise<ConversationResult> {
+    try {
+        userConversationsModel.SetOrm(orm);
+        await userConversationsModel.Update({
+            where: {
+                id: conversationId,
+                profile_id: address,
+            },
+            data: {
+                conversation_name: name,
+            },
+        });
+        return {
+            success: true
+        };
+    } catch (error) {
+        console.error(`Error in updateConversation: ${error instanceof Error ? error.message : String(error)}`);
+        return {
+            success: false,
+            error: `Failed to update conversation: ${error instanceof Error ? error.message : String(error)}`
+        };
+    }
 }
 
 /**
- * Delete a specific conversation.
- * @param orm The orm instance from durable object class
- * @param address The Stacks address for the user's profile.
- * @param conversationId The ID of the conversation to delete.
+ * Delete a specific conversation
+ * @param orm The D1Orm instance from durable object class
+ * @param address The Stacks address for the user's profile
+ * @param conversationId The ID of the conversation to delete
+ * @returns Promise containing the deletion result or error details
+ * @throws Error if database deletion fails
  */
-export async function deleteConversation(orm: D1Orm, address: string, conversationId: number) {
-	userConversationsModel.SetOrm(orm);
-	const result = await userConversationsModel.Delete({
-		where: {
-			id: conversationId,
-			profile_id: address,
-		},
-	});
-	return result;
+export async function deleteConversation(
+    orm: D1Orm, 
+    address: string, 
+    conversationId: number
+): Promise<ConversationResult> {
+    try {
+        userConversationsModel.SetOrm(orm);
+        await userConversationsModel.Delete({
+            where: {
+                id: conversationId,
+                profile_id: address,
+            },
+        });
+        return {
+            success: true
+        };
+    } catch (error) {
+        console.error(`Error in deleteConversation: ${error instanceof Error ? error.message : String(error)}`);
+        return {
+            success: false,
+            error: `Failed to delete conversation: ${error instanceof Error ? error.message : String(error)}`
+        };
+    }
 }
 
 /**
- * Get a conversation.
- * @param orm The orm instance from durable object class
- * @param conversationId The ID of the conversation
+ * Get a specific conversation by ID
+ * @param orm The D1Orm instance from durable object class
+ * @param conversationId The ID of the conversation to retrieve
+ * @returns Promise containing the conversation data or error details
+ * @throws Error if database query fails
  */
-export async function getConversation(orm: D1Orm, conversationId: number) {
-	userConversationsModel.SetOrm(orm);
-	const conversation = await userConversationsModel.First({
-		where: {
-			id: conversationId,
-		},
-	});
-	return conversation;
+export async function getConversation(
+    orm: D1Orm, 
+    conversationId: number
+): Promise<ConversationResult> {
+    try {
+        userConversationsModel.SetOrm(orm);
+        const conversation = await userConversationsModel.First({
+            where: {
+                id: conversationId,
+            },
+        });
+        return {
+            conversation: conversation as ConversationData,
+            success: true
+        };
+    } catch (error) {
+        console.error(`Error in getConversation: ${error instanceof Error ? error.message : String(error)}`);
+        return {
+            success: false,
+            error: `Failed to get conversation: ${error instanceof Error ? error.message : String(error)}`
+        };
+    }
 }
 
 /**
