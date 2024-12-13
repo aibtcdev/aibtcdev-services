@@ -1,24 +1,11 @@
 import { D1Orm } from 'd1-orm';
-import { userAgentsModel, userCrewsModel, userCronsModel, userProfilesModel, userTasksModel } from '../models';
+import { userAgentsModel, userCrewsModel, userCronsModel, userProfilesModel, userTasksModel, UserCronsTable } from '../models';
 
 /** CRON MANAGEMENT */
 
-interface CronData {
-    id: number;
-    created_at: string;
-    updated_at: string;
-    profile_id: string;
-    crew_id: number;
-    cron_last_run: string | null;
-    cron_next_run: string | null;
-    cron_enabled: number;
-    cron_interval: string;
-    cron_input: string;
-}
-
 interface CronResult {
-    cron?: CronData;
-    crons?: CronData[];
+    cron?: UserCronsTable;
+    crons?: UserCronsTable[];
     success: boolean;
     error?: string;
 }
@@ -44,7 +31,7 @@ export async function getEnabledCrons(orm: D1Orm): Promise<CronResult> {
             ],
         });
         return {
-            crons: result.results as CronData[],
+            crons: result.results as unknown as UserCronsTable[],
             success: true
         };
     } catch (error) {
@@ -79,7 +66,7 @@ export async function getCronsByCrew(orm: D1Orm, crewId: number): Promise<CronRe
             ],
         });
         return {
-            crons: result.results as CronData[],
+            crons: result.results as unknown as UserCronsTable[],
             success: true
         };
     } catch (error) {
@@ -99,12 +86,12 @@ export async function getCronsByCrew(orm: D1Orm, crewId: number): Promise<CronRe
  * @returns Promise containing the created cron or error details
  * @throws Error if database insertion fails
  */
-export async function createCron(orm: D1Orm, cronData: Omit<CronData, 'id' | 'created_at' | 'updated_at' | 'cron_last_run' | 'cron_next_run'>): Promise<CronResult> {
+export async function createCron(orm: D1Orm, cronData: Omit<UserCronsTable, 'id' | 'created_at' | 'updated_at'>): Promise<CronResult> {
     try {
         userCronsModel.SetOrm(orm);
         const cron = await userCronsModel.InsertOne(cronData);
         return {
-            cron: cron as CronData,
+            cron: cron as unknown as UserCronsTable,
             success: true
         };
     } catch (error) {
