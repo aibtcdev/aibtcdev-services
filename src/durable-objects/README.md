@@ -16,7 +16,7 @@ All Durable Objects share these common patterns:
 - **AuthDO**: Handles authentication flows and session management
 - **CdnDO**: Manages R2 bucket operations for content delivery
 - **DatabaseDO**: Manages database operations and queries
-- - 🚧 **ContextDO**: Provides transformed data as API endpoints
+- 🚧 **ContextDO**: Provides transformed data as API endpoints
 - 🚧 **SchedulerDO**: Handles scheduling and execution of backend jobs
 - 🚧 **ToolsDO**: Runs TypeScript tools requested by the backend
 
