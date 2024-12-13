@@ -1,5 +1,5 @@
 import { D1Orm } from 'd1-orm';
-import { userAgentsModel, UserAgentsTable } from '../models';
+import { userAgentsModel, userTasksModel, UserAgentsTable } from '../models';
 
 /** AGENT MANAGEMENT */
 
@@ -60,7 +60,7 @@ export async function createAgent(
         userAgentsModel.SetOrm(orm);
         const agent = await userAgentsModel.InsertOne(agentData);
         return {
-            agent: agent as AgentData,
+            agent: agent as UserAgentsTable,
             success: true
         };
     } catch (error) {

@@ -1,5 +1,12 @@
 import { D1Orm } from 'd1-orm';
-import { userConversationsModel, userCrewExecutionsModel, userCrewExecutionStepsModel, UserConversationsTable } from '../models';
+import { 
+    userConversationsModel, 
+    userCrewExecutionsModel, 
+    userCrewExecutionStepsModel, 
+    UserConversationsTable,
+    UserCrewExecutionsTable,
+    UserCrewExecutionStepsTable 
+} from '../models';
 
 /** CONVERSATION MANAGEMENT */
 
@@ -380,8 +387,8 @@ export async function getLatestConversationId(
 
 interface ConversationHistoryResult {
     history?: Array<{
-        execution: any;
-        steps: any[];
+        execution: UserCrewExecutionsTable;
+        steps: UserCrewExecutionStepsTable[];
     }>;
     success: boolean;
     error?: string;
