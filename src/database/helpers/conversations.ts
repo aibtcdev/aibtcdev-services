@@ -1,19 +1,11 @@
 import { D1Orm } from 'd1-orm';
-import { userConversationsModel, userCrewExecutionsModel, userCrewExecutionStepsModel } from '../models';
+import { userConversationsModel, userCrewExecutionsModel, userCrewExecutionStepsModel, UserConversationsTable } from '../models';
 
 /** CONVERSATION MANAGEMENT */
 
-interface ConversationData {
-    id: number;
-    created_at: string;
-    updated_at: string;
-    profile_id: string;
-    conversation_name: string;
-}
-
 interface ConversationResult {
-    conversation?: ConversationData;
-    conversations?: ConversationData[];
+    conversation?: UserConversationsTable;
+    conversations?: UserConversationsTable[];
     success: boolean;
     error?: string;
 }
@@ -38,7 +30,7 @@ export async function addConversation(
             conversation_name: name,
         });
         return {
-            conversation: conversation as ConversationData,
+            conversation: conversation as UserConversationsTable,
             success: true
         };
     } catch (error) {
@@ -140,7 +132,7 @@ export async function getConversation(
             },
         });
         return {
-            conversation: conversation as ConversationData,
+            conversation: conversation as UserConversationsTable,
             success: true
         };
     } catch (error) {
@@ -193,7 +185,7 @@ export async function getConversationWithExecutions(
         });
 
         return {
-            conversation: conversation as ConversationData,
+            conversation: conversation as UserConversationsTable,
             executions: executions.results,
             success: true
         };
@@ -231,7 +223,7 @@ export async function getConversations(
             ],
         });
         return {
-            conversations: result.results as ConversationData[],
+            conversations: result.results as UserConversationsTable[],
             success: true
         };
     } catch (error) {
@@ -254,7 +246,7 @@ export async function getConversations(
 export async function getConversationsWithExecutions(
     orm: D1Orm, 
     address: string
-): Promise<ConversationResult & { details?: Array<{ conversation: ConversationData; executions: any[] }> }> {
+): Promise<ConversationResult & { details?: Array<{ conversation: UserConversationsTable; executions: any[] }> }> {
     try {
         userConversationsModel.SetOrm(orm);
         userCrewExecutionsModel.SetOrm(orm);
@@ -287,7 +279,7 @@ export async function getConversationsWithExecutions(
             });
 
             details.push({
-                conversation: conversation as ConversationData,
+                conversation: conversation as UserConversationsTable,
                 executions: executions.results,
             });
         }
@@ -338,7 +330,7 @@ export async function getLatestConversation(
         }
 
         return {
-            conversation: result.results[0] as ConversationData,
+            conversation: result.results[0] as UserConversationsTable,
             success: true
         };
     } catch (error) {
