@@ -7,7 +7,9 @@ export interface Env {
 	DATABASE_DO: DurableObjectNamespace<import('./src/index').DatabaseDO>;
 	SCHEDULER_DO: DurableObjectNamespace<import('./src/index').SchedulerDO>;
 	TOOLS_DO: DurableObjectNamespace<import('./src/index').ToolsDO>;
-	AIBTCDEV_SERVICES_DB: D1Database;
+	IMAGES_DO: DurableObjectNamespace<import('./src/index').ImageGeneratorDO>;
 	CDN_DO: DurableObjectNamespace<import('./src/index').CdnDO>;
 	AIBTCDEV_SERVICES_BUCKET: R2Bucket;
+	AIBTCDEV_SERVICES_DB: D1Database;
+	OPENAI_API_KEY: process.env.OPENAI_API_KEY;
 }
