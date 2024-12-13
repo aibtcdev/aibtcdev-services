@@ -142,7 +142,7 @@ export async function updateCronInput(orm: D1Orm, cronId: number, cronInput: str
  * @returns Promise containing the update result or error details
  * @throws Error if database update fails
  */
-export async function toggleCronStatus(orm: D1Orm, cronId: number, enabled: number): Promise<CronResult> {
+export async function toggleCronStatus(orm: D1Orm, cronId: number, enabled: 0 | 1): Promise<CronResult> {
     try {
         userCronsModel.SetOrm(orm);
         await userCronsModel.Update({
