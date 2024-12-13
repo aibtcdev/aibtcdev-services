@@ -23,8 +23,7 @@ export async function getUserRole(orm: D1Orm, address: string): Promise<ProfileR
         const profile = await userProfilesModel.First({
             where: {
                 stx_address: address
-            },
-            select: ['user_role']
+            }
         });
         return {
             profile: profile as unknown as UserProfilesTable,
