@@ -32,7 +32,7 @@ export async function getAgents(orm: D1Orm, crewId: number): Promise<AgentResult
             ],
         });
         return {
-            agents: result.results as UserAgentsTable[],
+            agents: result.results as unknown as UserAgentsTable[],
             success: true
         };
     } catch (error) {
@@ -60,7 +60,7 @@ export async function createAgent(
         userAgentsModel.SetOrm(orm);
         const agent = await userAgentsModel.InsertOne(agentData);
         return {
-            agent: agent as UserAgentsTable,
+            agent: agent as unknown as UserAgentsTable,
             success: true
         };
     } catch (error) {
