@@ -1,23 +1,11 @@
 import { D1Orm } from 'd1-orm';
-import { userTasksModel } from '../models';
+import { userTasksModel, UserTasksTable } from '../models';
 
 /** TASK MANAGEMENT */
 
-interface TaskData {
-    id: number;
-    created_at: string;
-    updated_at: string;
-    profile_id: string;
-    crew_id: number;
-    agent_id: number;
-    task_name: string;
-    task_description: string;
-    task_expected_output: string;
-}
-
 interface TaskResult {
-    task?: TaskData;
-    tasks?: TaskData[];
+    task?: UserTasksTable;
+    tasks?: UserTasksTable[];
     success: boolean;
     error?: string;
 }
@@ -38,7 +26,7 @@ export async function getTask(orm: D1Orm, taskId: number): Promise<TaskResult> {
             }
         });
         return {
-            task: task as TaskData,
+            task: task as unknown as UserTasksTable,
             success: true
         };
     } catch (error) {
@@ -72,7 +60,7 @@ export async function getTasks(orm: D1Orm, agentId: number): Promise<TaskResult>
             ],
         });
         return {
-            tasks: result.results as TaskData[],
+            tasks: result.results as unknown as UserTasksTable[],
             success: true
         };
     } catch (error) {
@@ -92,12 +80,12 @@ export async function getTasks(orm: D1Orm, agentId: number): Promise<TaskResult>
  * @returns Promise containing the created task or error details
  * @throws Error if database insertion fails
  */
-export async function createTask(orm: D1Orm, taskData: Omit<TaskData, 'id' | 'created_at' | 'updated_at'>): Promise<TaskResult> {
+export async function createTask(orm: D1Orm, taskData: Omit<UserTasksTable, 'id' | 'created_at' | 'updated_at'>): Promise<TaskResult> {
     try {
         userTasksModel.SetOrm(orm);
         const task = await userTasksModel.InsertOne(taskData);
         return {
-            task: task as TaskData,
+            task: task as unknown as UserTasksTable,
             success: true
         };
     } catch (error) {
@@ -117,7 +105,7 @@ export async function createTask(orm: D1Orm, taskData: Omit<TaskData, 'id' | 'cr
  * @returns Promise containing the update result or error details
  * @throws Error if database update fails
  */
-export async function updateTask(orm: D1Orm, taskId: number, updates: Partial<Pick<TaskData, 'task_name' | 'task_description' | 'task_expected_output'>>): Promise<TaskResult> {
+export async function updateTask(orm: D1Orm, taskId: number, updates: Partial<Pick<UserTasksTable, 'task_name' | 'task_description' | 'task_expected_output'>>): Promise<TaskResult> {
     try {
         userTasksModel.SetOrm(orm);
         await userTasksModel.Update({
