@@ -1,25 +1,13 @@
 import { D1Orm } from 'd1-orm';
-import { userAgentsModel, userTasksModel } from '../models';
+import { userAgentsModel, UserAgentsTable } from '../models';
 
 /** AGENT MANAGEMENT */
 
-interface AgentData {
-    id: number;
-    created_at: string;
-    updated_at: string;
-    profile_id: string;
-    crew_id: number;
-    agent_name: string;
-    agent_role: string;
-    agent_goal: string;
-    agent_backstory: string;
-    agent_tools?: string;
-}
-
 interface AgentResult {
-    results: AgentData[];
     success: boolean;
     error?: string;
+    agent?: UserAgentsTable;
+    agents?: UserAgentsTable[];
 }
 
 /**
@@ -32,7 +20,7 @@ interface AgentResult {
 export async function getAgents(orm: D1Orm, crewId: number): Promise<AgentResult> {
     try {
         userAgentsModel.SetOrm(orm);
-        const agents = await userAgentsModel.All({
+        const result = await userAgentsModel.All({
             where: {
                 crew_id: crewId
             },
@@ -44,7 +32,7 @@ export async function getAgents(orm: D1Orm, crewId: number): Promise<AgentResult
             ],
         });
         return {
-            results: agents.results as AgentData[],
+            agents: result.results as UserAgentsTable[],
             success: true
         };
     } catch (error) {
@@ -64,11 +52,10 @@ export async function getAgents(orm: D1Orm, crewId: number): Promise<AgentResult
  * @returns Promise containing the created agent or error details
  * @throws Error if database insertion fails
  */
-export async function createAgent(orm: D1Orm, agentData: Omit<AgentData, 'id' | 'created_at' | 'updated_at'>): Promise<{
-    agent?: AgentData;
-    success: boolean;
-    error?: string;
-}> {
+export async function createAgent(
+    orm: D1Orm, 
+    agentData: Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at'>
+): Promise<AgentResult> {
     try {
         userAgentsModel.SetOrm(orm);
         const agent = await userAgentsModel.InsertOne(agentData);
@@ -93,10 +80,11 @@ export async function createAgent(orm: D1Orm, agentData: Omit<AgentData, 'id' | 
  * @returns Promise containing the update result or error details
  * @throws Error if database update fails
  */
-export async function updateAgent(orm: D1Orm, agentId: number, updates: Partial<Omit<AgentData, 'id' | 'created_at' | 'updated_at' | 'profile_id' | 'crew_id'>>): Promise<{
-    success: boolean;
-    error?: string;
-}> {
+export async function updateAgent(
+    orm: D1Orm,
+    agentId: number,
+    updates: Partial<Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at' | 'profile_id' | 'crew_id'>>
+): Promise<AgentResult> {
     try {
         userAgentsModel.SetOrm(orm);
         await userAgentsModel.Update({
