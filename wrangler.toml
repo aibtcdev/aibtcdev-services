@@ -49,6 +49,10 @@ class_name = "ToolsDO"
 name = "IMAGES_DO"
 class_name = "ImageGeneratorDO"
 
+[[durable_objects.bindings]]
+name = "METADATA_DO"
+class_name = "TokenMetadataDO"
+
 # Durable Object migrations.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#migrations
 [[migrations]]

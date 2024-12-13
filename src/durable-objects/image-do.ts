@@ -77,8 +77,8 @@ export class ImageGeneratorDO extends DurableObject<Env> {
 						await this.env.AIBTCDEV_SERVICES_BUCKET.put(key, imageData, {
 							httpMetadata: {
 								contentType: 'image/png',
-								// customMetadata: metadata as any,
 							},
+							customMetadata: metadata,
 						});
 
 						return {
@@ -140,7 +140,7 @@ export class ImageGeneratorDO extends DurableObject<Env> {
 						url: `/image/get/${obj.key}`,
 						size: obj.size,
 						uploaded: obj.uploaded,
-						// metadata: obj.httpMetadata?.customMetadata,
+						metadata: obj.customMetadata,
 					})),
 					truncated: objects.truncated,
 					cursor: objects.truncated ? objects.cursor : undefined,

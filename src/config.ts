@@ -34,7 +34,7 @@ export class AppConfig {
 		return {
 			// List of all supported API service endpoints
 			// Used for routing and validation
-			SUPPORTED_SERVICES: ['/auth', '/cdn', '/context', '/database', '/scheduler', '/tools', '/image'],
+			SUPPORTED_SERVICES: ['/auth', '/cdn', '/context', '/database', '/scheduler', '/tools', '/image', '/metadata'],
 
 			// Default interval for Durable Object alarm checks
 			// Currently set to 8 hours while alarm functionality is in development

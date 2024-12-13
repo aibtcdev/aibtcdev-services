@@ -5,3 +5,4 @@ export * from './database-do';
 export * from './scheduler-do';
 export * from './tools-do';
 export * from './image-do';
+export * from './metadata-do';
