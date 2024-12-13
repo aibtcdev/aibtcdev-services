@@ -3,21 +3,36 @@ import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
 import { createJsonResponse } from '../utils/requests-responses';
 import { D1Orm } from 'd1-orm';
+import { UserAgentsTable, UserCrewsTable, UserCronsTable, UserProfilesTable, UserTasksTable } from '../database/models';
+import { getAgents, createAgent, updateAgent, deleteAgent } from '../database/helpers/agents';
 import {
-	addCrewExecution,
-	getConversationHistory,
-	getConversations,
+	createCrew,
+	getCrew,
+	updateCrew,
+	deleteCrew,
+	getPublicCrews,
 	getCrewExecutions,
+	addCrewExecution,
+} from '../database/helpers/crews';
+import {
+	getCronsByCrew,
+	createCron,
+	updateCronInput,
+	toggleCronStatus,
 	getEnabledCrons,
 	getEnabledCronsDetailed,
-	getLatestConversation,
-	getPublicCrews,
+} from '../database/helpers/crons';
+import {
 	getUserRole,
 	getUserProfile,
 	createUserProfile,
 	updateUserProfile,
 	deleteUserProfile,
-} from '../database/helpers';
+	getAllUserProfiles,
+	updateUserProfileById,
+} from '../database/helpers/profiles';
+import { getConversationHistory, getConversations, getLatestConversation } from '../database/helpers/conversations';
+import { getTask, getTasks, createTask, updateTask, deleteTask, deleteTasks } from '../database/helpers/tasks';
 import { validateSharedKeyAuth } from '../utils/auth-helper';
 
 /**
@@ -53,7 +68,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/profiles/admin/list',
 		'/profiles/admin/update',
 		'/agents/get',
-		'/agents/create', 
+		'/agents/create',
 		'/agents/update',
 		'/agents/delete',
 		'/tasks/get',
@@ -61,7 +76,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/tasks/create',
 		'/tasks/update',
 		'/tasks/delete',
-		'/tasks/delete-all'
+		'/tasks/delete-all',
 	];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -171,7 +186,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (request.method !== 'POST') {
 					return createJsonResponse({ error: 'Method not allowed' }, 405);
 				}
-				const crewData = await request.json();
+				const crewData = (await request.json()) as Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at'>;
 				if (!crewData.profile_id || !crewData.crew_name) {
 					return createJsonResponse({ error: 'Missing required fields: profile_id, crew_name' }, 400);
 				}
@@ -187,7 +202,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (!crewId) {
 					return createJsonResponse({ error: 'Missing id parameter' }, 400);
 				}
-				const updates = await request.json();
+				const updates = (await request.json()) as Partial<Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at' | 'profile_id'>>;
 				const result = await updateCrew(this.orm, parseInt(crewId), updates);
 				return createJsonResponse({ result });
 			}
@@ -218,9 +233,15 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (request.method !== 'POST') {
 					return createJsonResponse({ error: 'Method not allowed' }, 405);
 				}
-				const agentData = await request.json();
-				if (!agentData.profile_id || !agentData.crew_id || !agentData.agent_name || 
-					!agentData.agent_role || !agentData.agent_goal || !agentData.agent_backstory) {
+				const agentData = (await request.json()) as Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at'>;
+				if (
+					!agentData.profile_id ||
+					!agentData.crew_id ||
+					!agentData.agent_name ||
+					!agentData.agent_role ||
+					!agentData.agent_goal ||
+					!agentData.agent_backstory
+				) {
 					return createJsonResponse({ error: 'Missing required fields' }, 400);
 				}
 				const agent = await createAgent(this.orm, agentData);
@@ -235,7 +256,9 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (!agentId) {
 					return createJsonResponse({ error: 'Missing id parameter' }, 400);
 				}
-				const updates = await request.json();
+				const updates = (await request.json()) as Partial<
+					Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at' | 'profile_id' | 'crew_id'>
+				>;
 				const result = await updateAgent(this.orm, parseInt(agentId), updates);
 				return createJsonResponse({ result });
 			}
@@ -275,9 +298,15 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (request.method !== 'POST') {
 					return createJsonResponse({ error: 'Method not allowed' }, 405);
 				}
-				const taskData = await request.json();
-				if (!taskData.profile_id || !taskData.crew_id || !taskData.agent_id || 
-					!taskData.task_name || !taskData.task_description || !taskData.task_expected_output) {
+				const taskData = (await request.json()) as UserTasksTable;
+				if (
+					!taskData.profile_id ||
+					!taskData.crew_id ||
+					!taskData.agent_id ||
+					!taskData.task_name ||
+					!taskData.task_description ||
+					!taskData.task_expected_output
+				) {
 					return createJsonResponse({ error: 'Missing required fields' }, 400);
 				}
 				const task = await createTask(this.orm, taskData);
@@ -292,7 +321,9 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (!taskId) {
 					return createJsonResponse({ error: 'Missing id parameter' }, 400);
 				}
-				const updates = await request.json();
+				const updates = (await request.json()) as Partial<
+					Omit<UserTasksTable, 'id' | 'created_at' | 'updated_at' | 'profile_id' | 'crew_id' | 'agent_id'>
+				>;
 				const result = await updateTask(this.orm, parseInt(taskId), updates);
 				return createJsonResponse({ result });
 			}
@@ -383,7 +414,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (request.method !== 'POST') {
 					return createJsonResponse({ error: 'Method not allowed' }, 405);
 				}
-				const cronData = await request.json();
+				const cronData = (await request.json()) as UserCronsTable;
 				if (!cronData.profile_id || !cronData.crew_id || cronData.cron_enabled === undefined) {
 					return createJsonResponse({ error: 'Missing required fields' }, 400);
 				}
@@ -402,7 +433,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (!cronId) {
 					return createJsonResponse({ error: 'Missing id parameter' }, 400);
 				}
-				const { cron_input } = await request.json();
+				const { cron_input } = (await request.json()) as UserCronsTable;
 				if (cron_input === undefined) {
 					return createJsonResponse({ error: 'Missing cron_input in request body' }, 400);
 				}
@@ -418,11 +449,11 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (!cronId) {
 					return createJsonResponse({ error: 'Missing id parameter' }, 400);
 				}
-				const { enabled } = await request.json();
-				if (enabled === undefined) {
+				const { cron_enabled } = (await request.json()) as UserCronsTable;
+				if (cron_enabled === undefined) {
 					return createJsonResponse({ error: 'Missing enabled in request body' }, 400);
 				}
-				const result = await toggleCronStatus(this.orm, parseInt(cronId), enabled ? 1 : 0);
+				const result = await toggleCronStatus(this.orm, parseInt(cronId), cron_enabled ? 1 : 0);
 				return createJsonResponse({ result });
 			}
 
@@ -449,7 +480,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (request.method !== 'POST') {
 					return createJsonResponse({ error: 'Method not allowed' }, 405);
 				}
-				const profileData = await request.json();
+				const profileData = (await request.json()) as UserProfilesTable;
 				if (!profileData.stx_address || !profileData.user_role) {
 					return createJsonResponse({ error: 'Missing required fields: stx_address, user_role' }, 400);
 				}
@@ -465,7 +496,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (!address) {
 					return createJsonResponse({ error: 'Missing address parameter' }, 400);
 				}
-				const profileData = await request.json();
+				const profileData = (await request.json()) as UserProfilesTable;
 				const result = await updateUserProfile(this.orm, address, profileData);
 				return createJsonResponse({ result });
 			}
@@ -496,13 +527,13 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (!userId) {
 					return createJsonResponse({ error: 'Missing userId parameter' }, 400);
 				}
-				const updates = await request.json();
+				const updates = (await request.json()) as UserProfilesTable;
 				const result = await updateUserProfileById(this.orm, parseInt(userId), updates);
 				return createJsonResponse({ result });
 			}
 		} catch (error) {
 			console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
-			return createJsonResponse({ error: 'Internal server error' }, 500);
+			return createJsonResponse({ error: `Database error: ${error instanceof Error ? error.message : String(error)}` }, 500);
 		}
 
 		return createJsonResponse(
