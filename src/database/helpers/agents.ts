@@ -38,7 +38,6 @@ export async function getAgents(orm: D1Orm, crewId: number): Promise<AgentResult
     } catch (error) {
         console.error(`Error in getAgents: ${error instanceof Error ? error.message : String(error)}`);
         return {
-            results: [],
             success: false,
             error: `Failed to get agents: ${error instanceof Error ? error.message : String(error)}`
         };
