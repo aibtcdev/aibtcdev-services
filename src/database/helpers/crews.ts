@@ -1,38 +1,13 @@
 import { D1Orm } from 'd1-orm';
-import { userCrewExecutionsModel, userCrewsModel } from '../models';
+import { userCrewExecutionsModel, userCrewsModel, UserCrewsTable, UserCrewExecutionsTable } from '../models';
 
 /** CREW MANAGEMENT */
 
-interface CrewData {
-    id: number;
-    created_at: string;
-    updated_at: string;
-    profile_id: string;
-    crew_name: string;
-    crew_description?: string;
-    crew_executions: number;
-    crew_is_public: number;
-    crew_is_cron: number;
-}
-
-interface CrewExecutionData {
-    id: number;
-    created_at: string;
-    updated_at: string;
-    profile_id: string;
-    crew_id: number;
-    conversation_id: number;
-    user_input?: string;
-    final_result?: string;
-    total_tokens: number;
-    successful_requests: number;
-}
-
 interface CrewResult {
-    crew?: CrewData;
-    crews?: CrewData[];
-    execution?: CrewExecutionData;
-    executions?: CrewExecutionData[];
+    crew?: UserCrewsTable;
+    crews?: UserCrewsTable[];
+    execution?: UserCrewExecutionsTable;
+    executions?: UserCrewExecutionsTable[];
     success: boolean;
     error?: string;
 }
@@ -65,7 +40,7 @@ export async function addCrewExecution(
             successful_requests: 0,
         });
         return {
-            execution: execution as CrewExecutionData,
+            execution: execution as unknown as UserCrewExecutionsTable,
             success: true
         };
     } catch (error) {
@@ -99,7 +74,7 @@ export async function getCrewExecutions(orm: D1Orm, address: string): Promise<Cr
             ],
         });
         return {
-            executions: result.results as CrewExecutionData[],
+            executions: result.results as unknown as UserCrewExecutionsTable[],
             success: true
         };
     } catch (error) {
@@ -133,7 +108,7 @@ export async function getPublicCrews(orm: D1Orm): Promise<CrewResult> {
             ],
         });
         return {
-            crews: result.results as CrewData[],
+            crews: result.results as unknown as UserCrewsTable[],
             success: true
         };
     } catch (error) {
@@ -162,7 +137,7 @@ export async function getCrew(orm: D1Orm, crewId: number): Promise<CrewResult> {
             }
         });
         return {
-            crew: crew as CrewData,
+            crew: crew as unknown as UserCrewsTable,
             success: true
         };
     } catch (error) {
@@ -181,12 +156,12 @@ export async function getCrew(orm: D1Orm, crewId: number): Promise<CrewResult> {
  * @returns Promise containing the created crew or error details
  * @throws Error if database insertion fails
  */
-export async function createCrew(orm: D1Orm, crewData: Omit<CrewData, 'id' | 'created_at' | 'updated_at' | 'crew_executions' | 'crew_is_cron'>): Promise<CrewResult> {
+export async function createCrew(orm: D1Orm, crewData: Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at' | 'crew_executions' | 'crew_is_cron'>): Promise<CrewResult> {
     try {
         userCrewsModel.SetOrm(orm);
         const crew = await userCrewsModel.InsertOne(crewData);
         return {
-            crew: crew as CrewData,
+            crew: crew as unknown as UserCrewsTable,
             success: true
         };
     } catch (error) {
@@ -209,7 +184,7 @@ export async function createCrew(orm: D1Orm, crewData: Omit<CrewData, 'id' | 'cr
 export async function updateCrew(
     orm: D1Orm, 
     crewId: number, 
-    updates: Partial<Pick<CrewData, 'crew_name' | 'crew_description' | 'crew_is_public'>>
+    updates: Partial<Pick<UserCrewsTable, 'crew_name' | 'crew_description' | 'crew_is_public'>>
 ): Promise<CrewResult> {
     try {
         userCrewsModel.SetOrm(orm);
