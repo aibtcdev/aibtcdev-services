@@ -6,6 +6,16 @@ import { D1Orm } from 'd1-orm';
 import { UserAgentsTable, UserCrewsTable, UserCronsTable, UserProfilesTable, UserTasksTable } from '../database/models';
 import { getAgents, createAgent, updateAgent, deleteAgent } from '../database/helpers/agents';
 import {
+    getAuthor,
+    addAuthor,
+    getTweet,
+    getThreadTweets,
+    getAuthorTweets,
+    addTweet,
+    getTweetLogs,
+    addLog,
+} from '../database/helpers/twitter';
+import {
 	createCrew,
 	getCrew,
 	updateCrew,
@@ -77,6 +87,15 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/tasks/update',
 		'/tasks/delete',
 		'/tasks/delete-all',
+		'/twitter/authors/get',
+		'/twitter/authors/create',
+		'/twitter/authors/update', 
+		'/twitter/tweets/get',
+		'/twitter/tweets/thread',
+		'/twitter/tweets/author',
+		'/twitter/tweets/add',
+		'/twitter/logs/get',
+		'/twitter/logs/add',
 	];
 
 	constructor(ctx: DurableObjectState, env: Env) {
