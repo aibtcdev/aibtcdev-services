@@ -555,6 +555,96 @@ export class DatabaseDO extends DurableObject<Env> {
 			return createJsonResponse({ error: `Database error: ${error instanceof Error ? error.message : String(error)}` }, 500);
 		}
 
+		// Twitter/X Bot endpoints
+		if (endpoint === '/twitter/authors/get') {
+			const authorId = url.searchParams.get('authorId');
+			if (!authorId) {
+				return createJsonResponse({ error: 'Missing authorId parameter' }, 400);
+			}
+			const author = await getAuthor(this.orm, authorId);
+			return createJsonResponse({ author });
+		}
+
+		if (endpoint === '/twitter/authors/create') {
+			if (request.method !== 'POST') {
+				return createJsonResponse({ error: 'Method not allowed' }, 405);
+			}
+			const { authorId, realname, username } = await request.json();
+			if (!authorId) {
+				return createJsonResponse({ error: 'Missing required fields: authorId' }, 400);
+			}
+			const author = await addAuthor(this.orm, authorId, realname, username);
+			return createJsonResponse({ author });
+		}
+
+		if (endpoint === '/twitter/tweets/get') {
+			const tweetId = url.searchParams.get('tweetId');
+			if (!tweetId) {
+				return createJsonResponse({ error: 'Missing tweetId parameter' }, 400);
+			}
+			const tweet = await getTweet(this.orm, tweetId);
+			return createJsonResponse({ tweet });
+		}
+
+		if (endpoint === '/twitter/tweets/thread') {
+			const threadId = url.searchParams.get('threadId');
+			if (!threadId) {
+				return createJsonResponse({ error: 'Missing threadId parameter' }, 400);
+			}
+			const tweets = await getThreadTweets(this.orm, parseInt(threadId));
+			return createJsonResponse({ tweets });
+		}
+
+		if (endpoint === '/twitter/tweets/author') {
+			const authorId = url.searchParams.get('authorId');
+			if (!authorId) {
+				return createJsonResponse({ error: 'Missing authorId parameter' }, 400);
+			}
+			const tweets = await getAuthorTweets(this.orm, authorId);
+			return createJsonResponse({ tweets });
+		}
+
+		if (endpoint === '/twitter/tweets/add') {
+			if (request.method !== 'POST') {
+				return createJsonResponse({ error: 'Method not allowed' }, 405);
+			}
+			const { authorId, tweetId, tweetBody, threadId, parentTweetId, isBotResponse } = await request.json();
+			if (!authorId || !tweetId || !tweetBody) {
+				return createJsonResponse({ error: 'Missing required fields: authorId, tweetId, tweetBody' }, 400);
+			}
+			const tweet = await addTweet(
+				this.orm,
+				authorId,
+				tweetId,
+				tweetBody,
+				threadId,
+				parentTweetId,
+				isBotResponse
+			);
+			return createJsonResponse({ tweet });
+		}
+
+		if (endpoint === '/twitter/logs/get') {
+			const tweetId = url.searchParams.get('tweetId');
+			if (!tweetId) {
+				return createJsonResponse({ error: 'Missing tweetId parameter' }, 400);
+			}
+			const logs = await getTweetLogs(this.orm, tweetId);
+			return createJsonResponse({ logs });
+		}
+
+		if (endpoint === '/twitter/logs/add') {
+			if (request.method !== 'POST') {
+				return createJsonResponse({ error: 'Method not allowed' }, 405);
+			}
+			const { tweetId, status, message } = await request.json();
+			if (!tweetId || !status) {
+				return createJsonResponse({ error: 'Missing required fields: tweetId, status' }, 400);
+			}
+			const log = await addLog(this.orm, tweetId, status, message);
+			return createJsonResponse({ log });
+		}
+
 		return createJsonResponse(
 			{
 				error: `Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
