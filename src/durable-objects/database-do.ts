@@ -57,6 +57,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/conversations',
 		'/conversations/latest',
 		'/conversations/history',
+		'/conversations/create',
 		'/crews/public',
 		'/crews/get',
 		'/crews/create',
@@ -473,6 +474,21 @@ export class DatabaseDO extends DurableObject<Env> {
 					return createJsonResponse({ error: 'Missing enabled in request body' }, 400);
 				}
 				const result = await toggleCronStatus(this.orm, parseInt(cronId), cron_enabled ? 1 : 0);
+				return createJsonResponse({ result });
+			}
+
+			// Conversation creation endpoint
+			if (endpoint === '/conversations/create') {
+				if (request.method !== 'POST') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+				
+				const { address, name } = await request.json();
+				if (!address) {
+					return createJsonResponse({ error: 'Missing required field: address' }, 400);
+				}
+				
+				const result = await addConversation(this.orm, address, name);
 				return createJsonResponse({ result });
 			}
 
