@@ -3,17 +3,29 @@ import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
 import { createJsonResponse } from '../utils/requests-responses';
 import { D1Orm } from 'd1-orm';
-import { UserAgentsTable, UserCrewsTable, UserCronsTable, UserProfilesTable, UserTasksTable } from '../database/models';
+import {
+	UserAgentsTable,
+	UserConversationsTable,
+	UserCrewExecutionsTable,
+	UserCrewExecutionStepsTable,
+	UserCrewsTable,
+	UserCronsTable,
+	UserProfilesTable,
+	UserTasksTable,
+	XBotAuthorsTable,
+	XBotLogsTable,
+	XBotTweetsTable,
+} from '../database/models';
 import { getAgents, createAgent, updateAgent, deleteAgent } from '../database/helpers/agents';
 import {
-    getAuthor,
-    addAuthor,
-    getTweet,
-    getThreadTweets,
-    getAuthorTweets,
-    addTweet,
-    getTweetLogs,
-    addLog,
+	getAuthor,
+	addAuthor,
+	getTweet,
+	getThreadTweets,
+	getAuthorTweets,
+	addTweet,
+	getTweetLogs,
+	addLog,
 } from '../database/helpers/twitter';
 import {
 	createCrew,
@@ -23,6 +35,10 @@ import {
 	getPublicCrews,
 	getCrewExecutions,
 	addCrewExecution,
+	getCrewsByProfile,
+	getExecutionSteps,
+	createExecutionStep,
+	deleteExecutionSteps,
 } from '../database/helpers/crews';
 import {
 	getCronsByCrew,
@@ -41,9 +57,9 @@ import {
 	getAllUserProfiles,
 	updateUserProfileById,
 } from '../database/helpers/profiles';
-import { getConversationHistory, getConversations, getLatestConversation } from '../database/helpers/conversations';
+import { addConversation, getConversationHistory, getConversations, getLatestConversation } from '../database/helpers/conversations';
 import { getTask, getTasks, createTask, updateTask, deleteTask, deleteTasks } from '../database/helpers/tasks';
-import { validateSharedKeyAuth } from '../utils/auth-helper';
+import { validateSessionToken, validateSharedKeyAuth } from '../utils/auth-helper';
 
 /**
  * Durable Object class for backend database calls
@@ -57,6 +73,8 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/conversations',
 		'/conversations/latest',
 		'/conversations/history',
+		'/conversations/create',
+		'/crews/profile',
 		'/crews/public',
 		'/crews/get',
 		'/crews/create',
@@ -89,13 +107,16 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/tasks/delete-all',
 		'/twitter/authors/get',
 		'/twitter/authors/create',
-		'/twitter/authors/update', 
+		'/twitter/authors/update',
 		'/twitter/tweets/get',
 		'/twitter/tweets/thread',
 		'/twitter/tweets/author',
 		'/twitter/tweets/add',
 		'/twitter/logs/get',
 		'/twitter/logs/add',
+		'/crews/steps/get',
+		'/crews/steps/create',
+		'/crews/steps/delete',
 	];
 
 	constructor(ctx: DurableObjectState, env: Env) {
@@ -187,6 +208,31 @@ export class DatabaseDO extends DurableObject<Env> {
 			}
 
 			// Crew endpoints
+			if (endpoint === '/crews/profile') {
+				const address = url.searchParams.get('address');
+				if (!address) {
+					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+				}
+
+				// Get the session token from Authorization header
+				const authHeader = request.headers.get('Authorization');
+				if (!authHeader) {
+					return createJsonResponse({ error: 'Missing authorization header' }, 401);
+				}
+
+				// Extract token from Bearer format
+				const token = authHeader.replace('Bearer ', '');
+
+				// Verify the token matches the requested address
+				const tokenAddress = await validateSessionToken(this.env, token);
+				if (!tokenAddress.success || tokenAddress.address !== address) {
+					return createJsonResponse({ error: 'Unauthorized access' }, 403);
+				}
+
+				const crews = await getCrewsByProfile(this.orm, address);
+				return createJsonResponse({ crews });
+			}
+
 			if (endpoint === '/crews/public') {
 				const crews = await getPublicCrews(this.orm);
 				return createJsonResponse({ crews });
@@ -476,6 +522,21 @@ export class DatabaseDO extends DurableObject<Env> {
 				return createJsonResponse({ result });
 			}
 
+			// Conversation creation endpoint
+			if (endpoint === '/conversations/create') {
+				if (request.method !== 'POST') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+
+				const { profile_id, conversation_name } = (await request.json()) as UserConversationsTable;
+				if (!profile_id) {
+					return createJsonResponse({ error: 'Missing required field: address' }, 400);
+				}
+
+				const result = await addConversation(this.orm, profile_id, conversation_name ? conversation_name : 'new conversation');
+				return createJsonResponse({ result });
+			}
+
 			// Profile endpoints
 			if (endpoint === '/profiles/role') {
 				const address = url.searchParams.get('address');
@@ -569,11 +630,11 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (request.method !== 'POST') {
 				return createJsonResponse({ error: 'Method not allowed' }, 405);
 			}
-			const { authorId, realname, username } = await request.json();
-			if (!authorId) {
+			const { author_id, realname, username } = (await request.json()) as XBotAuthorsTable;
+			if (!author_id) {
 				return createJsonResponse({ error: 'Missing required fields: authorId' }, 400);
 			}
-			const author = await addAuthor(this.orm, authorId, realname, username);
+			const author = await addAuthor(this.orm, author_id, realname || undefined, username || undefined);
 			return createJsonResponse({ author });
 		}
 
@@ -608,18 +669,18 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (request.method !== 'POST') {
 				return createJsonResponse({ error: 'Method not allowed' }, 405);
 			}
-			const { authorId, tweetId, tweetBody, threadId, parentTweetId, isBotResponse } = await request.json();
-			if (!authorId || !tweetId || !tweetBody) {
+			const { author_id, tweet_id, tweet_body, thread_id, parent_tweet_id, is_bot_response } = (await request.json()) as XBotTweetsTable;
+			if (!author_id || !tweet_id || !tweet_body) {
 				return createJsonResponse({ error: 'Missing required fields: authorId, tweetId, tweetBody' }, 400);
 			}
 			const tweet = await addTweet(
 				this.orm,
-				authorId,
-				tweetId,
-				tweetBody,
-				threadId,
-				parentTweetId,
-				isBotResponse
+				author_id,
+				tweet_id,
+				tweet_body,
+				thread_id || undefined,
+				parent_tweet_id || undefined,
+				is_bot_response || undefined
 			);
 			return createJsonResponse({ tweet });
 		}
@@ -637,12 +698,101 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (request.method !== 'POST') {
 				return createJsonResponse({ error: 'Method not allowed' }, 405);
 			}
-			const { tweetId, status, message } = await request.json();
-			if (!tweetId || !status) {
+			const { tweet_id, tweet_status, log_message } = (await request.json()) as XBotLogsTable;
+			if (!tweet_id || !tweet_status) {
 				return createJsonResponse({ error: 'Missing required fields: tweetId, status' }, 400);
 			}
-			const log = await addLog(this.orm, tweetId, status, message);
+			const log = await addLog(this.orm, tweet_id, tweet_status, log_message || undefined);
 			return createJsonResponse({ log });
+		}
+
+		// Crew execution steps endpoints
+		if (endpoint === '/crews/steps/get') {
+			const executionId = url.searchParams.get('executionId');
+			if (!executionId) {
+				return createJsonResponse({ error: 'Missing executionId parameter' }, 400);
+			}
+
+			// Get the session token from Authorization header
+			const authHeader = request.headers.get('Authorization');
+			if (!authHeader) {
+				return createJsonResponse({ error: 'Missing authorization header' }, 401);
+			}
+
+			// Extract token from Bearer format
+			const token = authHeader.replace('Bearer ', '');
+
+			// Verify the token matches the requested address
+			const tokenAddress = await validateSessionToken(this.env, token);
+			if (!tokenAddress.success) {
+				return createJsonResponse({ error: 'Unauthorized access' }, 403);
+			}
+
+			const steps = await getExecutionSteps(this.orm, parseInt(executionId));
+			return createJsonResponse({ steps });
+		}
+
+		if (endpoint === '/crews/steps/create') {
+			if (request.method !== 'POST') {
+				return createJsonResponse({ error: 'Method not allowed' }, 405);
+			}
+
+			// Get the session token from Authorization header
+			const authHeader = request.headers.get('Authorization');
+			if (!authHeader) {
+				return createJsonResponse({ error: 'Missing authorization header' }, 401);
+			}
+
+			// Extract token from Bearer format
+			const token = authHeader.replace('Bearer ', '');
+
+			// Verify the token
+			const tokenAddress = await validateSessionToken(this.env, token);
+			if (!tokenAddress) {
+				return createJsonResponse({ error: 'Unauthorized access' }, 403);
+			}
+
+			const stepData = (await request.json()) as UserCrewExecutionStepsTable;
+			if (!stepData.profile_id || !stepData.crew_id || !stepData.execution_id || !stepData.step_type || !stepData.step_data) {
+				return createJsonResponse({ error: 'Missing required fields' }, 400);
+			}
+
+			// Verify the profile_id matches the token address
+			if (stepData.profile_id !== tokenAddress.address) {
+				return createJsonResponse({ error: 'Unauthorized: profile_id does not match token' }, 403);
+			}
+
+			const step = await createExecutionStep(this.orm, stepData);
+			return createJsonResponse({ step });
+		}
+
+		if (endpoint === '/crews/steps/delete') {
+			if (request.method !== 'DELETE') {
+				return createJsonResponse({ error: 'Method not allowed' }, 405);
+			}
+
+			const executionId = url.searchParams.get('executionId');
+			if (!executionId) {
+				return createJsonResponse({ error: 'Missing executionId parameter' }, 400);
+			}
+
+			// Get the session token from Authorization header
+			const authHeader = request.headers.get('Authorization');
+			if (!authHeader) {
+				return createJsonResponse({ error: 'Missing authorization header' }, 401);
+			}
+
+			// Extract token from Bearer format
+			const token = authHeader.replace('Bearer ', '');
+
+			// Verify the token
+			const tokenAddress = await validateSessionToken(this.env, token);
+			if (!tokenAddress) {
+				return createJsonResponse({ error: 'Unauthorized access' }, 403);
+			}
+
+			const result = await deleteExecutionSteps(this.orm, parseInt(executionId));
+			return createJsonResponse({ result });
 		}
 
 		return createJsonResponse(
