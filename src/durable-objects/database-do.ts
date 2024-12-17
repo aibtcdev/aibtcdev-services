@@ -691,6 +691,95 @@ export class DatabaseDO extends DurableObject<Env> {
 			return createJsonResponse({ log });
 		}
 
+			// Crew execution steps endpoints
+			if (endpoint === '/crews/steps/get') {
+				const executionId = url.searchParams.get('executionId');
+				if (!executionId) {
+					return createJsonResponse({ error: 'Missing executionId parameter' }, 400);
+				}
+
+				// Get the session token from Authorization header
+				const authHeader = request.headers.get('Authorization');
+				if (!authHeader) {
+					return createJsonResponse({ error: 'Missing authorization header' }, 401);
+				}
+
+				// Extract token from Bearer format
+				const token = authHeader.replace('Bearer ', '');
+				
+				// Verify the token matches the requested address
+				const tokenAddress = await validateSessionToken(this.env, token);
+				if (!tokenAddress) {
+					return createJsonResponse({ error: 'Unauthorized access' }, 403);
+				}
+
+				const steps = await getExecutionSteps(this.orm, parseInt(executionId));
+				return createJsonResponse({ steps });
+			}
+
+			if (endpoint === '/crews/steps/create') {
+				if (request.method !== 'POST') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+
+				// Get the session token from Authorization header
+				const authHeader = request.headers.get('Authorization');
+				if (!authHeader) {
+					return createJsonResponse({ error: 'Missing authorization header' }, 401);
+				}
+
+				// Extract token from Bearer format
+				const token = authHeader.replace('Bearer ', '');
+				
+				// Verify the token
+				const tokenAddress = await validateSessionToken(this.env, token);
+				if (!tokenAddress) {
+					return createJsonResponse({ error: 'Unauthorized access' }, 403);
+				}
+
+				const stepData = await request.json();
+				if (!stepData.profile_id || !stepData.crew_id || !stepData.execution_id || !stepData.step_type || !stepData.step_data) {
+					return createJsonResponse({ error: 'Missing required fields' }, 400);
+				}
+
+				// Verify the profile_id matches the token address
+				if (stepData.profile_id !== tokenAddress) {
+					return createJsonResponse({ error: 'Unauthorized: profile_id does not match token' }, 403);
+				}
+
+				const step = await createExecutionStep(this.orm, stepData);
+				return createJsonResponse({ step });
+			}
+
+			if (endpoint === '/crews/steps/delete') {
+				if (request.method !== 'DELETE') {
+					return createJsonResponse({ error: 'Method not allowed' }, 405);
+				}
+
+				const executionId = url.searchParams.get('executionId');
+				if (!executionId) {
+					return createJsonResponse({ error: 'Missing executionId parameter' }, 400);
+				}
+
+				// Get the session token from Authorization header
+				const authHeader = request.headers.get('Authorization');
+				if (!authHeader) {
+					return createJsonResponse({ error: 'Missing authorization header' }, 401);
+				}
+
+				// Extract token from Bearer format
+				const token = authHeader.replace('Bearer ', '');
+				
+				// Verify the token
+				const tokenAddress = await validateSessionToken(this.env, token);
+				if (!tokenAddress) {
+					return createJsonResponse({ error: 'Unauthorized access' }, 403);
+				}
+
+				const result = await deleteExecutionSteps(this.orm, parseInt(executionId));
+				return createJsonResponse({ result });
+			}
+
 		return createJsonResponse(
 			{
 				error: `Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
