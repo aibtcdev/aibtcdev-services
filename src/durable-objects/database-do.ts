@@ -195,6 +195,22 @@ export class DatabaseDO extends DurableObject<Env> {
 				if (!address) {
 					return createJsonResponse({ error: 'Missing address parameter' }, 400);
 				}
+
+				// Get the session token from Authorization header
+				const authHeader = request.headers.get('Authorization');
+				if (!authHeader) {
+					return createJsonResponse({ error: 'Missing authorization header' }, 401);
+				}
+
+				// Extract token from Bearer format
+				const token = authHeader.replace('Bearer ', '');
+				
+				// Verify the token matches the requested address
+				const tokenAddress = await validateSessionToken(this.env, token);
+				if (!tokenAddress || tokenAddress !== address) {
+					return createJsonResponse({ error: 'Unauthorized access' }, 403);
+				}
+
 				const crews = await getCrewsByProfile(this.orm, address);
 				return createJsonResponse({ crews });
 			}
