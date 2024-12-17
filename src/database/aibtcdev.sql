@@ -303,6 +303,7 @@ CREATE TABLE user_crew_execution_steps (
 CREATE INDEX idx_execution_steps_created_at ON user_crew_execution_steps(created_at); 
 CREATE INDEX idx_execution_steps_profile_id ON user_crew_execution_steps(profile_id);
 CREATE INDEX idx_execution_steps_crew_id ON user_crew_execution_steps(crew_id);
+CREATE INDEX idx_execution_steps_profile_id ON user_crew_execution_steps(profile_id);
 CREATE INDEX idx_execution_steps_execution_id ON user_crew_execution_steps(execution_id);
 CREATE INDEX idx_execution_steps_type ON user_crew_execution_steps(step_type);
 
