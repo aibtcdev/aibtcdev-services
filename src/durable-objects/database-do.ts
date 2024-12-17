@@ -3,7 +3,19 @@ import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
 import { createJsonResponse } from '../utils/requests-responses';
 import { D1Orm } from 'd1-orm';
-import { UserAgentsTable, UserCrewsTable, UserCronsTable, UserProfilesTable, UserTasksTable } from '../database/models';
+import {
+	UserAgentsTable,
+	UserConversationsTable,
+	UserCrewExecutionsTable,
+	UserCrewExecutionStepsTable,
+	UserCrewsTable,
+	UserCronsTable,
+	UserProfilesTable,
+	UserTasksTable,
+	XBotAuthorsTable,
+	XBotLogsTable,
+	XBotTweetsTable,
+} from '../database/models';
 import { getAgents, createAgent, updateAgent, deleteAgent } from '../database/helpers/agents';
 import {
 	getAuthor,
@@ -24,6 +36,9 @@ import {
 	getCrewExecutions,
 	addCrewExecution,
 	getCrewsByProfile,
+	getExecutionSteps,
+	createExecutionStep,
+	deleteExecutionSteps,
 } from '../database/helpers/crews';
 import {
 	getCronsByCrew,
@@ -42,7 +57,7 @@ import {
 	getAllUserProfiles,
 	updateUserProfileById,
 } from '../database/helpers/profiles';
-import { getConversationHistory, getConversations, getLatestConversation } from '../database/helpers/conversations';
+import { addConversation, getConversationHistory, getConversations, getLatestConversation } from '../database/helpers/conversations';
 import { getTask, getTasks, createTask, updateTask, deleteTask, deleteTasks } from '../database/helpers/tasks';
 import { validateSessionToken, validateSharedKeyAuth } from '../utils/auth-helper';
 
@@ -513,12 +528,12 @@ export class DatabaseDO extends DurableObject<Env> {
 					return createJsonResponse({ error: 'Method not allowed' }, 405);
 				}
 
-				const { address, name } = await request.json();
-				if (!address) {
+				const { profile_id, conversation_name } = (await request.json()) as UserConversationsTable;
+				if (!profile_id) {
 					return createJsonResponse({ error: 'Missing required field: address' }, 400);
 				}
 
-				const result = await addConversation(this.orm, address, name);
+				const result = await addConversation(this.orm, profile_id, conversation_name ? conversation_name : 'new conversation');
 				return createJsonResponse({ result });
 			}
 
@@ -615,11 +630,11 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (request.method !== 'POST') {
 				return createJsonResponse({ error: 'Method not allowed' }, 405);
 			}
-			const { authorId, realname, username } = await request.json();
-			if (!authorId) {
+			const { author_id, realname, username } = (await request.json()) as XBotAuthorsTable;
+			if (!author_id) {
 				return createJsonResponse({ error: 'Missing required fields: authorId' }, 400);
 			}
-			const author = await addAuthor(this.orm, authorId, realname, username);
+			const author = await addAuthor(this.orm, author_id, realname || undefined, username || undefined);
 			return createJsonResponse({ author });
 		}
 
@@ -654,11 +669,19 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (request.method !== 'POST') {
 				return createJsonResponse({ error: 'Method not allowed' }, 405);
 			}
-			const { authorId, tweetId, tweetBody, threadId, parentTweetId, isBotResponse } = await request.json();
-			if (!authorId || !tweetId || !tweetBody) {
+			const { author_id, tweet_id, tweet_body, thread_id, parent_tweet_id, is_bot_response } = (await request.json()) as XBotTweetsTable;
+			if (!author_id || !tweet_id || !tweet_body) {
 				return createJsonResponse({ error: 'Missing required fields: authorId, tweetId, tweetBody' }, 400);
 			}
-			const tweet = await addTweet(this.orm, authorId, tweetId, tweetBody, threadId, parentTweetId, isBotResponse);
+			const tweet = await addTweet(
+				this.orm,
+				author_id,
+				tweet_id,
+				tweet_body,
+				thread_id || undefined,
+				parent_tweet_id || undefined,
+				is_bot_response || undefined
+			);
 			return createJsonResponse({ tweet });
 		}
 
@@ -675,11 +698,11 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (request.method !== 'POST') {
 				return createJsonResponse({ error: 'Method not allowed' }, 405);
 			}
-			const { tweetId, status, message } = await request.json();
-			if (!tweetId || !status) {
+			const { tweet_id, tweet_status, log_message } = (await request.json()) as XBotLogsTable;
+			if (!tweet_id || !tweet_status) {
 				return createJsonResponse({ error: 'Missing required fields: tweetId, status' }, 400);
 			}
-			const log = await addLog(this.orm, tweetId, status, message);
+			const log = await addLog(this.orm, tweet_id, tweet_status, log_message || undefined);
 			return createJsonResponse({ log });
 		}
 
@@ -729,13 +752,13 @@ export class DatabaseDO extends DurableObject<Env> {
 				return createJsonResponse({ error: 'Unauthorized access' }, 403);
 			}
 
-			const stepData = await request.json();
+			const stepData = (await request.json()) as UserCrewExecutionStepsTable;
 			if (!stepData.profile_id || !stepData.crew_id || !stepData.execution_id || !stepData.step_type || !stepData.step_data) {
 				return createJsonResponse({ error: 'Missing required fields' }, 400);
 			}
 
 			// Verify the profile_id matches the token address
-			if (stepData.profile_id !== tokenAddress) {
+			if (stepData.profile_id !== tokenAddress.address) {
 				return createJsonResponse({ error: 'Unauthorized: profile_id does not match token' }, 403);
 			}
 
