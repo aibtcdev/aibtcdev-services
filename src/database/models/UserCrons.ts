@@ -13,7 +13,7 @@ export const userCronsModel = new Model(
 		updated_at: { type: DataTypes.STRING },
 		profile_id: { type: DataTypes.STRING, notNull: true },
 		crew_id: { type: DataTypes.INTEGER, notNull: true },
-		cron_enabled: { type: DataTypes.INTEGER, notNull: true },
+		cron_enabled: { type: DataTypes.BOOLEAN, notNull: true },
 		cron_interval: { type: DataTypes.STRING, notNull: true },
 		cron_input: { type: DataTypes.STRING, notNull: true },
 	}

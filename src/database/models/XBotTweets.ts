@@ -18,7 +18,7 @@ export const xBotTweetsModel = new Model(
         tweet_created_at: { type: DataTypes.STRING },
         tweet_updated_at: { type: DataTypes.STRING },
         tweet_body: { type: DataTypes.STRING },
-        is_bot_response: { type: DataTypes.INTEGER },
+        is_bot_response: { type: DataTypes.BOOLEAN },
     }
 );
 
