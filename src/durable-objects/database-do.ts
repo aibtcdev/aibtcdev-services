@@ -23,6 +23,7 @@ import {
 	getPublicCrews,
 	getCrewExecutions,
 	addCrewExecution,
+	getCrewsByProfile,
 } from '../database/helpers/crews';
 import {
 	getCronsByCrew,
@@ -58,6 +59,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/conversations/latest',
 		'/conversations/history',
 		'/conversations/create',
+		'/crews/profile',
 		'/crews/public',
 		'/crews/get',
 		'/crews/create',
@@ -188,6 +190,15 @@ export class DatabaseDO extends DurableObject<Env> {
 			}
 
 			// Crew endpoints
+			if (endpoint === '/crews/profile') {
+				const address = url.searchParams.get('address');
+				if (!address) {
+					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+				}
+				const crews = await getCrewsByProfile(this.orm, address);
+				return createJsonResponse({ crews });
+			}
+
 			if (endpoint === '/crews/public') {
 				const crews = await getPublicCrews(this.orm);
 				return createJsonResponse({ crews });

@@ -238,3 +238,38 @@ export async function deleteCrew(orm: D1Orm, crewId: number): Promise<CrewResult
         };
     }
 }
+
+/**
+ * Get all crews for a profile
+ * @param orm The D1Orm instance from durable object class
+ * @param address The Stacks address for the user's profile
+ * @returns Promise containing array of crews or error details
+ * @throws Error if database query fails
+ */
+export async function getCrewsByProfile(orm: D1Orm, address: string): Promise<CrewResult> {
+    try {
+        userCrewsModel.SetOrm(orm);
+        const result = await userCrewsModel.All({
+            where: {
+                profile_id: address
+            },
+            orderBy: [
+                {
+                    column: 'created_at',
+                    descending: true,
+                },
+            ],
+        });
+        return {
+            crews: result.results as unknown as UserCrewsTable[],
+            success: true
+        };
+    } catch (error) {
+        console.error(`Error in getCrewsByProfile: ${error instanceof Error ? error.message : String(error)}`);
+        return {
+            crews: [],
+            success: false,
+            error: `Failed to get crews for profile: ${error instanceof Error ? error.message : String(error)}`
+        };
+    }
+}
