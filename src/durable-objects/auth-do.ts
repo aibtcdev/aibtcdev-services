@@ -150,11 +150,11 @@ export class AuthDO extends DurableObject<Env> {
 				// signing before expiration extends the expiration
 				const sessionToken = crypto.randomUUID();
 				// first key allows us to filter by address
-				this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:address:${addressFromPublicKey}`, sessionToken, {
+				await this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:address:${addressFromPublicKey}`, sessionToken, {
 					expirationTtl: this.CACHE_TTL,
 				});
 				// second key allows us to filter by session key
-				this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:session:${sessionToken}`, addressFromPublicKey, {
+				await this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:session:${sessionToken}`, addressFromPublicKey, {
 					expirationTtl: this.CACHE_TTL,
 				});
 				// return 200 with session token
