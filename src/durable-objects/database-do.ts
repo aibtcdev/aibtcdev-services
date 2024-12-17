@@ -99,6 +99,9 @@ export class DatabaseDO extends DurableObject<Env> {
 		'/twitter/tweets/add',
 		'/twitter/logs/get',
 		'/twitter/logs/add',
+		'/crews/steps/get',
+		'/crews/steps/create',
+		'/crews/steps/delete',
 	];
 
 	constructor(ctx: DurableObjectState, env: Env) {

@@ -246,6 +246,92 @@ export async function deleteCrew(orm: D1Orm, crewId: number): Promise<CrewResult
  * @returns Promise containing array of crews or error details
  * @throws Error if database query fails
  */
+/**
+ * Get all execution steps for a specific execution
+ * @param orm The D1Orm instance from durable object class
+ * @param executionId The ID of the execution to get steps for
+ * @returns Promise containing array of execution steps or error details
+ */
+export async function getExecutionSteps(orm: D1Orm, executionId: number): Promise<CrewResult> {
+    try {
+        userCrewExecutionStepsModel.SetOrm(orm);
+        const result = await userCrewExecutionStepsModel.All({
+            where: {
+                execution_id: executionId
+            },
+            orderBy: [
+                {
+                    column: 'created_at',
+                    ascending: true,
+                },
+            ],
+        });
+        return {
+            steps: result.results as unknown as UserCrewExecutionStepsTable[],
+            success: true
+        };
+    } catch (error) {
+        console.error(`Error in getExecutionSteps: ${error instanceof Error ? error.message : String(error)}`);
+        return {
+            steps: [],
+            success: false,
+            error: `Failed to get execution steps: ${error instanceof Error ? error.message : String(error)}`
+        };
+    }
+}
+
+/**
+ * Create a new execution step
+ * @param orm The D1Orm instance from durable object class
+ * @param stepData The step data to create
+ * @returns Promise containing the created step or error details
+ */
+export async function createExecutionStep(
+    orm: D1Orm, 
+    stepData: Omit<UserCrewExecutionStepsTable, 'id' | 'created_at' | 'updated_at'>
+): Promise<CrewResult> {
+    try {
+        userCrewExecutionStepsModel.SetOrm(orm);
+        const step = await userCrewExecutionStepsModel.InsertOne(stepData);
+        return {
+            step: step as unknown as UserCrewExecutionStepsTable,
+            success: true
+        };
+    } catch (error) {
+        console.error(`Error in createExecutionStep: ${error instanceof Error ? error.message : String(error)}`);
+        return {
+            success: false,
+            error: `Failed to create execution step: ${error instanceof Error ? error.message : String(error)}`
+        };
+    }
+}
+
+/**
+ * Delete all execution steps for a specific execution
+ * @param orm The D1Orm instance from durable object class
+ * @param executionId The ID of the execution to delete steps for
+ * @returns Promise containing the deletion result or error details
+ */
+export async function deleteExecutionSteps(orm: D1Orm, executionId: number): Promise<CrewResult> {
+    try {
+        userCrewExecutionStepsModel.SetOrm(orm);
+        await userCrewExecutionStepsModel.Delete({
+            where: {
+                execution_id: executionId
+            }
+        });
+        return {
+            success: true
+        };
+    } catch (error) {
+        console.error(`Error in deleteExecutionSteps: ${error instanceof Error ? error.message : String(error)}`);
+        return {
+            success: false,
+            error: `Failed to delete execution steps: ${error instanceof Error ? error.message : String(error)}`
+        };
+    }
+}
+
 export async function getCrewsByProfile(orm: D1Orm, address: string): Promise<CrewResult> {
     try {
         userCrewsModel.SetOrm(orm);
