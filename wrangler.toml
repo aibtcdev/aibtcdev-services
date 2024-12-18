@@ -63,6 +63,10 @@ new_classes = ["AuthDO", "ContextDO", "DatabaseDO", "SchedulerDO", "ToolsDO"]
 tag = "v2"
 new_classes = ["CdnDO"]
 
+[[migrations]]
+tag = "v3"
+new_classes = ["ImageGeneratorDO", "TokenMetadataDO"]
+
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
 [[kv_namespaces]]
