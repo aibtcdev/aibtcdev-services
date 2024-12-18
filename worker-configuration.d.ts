@@ -15,5 +15,5 @@ export interface Env {
 	CDN_DO: DurableObjectNamespace<import('./src/index').CdnDO>;
 	AIBTCDEV_SERVICES_BUCKET: R2Bucket;
 	AIBTCDEV_SERVICES_DB: D1Database;
-	OPENAI_API_KEY: process.env.OPENAI_API_KEY;
+	OPENAI_API_KEY: string;
 }
