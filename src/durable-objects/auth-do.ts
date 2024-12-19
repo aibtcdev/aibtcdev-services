@@ -1,16 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
-import { sha256 } from '@noble/hashes/sha256';
-import { bytesToHex } from '@stacks/common';
 import { verifyMessageSignatureRsv } from '@stacks/encryption';
-import {
-	encodeStructuredData,
-	getAddressFromPublicKey,
-	publicKeyFromSignatureRsv,
-	stringAsciiCV,
-	tupleCV,
-	uintCV,
-	validateStacksAddress,
-} from '@stacks/transactions';
+import { getAddressFromPublicKey, validateStacksAddress } from '@stacks/transactions';
 import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
 import { createJsonResponse } from '../utils/requests-responses';
@@ -96,71 +86,66 @@ export class AuthDO extends DurableObject<Env> {
 		if (endpoint === '/request-auth-token') {
 			// get signature from body
 			const body = await request.json();
-			if (!body || typeof body !== 'object' || !('data' in body)) {
+			if (!body || typeof body !== 'object' || !('signature' in body) || !('publicKey' in body)) {
 				return createJsonResponse(
 					{
-						error: 'Missing or invalid "data" in request body',
+						error: 'Missing or invalid "signature" or "publicKey" in request body',
 					},
 					400
 				);
 			}
-			const signedMessage = String(body.data);
+			const signedMessage = String(body.signature);
+			const publicKey = String(body.publicKey);
 			// try to verify signature
 			try {
-				// TODO: this needs a home, corresponds with front-end settings
-				// might fail signature check if it does not match
-				const expectedDomain = tupleCV({
-					name: stringAsciiCV('sprint.aibtc.dev'),
-					version: stringAsciiCV('0.0.1'),
-					'chain-id': uintCV(1), // hardcoded mainnet, testnet is u2147483648
-				});
-				// same here this has to match front-end
-				const expectedMessage = stringAsciiCV('Welcome to aibtcdev!');
-				const encodedMessage = encodeStructuredData({ message: expectedMessage, domain: expectedDomain });
-				const encodedMessageHashed = sha256(encodedMessage);
-				// get public key from signature
-				const publicKey = publicKeyFromSignatureRsv(bytesToHex(encodedMessageHashed), signedMessage);
-				// verify signature
+				const expectedMessageText = 'welcome to aibtcdev!';
 				const isSignatureVerified = verifyMessageSignatureRsv({
 					signature: signedMessage, // what they sent us
-					message: encodedMessageHashed, // what we expect
-					publicKey: publicKey, // public key from signature
+					message: expectedMessageText, // what we expect
+					publicKey, // public key from signature
 				});
+				const addressFromPubkey = getAddressFromPublicKey(publicKey, 'mainnet');
+				const isAddressValid = validateStacksAddress(addressFromPubkey);
+				// check if signature is valid with the public key
 				if (!isSignatureVerified) {
 					return createJsonResponse(
 						{
-							error: `Failed to verify signature ${signedMessage}`,
+							error: `Signature verification failed for public key ${publicKey}`,
 						},
 						401
 					);
 				}
-				// get address from public key
-				const addressFromPublicKey = getAddressFromPublicKey(publicKey, 'mainnet');
-				// verify valid stacks address returned
-				if (!validateStacksAddress(addressFromPublicKey)) {
+				// check if address is valid
+				if (!isAddressValid) {
 					return createJsonResponse(
 						{
-							error: `Failed to get address from public key ${publicKey}`,
+							error: `Invalid address ${addressFromPubkey} from public key ${publicKey}`,
 						},
-						401
+						400
 					);
 				}
 				// add address to kv key list with unique session key
 				// expires after 30 days and requires new signature from user
 				// signing before expiration extends the expiration
 				const sessionToken = crypto.randomUUID();
-				// first key allows us to filter by address
-				await this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:address:${addressFromPublicKey}`, sessionToken, {
+				// allow lookup of pubkey from address
+				const savePubkey = this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:pubkey:${addressFromPubkey}`, publicKey, {
 					expirationTtl: this.CACHE_TTL,
 				});
-				// second key allows us to filter by session key
-				await this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:session:${sessionToken}`, addressFromPublicKey, {
+				// allow lookup of address from session token
+				const saveSessionToken = this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:session:${sessionToken}`, addressFromPubkey, {
 					expirationTtl: this.CACHE_TTL,
 				});
+				// allow lookup of session token from address
+				const saveAddress = this.env.AIBTCDEV_SERVICES_KV.put(`${this.KEY_PREFIX}:address:${addressFromPubkey}`, sessionToken, {
+					expirationTtl: this.CACHE_TTL,
+				});
+				// wait for all kv operations to complete
+				await Promise.all([savePubkey, saveSessionToken, saveAddress]);
 				// return 200 with session token
 				return createJsonResponse({
 					message: 'auth token successfully created',
-					address: addressFromPublicKey,
+					address: addressFromPubkey,
 					sessionToken,
 				});
 			} catch (error) {
