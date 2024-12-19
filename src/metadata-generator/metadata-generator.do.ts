@@ -28,7 +28,7 @@ interface GenerateMetadataRequest {
 	imagePrompt?: string;
 }
 
-export class TokenMetadataDO extends DurableObject<Env> {
+export class MetadataGeneratorDO extends DurableObject<Env> {
 	private readonly BASE_PATH = '/metadata';
 	private readonly KEY_PREFIX = 'sip10';
 	private readonly IMAGE_DO_NAME = 'IMAGE_GENERATOR';

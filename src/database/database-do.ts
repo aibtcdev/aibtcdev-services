@@ -15,18 +15,9 @@ import {
 	XBotAuthorsTable,
 	XBotLogsTable,
 	XBotTweetsTable,
-} from '../database/models';
-import { getAgents, createAgent, updateAgent, deleteAgent } from '../database/helpers/agents';
-import {
-	getAuthor,
-	addAuthor,
-	getTweet,
-	getThreadTweets,
-	getAuthorTweets,
-	addTweet,
-	getTweetLogs,
-	addLog,
-} from '../database/helpers/twitter';
+} from './models';
+import { getAgents, createAgent, updateAgent, deleteAgent } from './helpers/agents';
+import { getAuthor, addAuthor, getTweet, getThreadTweets, getAuthorTweets, addTweet, getTweetLogs, addLog } from './helpers/twitter';
 import {
 	createCrew,
 	getCrew,
@@ -39,15 +30,8 @@ import {
 	getExecutionSteps,
 	createExecutionStep,
 	deleteExecutionSteps,
-} from '../database/helpers/crews';
-import {
-	getCronsByCrew,
-	createCron,
-	updateCronInput,
-	toggleCronStatus,
-	getEnabledCrons,
-	getEnabledCronsDetailed,
-} from '../database/helpers/crons';
+} from './helpers/crews';
+import { getCronsByCrew, createCron, updateCronInput, toggleCronStatus, getEnabledCrons, getEnabledCronsDetailed } from './helpers/crons';
 import {
 	getUserRole,
 	getUserProfile,
@@ -56,9 +40,9 @@ import {
 	deleteUserProfile,
 	getAllUserProfiles,
 	updateUserProfileById,
-} from '../database/helpers/profiles';
-import { addConversation, getConversationHistory, getConversations, getLatestConversation } from '../database/helpers/conversations';
-import { getTask, getTasks, createTask, updateTask, deleteTask, deleteTasks } from '../database/helpers/tasks';
+} from './helpers/profiles';
+import { addConversation, getConversationHistory, getConversations, getLatestConversation } from './helpers/conversations';
+import { getTask, getTasks, createTask, updateTask, deleteTask, deleteTasks } from './helpers/tasks';
 import { validateSessionToken, validateSharedKeyAuth } from '../utils/auth-helper';
 
 /**

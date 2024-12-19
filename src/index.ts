@@ -1,10 +1,17 @@
 import { Env } from '../worker-configuration';
 import { AppConfig } from './config';
 import { corsHeaders, createJsonResponse } from './utils/requests-responses';
-import { AuthDO, CdnDO, ContextDO, DatabaseDO, SchedulerDO, ToolsDO, ImageGeneratorDO, TokenMetadataDO } from './durable-objects';
+import { AuthDO } from './auth/auth-do';
+import { CdnDO } from './cdn/cdn-do';
+import { ContextDO } from './context/context-do';
+import { DatabaseDO } from './database/database-do';
+import { ImageGeneratorDO } from './image-generator/image-generator.do';
+import { MetadataGeneratorDO } from './metadata-generator/metadata-generator.do';
+import { SchedulerDO } from './scheduler/scheduler-do';
+import { ToolsDO } from './tools/tools-do';
 
 // export the Durable Object classes we're using
-export { AuthDO, ContextDO, DatabaseDO, SchedulerDO, ToolsDO, CdnDO, ImageGeneratorDO, TokenMetadataDO };
+export { AuthDO, CdnDO, ContextDO, DatabaseDO, ImageGeneratorDO, MetadataGeneratorDO, SchedulerDO, ToolsDO };
 
 export default {
 	/**
@@ -60,6 +67,18 @@ export default {
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
 
+		if (path.startsWith('/image-generator')) {
+			let id: DurableObjectId = env.IMAGES_DO.idFromName('image-generator-do'); // create the instance
+			let stub = env.IMAGES_DO.get(id); // get the stub for communication
+			return await stub.fetch(request); // forward the request to the Durable Object
+		}
+
+		if (path.startsWith('/metadata-generator')) {
+			let id: DurableObjectId = env.METADATA_DO.idFromName('metadata-generator-do'); // create the instance
+			let stub = env.METADATA_GENERATOR_DO.get(id); // get the stub for communication
+			return await stub.fetch(request); // forward the request to the Durable Object
+		}
+
 		if (path.startsWith('/scheduler')) {
 			let id: DurableObjectId = env.SCHEDULER_DO.idFromName('scheduler-do'); // create the instance
 			let stub = env.SCHEDULER_DO.get(id); // get the stub for communication
@@ -69,18 +88,6 @@ export default {
 		if (path.startsWith('/tools')) {
 			let id: DurableObjectId = env.TOOLS_DO.idFromName('tools-do'); // create the instance
 			let stub = env.TOOLS_DO.get(id); // get the stub for communication
-			return await stub.fetch(request); // forward the request to the Durable Object
-		}
-
-		if (path.startsWith('/image')) {
-			let id: DurableObjectId = env.IMAGES_DO.idFromName('image-do'); // create the instance
-			let stub = env.IMAGES_DO.get(id); // get the stub for communication
-			return await stub.fetch(request); // forward the request to the Durable Object
-		}
-
-		if (path.startsWith('/metadata')) {
-			let id: DurableObjectId = env.METADATA_DO.idFromName('metadata-do'); // create the instance
-			let stub = env.METADATA_DO.get(id); // get the stub for communication
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
 
