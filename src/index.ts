@@ -68,13 +68,13 @@ export default {
 		}
 
 		if (path.startsWith('/image-generator')) {
-			let id: DurableObjectId = env.IMAGES_DO.idFromName('image-generator-do'); // create the instance
-			let stub = env.IMAGES_DO.get(id); // get the stub for communication
+			let id: DurableObjectId = env.IMAGE_GENERATOR_DO.idFromName('image-generator-do'); // create the instance
+			let stub = env.IMAGE_GENERATOR_DO.get(id); // get the stub for communication
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
 
 		if (path.startsWith('/metadata-generator')) {
-			let id: DurableObjectId = env.METADATA_DO.idFromName('metadata-generator-do'); // create the instance
+			let id: DurableObjectId = env.METADATA_GENERATOR_DO.idFromName('metadata-generator-do'); // create the instance
 			let stub = env.METADATA_GENERATOR_DO.get(id); // get the stub for communication
 			return await stub.fetch(request); // forward the request to the Durable Object
 		}
