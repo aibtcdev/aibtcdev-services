@@ -38,20 +38,20 @@ name = "DATABASE_DO"
 class_name = "DatabaseDO"
 
 [[durable_objects.bindings]]
+name = "IMAGE_GENERATOR_DO"
+class_name = "ImageGeneratorDO"
+
+[[durable_objects.bindings]]
+name = "METADATA_GENERATOR_DO"
+class_name = "MetadataGeneratorDO"
+
+[[durable_objects.bindings]]
 name = "SCHEDULER_DO"
 class_name = "SchedulerDO"
 
 [[durable_objects.bindings]]
 name = "TOOLS_DO"
 class_name = "ToolsDO"
-
-[[durable_objects.bindings]]
-name = "IMAGES_DO"
-class_name = "ImageGeneratorDO"
-
-[[durable_objects.bindings]]
-name = "METADATA_DO"
-class_name = "TokenMetadataDO"
 
 # Durable Object migrations.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#migrations
@@ -66,6 +66,11 @@ new_classes = ["CdnDO"]
 [[migrations]]
 tag = "v3"
 new_classes = ["ImageGeneratorDO", "TokenMetadataDO"]
+
+[[migrations]]
+tag = "v4"
+new_classes = ["MetadataGeneratorDO"]
+deleted_classes = ["TokenMetadataDO"]
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces

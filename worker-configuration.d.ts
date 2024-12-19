@@ -10,8 +10,8 @@ export interface Env {
 	DATABASE_DO: DurableObjectNamespace<import('./src/index').DatabaseDO>;
 	SCHEDULER_DO: DurableObjectNamespace<import('./src/index').SchedulerDO>;
 	TOOLS_DO: DurableObjectNamespace<import('./src/index').ToolsDO>;
-	IMAGES_DO: DurableObjectNamespace<import('./src/index').ImageGeneratorDO>;
-	METADATA_DO: DurableObjectNamespace<import('./src/index').TokenMetadataDO>;
+	IMAGE_GENERATOR_DO: DurableObjectNamespace<import('./src/index').ImageGeneratorDO>;
+	METADATA_GENERATOR_DO: DurableObjectNamespace<import('./src/index').MetadataGeneratorDO>;
 	CDN_DO: DurableObjectNamespace<import('./src/index').CdnDO>;
 	AIBTCDEV_SERVICES_BUCKET: R2Bucket;
 	AIBTCDEV_SERVICES_DB: D1Database;
