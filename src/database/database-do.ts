@@ -370,24 +370,30 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/tasks/get') {
 				const taskId = url.searchParams.get('id');
 				if (!taskId) {
-					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+					return createJsonResponse('Missing id parameter', 400);
 				}
 				const task = await getTask(this.orm, parseInt(taskId));
-				return createJsonResponse({ task });
+				return createJsonResponse({
+					message: 'Successfully retrieved task',
+					data: task
+				});
 			}
 
 			if (endpoint === '/tasks/list') {
 				const agentId = url.searchParams.get('agentId');
 				if (!agentId) {
-					return createJsonResponse({ error: 'Missing agentId parameter' }, 400);
+					return createJsonResponse('Missing agentId parameter', 400);
 				}
 				const tasks = await getTasks(this.orm, parseInt(agentId));
-				return createJsonResponse({ tasks });
+				return createJsonResponse({
+					message: 'Successfully retrieved tasks',
+					data: tasks
+				});
 			}
 
 			if (endpoint === '/tasks/create') {
 				if (request.method !== 'POST') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createJsonResponse('Method not allowed', 405);
 				}
 				const taskData = (await request.json()) as UserTasksTable;
 				if (
@@ -398,49 +404,61 @@ export class DatabaseDO extends DurableObject<Env> {
 					!taskData.task_description ||
 					!taskData.task_expected_output
 				) {
-					return createJsonResponse({ error: 'Missing required fields' }, 400);
+					return createJsonResponse('Missing required fields: profile_id, crew_id, agent_id, task_name, task_description, task_expected_output', 400);
 				}
 				const task = await createTask(this.orm, taskData);
-				return createJsonResponse({ task });
+				return createJsonResponse({
+					message: 'Successfully created task',
+					data: task
+				});
 			}
 
 			if (endpoint === '/tasks/update') {
 				if (request.method !== 'PUT') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createJsonResponse('Method not allowed', 405);
 				}
 				const taskId = url.searchParams.get('id');
 				if (!taskId) {
-					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+					return createJsonResponse('Missing id parameter', 400);
 				}
 				const updates = (await request.json()) as Partial<
 					Omit<UserTasksTable, 'id' | 'created_at' | 'updated_at' | 'profile_id' | 'crew_id' | 'agent_id'>
 				>;
 				const result = await updateTask(this.orm, parseInt(taskId), updates);
-				return createJsonResponse({ result });
+				return createJsonResponse({
+					message: 'Successfully updated task',
+					data: result
+				});
 			}
 
 			if (endpoint === '/tasks/delete') {
 				if (request.method !== 'DELETE') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createJsonResponse('Method not allowed', 405);
 				}
 				const taskId = url.searchParams.get('id');
 				if (!taskId) {
-					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+					return createJsonResponse('Missing id parameter', 400);
 				}
 				const result = await deleteTask(this.orm, parseInt(taskId));
-				return createJsonResponse({ result });
+				return createJsonResponse({
+					message: 'Successfully deleted task',
+					data: result
+				});
 			}
 
 			if (endpoint === '/tasks/delete-all') {
 				if (request.method !== 'DELETE') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createJsonResponse('Method not allowed', 405);
 				}
 				const agentId = url.searchParams.get('agentId');
 				if (!agentId) {
-					return createJsonResponse({ error: 'Missing agentId parameter' }, 400);
+					return createJsonResponse('Missing agentId parameter', 400);
 				}
 				const result = await deleteTasks(this.orm, parseInt(agentId));
-				return createJsonResponse({ result });
+				return createJsonResponse({
+					message: 'Successfully deleted all tasks for agent',
+					data: result
+				});
 			}
 
 			if (endpoint === '/crews/executions') {
