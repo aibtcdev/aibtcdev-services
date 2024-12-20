@@ -13,7 +13,7 @@ export function corsHeaders(origin?: string): HeadersInit {
 	};
 }
 
-export function createApiResponse(response: { message: string; data?: Record<string, unknown> } | string, status: number = 200): Response {
+export function createApiResponse(response: { message: string; data?: unknown } | string, status: number = 200): Response {
 	const isOk = status >= 200 && status < 300;
 	const isStringResponse = typeof response === 'string';
 
