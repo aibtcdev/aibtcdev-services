@@ -48,12 +48,7 @@ export class AuthDO extends DurableObject<Env> {
 		const path = url.pathname;
 
 		if (!path.startsWith(this.BASE_PATH)) {
-			return createJsonResponse(
-				{
-					error: `Request at ${path} does not start with base path ${this.BASE_PATH}`,
-				},
-				404
-			);
+			return createJsonResponse(`Request at ${path} does not start with base path ${this.BASE_PATH}`, 404);
 		}
 
 		// Remove base path to get the endpoint
@@ -75,12 +70,7 @@ export class AuthDO extends DurableObject<Env> {
 
 		// all methods from this point forward are POST
 		if (request.method !== 'POST') {
-			return createJsonResponse(
-				{
-					error: `Unsupported method: ${request.method}, supported method: POST`,
-				},
-				405
-			);
+			return createJsonResponse(`Unsupported method: ${request.method}, supported method: POST`, 405);
 		}
 
 		if (endpoint === '/request-auth-token') {
@@ -219,11 +209,6 @@ export class AuthDO extends DurableObject<Env> {
 
 		// TODO: endpoint to revoke a session token
 
-		return createJsonResponse(
-			{
-				error: `Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
-			},
-			404
-		);
+		return createJsonResponse(`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`, 404);
 	}
 }

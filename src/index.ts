@@ -92,11 +92,6 @@ export default {
 		}
 
 		// Return 404 for any other path
-		return createJsonResponse(
-			{
-				error: `Unsupported service at: ${path}, supported services: ${config.SUPPORTED_SERVICES.join(', ')}`,
-			},
-			404
-		);
+		return createJsonResponse(`Unsupported service at: ${path}, supported services: ${config.SUPPORTED_SERVICES.join(', ')}`, 404);
 	},
 } satisfies ExportedHandler<Env>;
