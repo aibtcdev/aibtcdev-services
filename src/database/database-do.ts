@@ -2,6 +2,7 @@ import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
 import { createApiResponse, createUnsupportedEndpointResponse } from '../utils/requests-responses';
+import { getHandler } from './handlers';
 import { D1Orm } from 'd1-orm';
 import {
 	UserAgentsTable,
@@ -161,41 +162,17 @@ export class DatabaseDO extends DurableObject<Env> {
 		}
 
 		try {
-			// Conversation endpoints
-			if (endpoint === '/conversations') {
-				const address = url.searchParams.get('address');
-				if (!address) {
-					return createApiResponse('Missing address parameter', 400);
+			// Handle conversations endpoints using the new handler system
+			if (endpoint.startsWith('/conversations')) {
+				const handler = getHandler(endpoint);
+				if (handler) {
+					return handler({
+						orm: this.orm,
+						env: this.env,
+						request,
+						url
+					});
 				}
-				const conversations = await getConversations(this.orm, address);
-				return createApiResponse({
-					message: 'Successfully retrieved conversations',
-					data: conversations,
-				});
-			}
-
-			if (endpoint === '/conversations/latest') {
-				const address = url.searchParams.get('address');
-				if (!address) {
-					return createApiResponse('Missing address parameter', 400);
-				}
-				const conversation = await getLatestConversation(this.orm, address);
-				return createApiResponse({
-					message: 'Successfully retrieved latest conversation',
-					data: conversation,
-				});
-			}
-
-			if (endpoint === '/conversations/history') {
-				const conversationId = url.searchParams.get('id');
-				if (!conversationId) {
-					return createApiResponse('Missing conversation ID parameter', 400);
-				}
-				const history = await getConversationHistory(this.orm, parseInt(conversationId));
-				return createApiResponse({
-					message: 'Successfully retrieved conversation history',
-					data: history,
-				});
 			}
 
 			// Crew endpoints
@@ -586,23 +563,6 @@ export class DatabaseDO extends DurableObject<Env> {
 				});
 			}
 
-			// Conversation creation endpoint
-			if (endpoint === '/conversations/create') {
-				if (request.method !== 'POST') {
-					return createApiResponse('Method not allowed', 405);
-				}
-
-				const { profile_id, conversation_name } = (await request.json()) as UserConversationsTable;
-				if (!profile_id) {
-					return createApiResponse('Missing required field: address', 400);
-				}
-
-				const result = await addConversation(this.orm, profile_id, conversation_name ? conversation_name : 'new conversation');
-				return createApiResponse({
-					message: 'Successfully updated user profile',
-					data: { result },
-				});
-			}
 
 			// Profile endpoints
 			if (endpoint === '/profiles/role') {
