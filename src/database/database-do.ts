@@ -162,7 +162,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		// frontend and backend each have their own stored in KV
 		const authResult = await validateSharedKeyAuth(this.env, request);
 		if (!authResult.success) {
-			return createJsonResponse({ error: authResult.error }, authResult.status);
+			return createJsonResponse(authResult.error, authResult.status);
 		}
 
 		try {
@@ -207,13 +207,13 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/crews/profile') {
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+					return createJsonResponse('Missing address parameter', 400);
 				}
 
 				// Get the session token from Authorization header
 				const authHeader = request.headers.get('Authorization');
 				if (!authHeader) {
-					return createJsonResponse({ error: 'Missing authorization header' }, 401);
+					return createJsonResponse('Missing authorization header', 401);
 				}
 
 				// Extract token from Bearer format
@@ -222,62 +222,80 @@ export class DatabaseDO extends DurableObject<Env> {
 				// Verify the token matches the requested address
 				const tokenAddress = await validateSessionToken(this.env, token);
 				if (!tokenAddress.success || tokenAddress.address !== address) {
-					return createJsonResponse({ error: 'Unauthorized access' }, 403);
+					return createJsonResponse('Unauthorized access', 403);
 				}
 
 				const crews = await getCrewsByProfile(this.orm, address);
-				return createJsonResponse({ crews });
+				return createJsonResponse({
+					message: 'Successfully retrieved profile crews',
+					data: crews
+				});
 			}
 
 			if (endpoint === '/crews/public') {
 				const crews = await getPublicCrews(this.orm);
-				return createJsonResponse({ crews });
+				return createJsonResponse({
+					message: 'Successfully retrieved public crews',
+					data: crews
+				});
 			}
 
 			if (endpoint === '/crews/get') {
 				const crewId = url.searchParams.get('id');
 				if (!crewId) {
-					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+					return createJsonResponse('Missing id parameter', 400);
 				}
 				const crew = await getCrew(this.orm, parseInt(crewId));
-				return createJsonResponse({ crew });
+				return createJsonResponse({
+					message: 'Successfully retrieved crew',
+					data: crew
+				});
 			}
 
 			if (endpoint === '/crews/create') {
 				if (request.method !== 'POST') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createJsonResponse('Method not allowed', 405);
 				}
 				const crewData = (await request.json()) as Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at'>;
 				if (!crewData.profile_id || !crewData.crew_name) {
-					return createJsonResponse({ error: 'Missing required fields: profile_id, crew_name' }, 400);
+					return createJsonResponse('Missing required fields: profile_id, crew_name', 400);
 				}
 				const crew = await createCrew(this.orm, crewData);
-				return createJsonResponse({ crew });
+				return createJsonResponse({
+					message: 'Successfully created crew',
+					data: crew
+				});
 			}
 
 			if (endpoint === '/crews/update') {
 				if (request.method !== 'PUT') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createJsonResponse('Method not allowed', 405);
 				}
 				const crewId = url.searchParams.get('id');
 				if (!crewId) {
-					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+					return createJsonResponse('Missing id parameter', 400);
 				}
 				const updates = (await request.json()) as Partial<Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at' | 'profile_id'>>;
 				const result = await updateCrew(this.orm, parseInt(crewId), updates);
-				return createJsonResponse({ result });
+				return createJsonResponse({
+					message: 'Successfully updated crew',
+					data: result
+				});
 			}
 
 			if (endpoint === '/crews/delete') {
 				if (request.method !== 'DELETE') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createJsonResponse('Method not allowed', 405);
 				}
 				const crewId = url.searchParams.get('id');
 				if (!crewId) {
-					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+					return createJsonResponse('Missing id parameter', 400);
 				}
 				const result = await deleteCrew(this.orm, parseInt(crewId));
-				return createJsonResponse({ result });
+				return createJsonResponse({
+					message: 'Successfully deleted crew',
+					data: result
+				});
 			}
 
 			// Agent endpoints
