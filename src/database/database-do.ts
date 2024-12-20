@@ -388,7 +388,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/tasks/create') {
 				if (request.method !== 'POST') {
-					return createJsonResponse('Method not allowed', 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const taskData = (await request.json()) as UserTasksTable;
 				if (
@@ -399,12 +399,12 @@ export class DatabaseDO extends DurableObject<Env> {
 					!taskData.task_description ||
 					!taskData.task_expected_output
 				) {
-					return createJsonResponse('Missing required fields: profile_id, crew_id, agent_id, task_name, task_description, task_expected_output', 400);
+					return createApiResponse('Missing required fields: profile_id, crew_id, agent_id, task_name, task_description, task_expected_output', 400);
 				}
 				const task = await createTask(this.orm, taskData);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully created task',
-					data: task
+					data: { task }
 				});
 			}
 
