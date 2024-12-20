@@ -162,93 +162,15 @@ export class DatabaseDO extends DurableObject<Env> {
 		}
 
 		try {
-			// pass off to handler
-			if (endpoint.startsWith('/conversations')) {
-				const handler = getHandler(endpoint);
-				if (handler) {
-					return handler({
-						orm: this.orm,
-						env: this.env,
-						request,
-						url,
-					});
-				}
-			}
-
-			if (endpoint.startsWith('/crews')) {
-				const handler = getHandler(endpoint);
-				if (handler) {
-					return handler({
-						orm: this.orm,
-						env: this.env,
-						request,
-						url,
-					});
-				}
-			}
-
-			if (endpoint.startsWith('/agents')) {
-				const handler = getHandler(endpoint);
-				if (handler) {
-					return handler({
-						orm: this.orm,
-						env: this.env,
-						request,
-						url,
-					});
-				}
-			}
-
-			// Pass off to tasks handler
-			if (endpoint.startsWith('/tasks')) {
-				const handler = getHandler(endpoint);
-				if (handler) {
-					return handler({
-						orm: this.orm,
-						env: this.env,
-						request,
-						url,
-					});
-				}
-			}
-
-			// Pass off to crons handler
-			if (endpoint.startsWith('/crons')) {
-				const handler = getHandler(endpoint);
-				if (handler) {
-					return handler({
-						orm: this.orm,
-						env: this.env,
-						request,
-						url,
-					});
-				}
-			}
-
-			// Pass off to profiles handler
-			if (endpoint.startsWith('/profiles')) {
-				const handler = getHandler(endpoint);
-				if (handler) {
-					return handler({
-						orm: this.orm,
-						env: this.env,
-						request,
-						url,
-					});
-				}
-			}
-
-			// Pass off to twitter handler
-			if (endpoint.startsWith('/twitter')) {
-				const handler = getHandler(endpoint);
-				if (handler) {
-					return handler({
-						orm: this.orm,
-						env: this.env,
-						request,
-						url,
-					});
-				}
+			// Get and execute handler if one exists for this endpoint
+			const handler = getHandler(endpoint);
+			if (handler) {
+				return handler({
+					orm: this.orm,
+					env: this.env,
+					request,
+					url,
+				});
 			}
 		} catch (error) {
 			console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
