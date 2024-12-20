@@ -19,9 +19,7 @@ export function createApiResponse(response: { message: string; data?: Record<str
 		success: isOk,
 		...(isOk
 			? {
-					data: typeof response === 'string' 
-						? { message: response } 
-						: { message: response.message, ...(response.data || {}) },
+					data: typeof response === 'string' ? { message: response } : { message: response.message, ...(response.data || {}) },
 			  }
 			: { error: response as string }),
 	};
