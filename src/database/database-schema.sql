@@ -7,7 +7,7 @@
 -- ============================================================================
 -- Basic Configuration
 -- ============================================================================
--- All tables link back to user_profiles with stx_address as profile_id.
+-- All tables link back to user_profiles with stx_address.
 -- All tables contain an auto-incrementing id, created_at, and updated_at field.
 -- All tables have indexes for commonly looked up columns.
 -- All tables have a trigger to update  the updated_at field.
@@ -58,17 +58,17 @@ CREATE TABLE user_socials (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   -- updated by trigger
-  profile_id TEXT NOT NULL,
+  stx_address TEXT NOT NULL,
   -- link to user_profiles
   platform TEXT NOT NULL,
   -- Twitter, Telegram, Discord, etc
   platform_id TEXT NOT NULL,
   -- ID on the platform
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE
+  FOREIGN KEY (stx_address) REFERENCES user_profiles(stx_address) ON DELETE CASCADE
 );
 
 -- Define indexes
-CREATE INDEX idx_socials_profile_id ON user_socials(profile_id);
+CREATE INDEX idx_socials_stx_address ON user_socials(stx_address);
 CREATE INDEX idx_socials_platform ON user_socials(platform);
 CREATE INDEX idx_socials_platform_id ON user_socials(platform_id);
 
@@ -93,7 +93,7 @@ CREATE TABLE user_crews (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   -- updated by trigger
-  profile_id TEXT NOT NULL,
+  stx_address TEXT NOT NULL,
   -- link to user_profiles
   crew_name TEXT NOT NULL,
   crew_description TEXT,
@@ -102,11 +102,11 @@ CREATE TABLE user_crews (
   crew_is_public INTEGER DEFAULT 0,
   crew_is_cron INTEGER DEFAULT 0,
   -- synced with user_crons.cron_enabled
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE
+  FOREIGN KEY (stx_address) REFERENCES user_profiles(stx_address) ON DELETE CASCADE
 );
 
 -- Define indexes
-CREATE INDEX idx_crews_profile_id ON user_crews(profile_id);
+CREATE INDEX idx_crews_stx_address ON user_crews(stx_address);
 CREATE INDEX idx_crews_crew_name ON user_crews(crew_name);
 
 -- Trigger for user_crews
@@ -129,7 +129,7 @@ CREATE TABLE user_agents (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   -- updated by trigger
-  profile_id TEXT NOT NULL,
+  stx_address TEXT NOT NULL,
   -- link to user_profiles
   crew_id INTEGER NOT NULL,
   -- link to user_crews
@@ -138,12 +138,12 @@ CREATE TABLE user_agents (
   agent_goal TEXT NOT NULL,
   agent_backstory TEXT NOT NULL,
   agent_tools TEXT,
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
+  FOREIGN KEY (stx_address) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
   FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE
 );
 
 -- Define indexes
-CREATE INDEX idx_agents_profile_id ON user_agents(profile_id);
+CREATE INDEX idx_agents_stx_address ON user_agents(stx_address);
 CREATE INDEX idx_agents_crew_id ON user_agents(crew_id);
 
 -- Trigger for user_agents
@@ -166,7 +166,7 @@ CREATE TABLE user_tasks (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   -- updated by trigger
-  profile_id TEXT NOT NULL,
+  stx_address TEXT NOT NULL,
   -- link to user_profiles
   crew_id INTEGER NOT NULL,
   -- link to user_crews
@@ -175,13 +175,13 @@ CREATE TABLE user_tasks (
   task_name TEXT NOT NULL,
   task_description TEXT NOT NULL,
   task_expected_output TEXT NOT NULL,
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
+  FOREIGN KEY (stx_address) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
   FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE,
   FOREIGN KEY (agent_id) REFERENCES user_agents(id) ON DELETE CASCADE
 );
 
 -- Define indexes
-CREATE INDEX idx_tasks_profile_id ON user_tasks(profile_id);
+CREATE INDEX idx_tasks_stx_address ON user_tasks(stx_address);
 CREATE INDEX idx_tasks_crew_id ON user_tasks(crew_id);
 CREATE INDEX idx_tasks_agent_id ON user_tasks(agent_id);
 
@@ -205,15 +205,15 @@ CREATE TABLE user_conversations (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   -- updated by trigger
-  profile_id TEXT NOT NULL,
+  stx_address TEXT NOT NULL,
   -- link to user_profiles
   conversation_name TEXT NOT NULL,
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE
+  FOREIGN KEY (stx_address) REFERENCES user_profiles(stx_address) ON DELETE CASCADE
 );
 
 -- Define indexes
 CREATE INDEX idx_conversations_created_at ON user_conversations(created_at);
-CREATE INDEX idx_conversations_profile_id ON user_conversations(profile_id);
+CREATE INDEX idx_conversations_stx_address ON user_conversations(stx_address);
 
 -- Trigger for user_conversations
 CREATE TRIGGER update_conversations_timestamp
@@ -234,7 +234,7 @@ CREATE TABLE user_crew_executions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  profile_id TEXT NOT NULL,
+  stx_address TEXT NOT NULL,
   -- link to user_profiles
   crew_id INTEGER NOT NULL,
   -- link to user_crews
@@ -244,14 +244,14 @@ CREATE TABLE user_crew_executions (
   final_result TEXT,
   total_tokens INTEGER,
   successful_requests INTEGER,
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
+  FOREIGN KEY (stx_address) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
   FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE,
   FOREIGN KEY (conversation_id) REFERENCES user_conversations(id) ON DELETE CASCADE
 );
 
 -- Define indexes
 CREATE INDEX idx_executions_created_at ON user_crew_executions(created_at);
-CREATE INDEX idx_executions_profile_id ON user_crew_executions(profile_id);
+CREATE INDEX idx_executions_stx_address ON user_crew_executions(stx_address);
 CREATE INDEX idx_executions_crew_id ON user_crew_executions(crew_id);
 CREATE INDEX idx_executions_conversation_id ON user_crew_executions(conversation_id);
 
@@ -284,7 +284,7 @@ CREATE TABLE user_crew_execution_steps (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  profile_id TEXT NOT NULL,
+  stx_address TEXT NOT NULL,
   -- link to user_profiles
   crew_id INTEGER NOT NULL,
   -- link to user_crews
@@ -294,16 +294,16 @@ CREATE TABLE user_crew_execution_steps (
   -- Thought, Action, Tool Output, Final Answer, etc
   step_data TEXT NOT NULL,
   -- Actual output to parse
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
+  FOREIGN KEY (stx_address) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
   FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE,
   FOREIGN KEY (execution_id) REFERENCES user_crew_executions(id) ON DELETE CASCADE
 );
 
 -- Define indexes for execution steps
 CREATE INDEX idx_execution_steps_created_at ON user_crew_execution_steps(created_at); 
-CREATE INDEX idx_execution_steps_profile_id ON user_crew_execution_steps(profile_id);
+CREATE INDEX idx_execution_steps_stx_address ON user_crew_execution_steps(stx_address);
 CREATE INDEX idx_execution_steps_crew_id ON user_crew_execution_steps(crew_id);
-CREATE INDEX idx_execution_steps_profile_id ON user_crew_execution_steps(profile_id);
+CREATE INDEX idx_execution_steps_stx_address ON user_crew_execution_steps(stx_address);
 CREATE INDEX idx_execution_steps_execution_id ON user_crew_execution_steps(execution_id);
 CREATE INDEX idx_execution_steps_type ON user_crew_execution_steps(step_type);
 
@@ -326,20 +326,20 @@ CREATE TABLE user_crons (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  profile_id TEXT NOT NULL,
+  stx_address TEXT NOT NULL,
   crew_id INTEGER NOT NULL,
   cron_last_run DATETIME DEFAULT NULL,
   cron_next_run DATETIME DEFAULT NULL,
   cron_enabled INTEGER NOT NULL DEFAULT 0,
   cron_interval TEXT NOT NULL,
   cron_input TEXT NOT NULL,
-  FOREIGN KEY (profile_id) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
+  FOREIGN KEY (stx_address) REFERENCES user_profiles(stx_address) ON DELETE CASCADE,
   FOREIGN KEY (crew_id) REFERENCES user_crews(id) ON DELETE CASCADE
 );
 
 -- Define indexes for crons
 CREATE INDEX idx_crons_created_at ON user_crons(created_at);
-CREATE INDEX idx_crons_profile_id ON user_crons(profile_id);
+CREATE INDEX idx_crons_stx_address ON user_crons(stx_address);
 CREATE INDEX idx_crons_crew_id ON user_crons(crew_id);
 CREATE INDEX idx_crons_enabled ON user_crons(cron_enabled);
 
