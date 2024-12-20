@@ -177,10 +177,10 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/conversations/latest') {
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse('Missing address parameter', 400);
+					return createApiResponse('Missing address parameter', 400);
 				}
 				const conversation = await getLatestConversation(this.orm, address);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully retrieved latest conversation',
 					data: conversation
 				});
@@ -189,10 +189,10 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/conversations/history') {
 				const conversationId = url.searchParams.get('id');
 				if (!conversationId) {
-					return createJsonResponse('Missing conversation ID parameter', 400);
+					return createApiResponse('Missing conversation ID parameter', 400);
 				}
 				const history = await getConversationHistory(this.orm, parseInt(conversationId));
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully retrieved conversation history',
 					data: history
 				});
@@ -208,7 +208,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				// Get the session token from Authorization header
 				const authHeader = request.headers.get('Authorization');
 				if (!authHeader) {
-					return createJsonResponse('Missing authorization header', 401);
+					return createApiResponse('Missing authorization header', 401);
 				}
 
 				// Extract token from Bearer format
@@ -217,11 +217,11 @@ export class DatabaseDO extends DurableObject<Env> {
 				// Verify the token matches the requested address
 				const tokenAddress = await validateSessionToken(this.env, token);
 				if (!tokenAddress.success || tokenAddress.address !== address) {
-					return createJsonResponse('Unauthorized access', 403);
+					return createApiResponse('Unauthorized access', 403);
 				}
 
 				const crews = await getCrewsByProfile(this.orm, address);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully retrieved profile crews',
 					data: crews
 				});
