@@ -462,9 +462,9 @@ export class DatabaseDO extends DurableObject<Env> {
 					return createJsonResponse('Missing address parameter', 400);
 				}
 				const executions = await getCrewExecutions(this.orm, address);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully retrieved crew executions',
-					data: executions
+					data: { executions }
 				});
 			}
 
@@ -552,7 +552,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 				const { cron_input } = (await request.json()) as UserCronsTable;
 				if (cron_input === undefined) {
-					return createJsonResponse({ error: 'Missing cron_input in request body' }, 400);
+					return createApiResponse('Missing cron_input in request body', 400);
 				}
 				const result = await updateCronInput(this.orm, parseInt(cronId), cron_input);
 				return createApiResponse({
@@ -563,11 +563,11 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/crons/toggle') {
 				if (request.method !== 'PUT') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const cronId = url.searchParams.get('id');
 				if (!cronId) {
-					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+					return createApiResponse('Missing id parameter', 400);
 				}
 				const { cron_enabled } = (await request.json()) as UserCronsTable;
 				if (cron_enabled === undefined) {
@@ -680,7 +680,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/profiles/admin/update') {
 				if (request.method !== 'PUT') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const userId = url.searchParams.get('userId');
 				if (!userId) {
@@ -688,7 +688,10 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 				const updates = (await request.json()) as UserProfilesTable;
 				const result = await updateUserProfileById(this.orm, parseInt(userId), updates);
-				return createJsonResponse({ result });
+				return createApiResponse({
+					message: 'Successfully updated user profile',
+					data: { result }
+				});
 			}
 		} catch (error) {
 			console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
@@ -865,7 +868,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			// Verify the profile_id matches the token address
 			if (stepData.profile_id !== tokenAddress.address) {
-				return createJsonResponse({ error: 'Unauthorized: profile_id does not match token' }, 403);
+				return createApiResponse('Unauthorized: profile_id does not match token', 403);
 			}
 
 			const step = await createExecutionStep(this.orm, stepData);
@@ -888,7 +891,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			// Get the session token from Authorization header
 			const authHeader = request.headers.get('Authorization');
 			if (!authHeader) {
-				return createJsonResponse({ error: 'Missing authorization header' }, 401);
+				return createApiResponse('Missing authorization header', 401);
 			}
 
 			// Extract token from Bearer format
@@ -897,7 +900,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			// Verify the token
 			const tokenAddress = await validateSessionToken(this.env, token);
 			if (!tokenAddress) {
-				return createJsonResponse({ error: 'Unauthorized access' }, 403);
+				return createApiResponse('Unauthorized access', 403);
 			}
 
 			const result = await deleteExecutionSteps(this.orm, parseInt(executionId));
