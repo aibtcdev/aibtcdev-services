@@ -1,6 +1,6 @@
-# Implementation Guide: createJsonResponse
+# Implementation Guide: createApiResponse
 
-This guide outlines the standardized implementation of `createJsonResponse` across all endpoints.
+This guide outlines the standardized implementation of `createApiResponse` across all endpoints.
 
 ## Response Formats
 
@@ -9,17 +9,17 @@ This guide outlines the standardized implementation of `createJsonResponse` acro
 #### When Returning Data
 
 ```javascript
-createJsonResponse({
-	message: 'A clear description of what succeeded',
-	data: theActualData,
+createApiResponse({
+    message: 'A clear description of what succeeded',
+    data: { theActualData }
 });
 ```
 
 #### When Returning Message Only
 
 ```javascript
-createJsonResponse({
-	message: 'A clear description of what succeeded',
+createApiResponse({
+    message: 'A clear description of what succeeded'
 });
 ```
 
@@ -28,48 +28,70 @@ createJsonResponse({
 Use a direct string message:
 
 ```javascript
-createJsonResponse('A clear description of what went wrong', errorStatusCode);
+createApiResponse('A clear description of what went wrong', errorStatusCode);
 ```
 
 ## Implementation Guidelines
 
 ### 3. Specific Patterns
 
-- Never wrap response data in unnecessary object literals (e.g., avoid `{ result }` when `result` is already an object)
 - Always include a descriptive message for successful operations
 - Keep error messages concise and descriptive
 - Use consistent status codes for similar types of errors
+- Data should be structured as an object when including additional information
 
 ### 4. Implementation Examples
 
 #### Success with Data
 
 ```javascript
-return createJsonResponse({
-	message: 'Successfully retrieved crews',
-	data: crews,
+return createApiResponse({
+    message: 'Successfully retrieved crews',
+    data: { crews }
 });
 ```
 
 #### Success with Message Only
 
 ```javascript
-return createJsonResponse({
-	message: `Successfully deleted ${key}`,
+return createApiResponse({
+    message: `Successfully deleted ${key}`
 });
 ```
 
 #### Error Response
 
 ```javascript
-return createJsonResponse('Missing required parameter: address', 400);
+return createApiResponse('Missing required parameter: address', 400);
 ```
 
 ## Response Structure
 
-The `createJsonResponse` function automatically wraps these responses in a standardized format that includes:
+The `createApiResponse` function automatically wraps responses in a standardized format that includes:
 
-- A success boolean flag
-- Either a data or error property based on the status code
+- A success boolean flag (true for 200-299 status codes, false otherwise)
+- For successful responses:
+  - data object containing message and any additional data
+- For error responses:
+  - error string with the error message
+
+Example Success Response:
+```json
+{
+    "success": true,
+    "data": {
+        "message": "Successfully retrieved crews",
+        "crews": [...]
+    }
+}
+```
+
+Example Error Response:
+```json
+{
+    "success": false,
+    "error": "Missing required parameter: address"
+}
+```
 
 This standardization ensures consistent response structures across all endpoints and makes it easier for clients to handle responses predictably.
