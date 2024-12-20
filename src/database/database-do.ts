@@ -753,9 +753,9 @@ export class DatabaseDO extends DurableObject<Env> {
 				return createApiResponse('Missing authorId parameter', 400);
 			}
 			const tweets = await getAuthorTweets(this.orm, authorId);
-			return createJsonResponse({
+			return createApiResponse({
 				message: 'Successfully retrieved author tweets',
-				data: tweets
+				data: { tweets }
 			});
 		}
 
@@ -785,12 +785,12 @@ export class DatabaseDO extends DurableObject<Env> {
 		if (endpoint === '/twitter/logs/get') {
 			const tweetId = url.searchParams.get('tweetId');
 			if (!tweetId) {
-				return createJsonResponse('Missing tweetId parameter', 400);
+				return createApiResponse('Missing tweetId parameter', 400);
 			}
 			const logs = await getTweetLogs(this.orm, tweetId);
-			return createJsonResponse({
+			return createApiResponse({
 				message: 'Successfully retrieved tweet logs',
-				data: logs
+				data: { logs }
 			});
 		}
 
