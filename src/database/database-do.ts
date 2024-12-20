@@ -175,7 +175,6 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 			}
 
-			// pass off to handler
 			if (endpoint.startsWith('/crews')) {
 				const handler = getHandler(endpoint);
 				if (handler) {
@@ -188,7 +187,6 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 			}
 
-			// pass off to handler
 			if (endpoint.startsWith('/agents')) {
 				const handler = getHandler(endpoint);
 				if (handler) {
