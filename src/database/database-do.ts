@@ -243,120 +243,18 @@ export class DatabaseDO extends DurableObject<Env> {
 			return createApiResponse(`Database error: ${error instanceof Error ? error.message : String(error)}`, 500);
 		}
 
-		// Twitter/X Bot endpoints
-		if (endpoint === '/twitter/authors/get') {
-			const authorId = url.searchParams.get('authorId');
-			if (!authorId) {
-				return createApiResponse('Missing authorId parameter', 400);
+		// Pass off to twitter handler
+		if (endpoint.startsWith('/twitter')) {
+			const handler = getHandler(endpoint);
+			if (handler) {
+				return handler({
+					orm: this.orm,
+					env: this.env,
+					request,
+					url,
+				});
 			}
-			const author = await getAuthor(this.orm, authorId);
-			return createApiResponse({
-				message: 'Successfully retrieved author',
-				data: { author },
-			});
 		}
-
-		if (endpoint === '/twitter/authors/create') {
-			if (request.method !== 'POST') {
-				return createApiResponse('Method not allowed', 405);
-			}
-			const { author_id, realname, username } = (await request.json()) as XBotAuthorsTable;
-			if (!author_id) {
-				return createApiResponse('Missing required fields: authorId', 400);
-			}
-			const author = await addAuthor(this.orm, author_id, realname || undefined, username || undefined);
-			return createApiResponse({
-				message: 'Successfully created author',
-				data: { author },
-			});
-		}
-
-		if (endpoint === '/twitter/tweets/get') {
-			const tweetId = url.searchParams.get('tweetId');
-			if (!tweetId) {
-				return createApiResponse('Missing tweetId parameter', 400);
-			}
-			const tweet = await getTweet(this.orm, tweetId);
-			return createApiResponse({
-				message: 'Successfully retrieved tweet',
-				data: { tweet },
-			});
-		}
-
-		if (endpoint === '/twitter/tweets/thread') {
-			const threadId = url.searchParams.get('threadId');
-			if (!threadId) {
-				return createApiResponse('Missing threadId parameter', 400);
-			}
-			const tweets = await getThreadTweets(this.orm, parseInt(threadId));
-			return createApiResponse({
-				message: 'Successfully retrieved thread tweets',
-				data: { tweets },
-			});
-		}
-
-		if (endpoint === '/twitter/tweets/author') {
-			const authorId = url.searchParams.get('authorId');
-			if (!authorId) {
-				return createApiResponse('Missing authorId parameter', 400);
-			}
-			const tweets = await getAuthorTweets(this.orm, authorId);
-			return createApiResponse({
-				message: 'Successfully retrieved author tweets',
-				data: { tweets },
-			});
-		}
-
-		if (endpoint === '/twitter/tweets/add') {
-			if (request.method !== 'POST') {
-				return createApiResponse('Method not allowed', 405);
-			}
-			const { author_id, tweet_id, tweet_body, thread_id, parent_tweet_id, is_bot_response } = (await request.json()) as XBotTweetsTable;
-			if (!author_id || !tweet_id || !tweet_body) {
-				return createApiResponse('Missing required fields: authorId, tweetId, tweetBody', 400);
-			}
-			const tweet = await addTweet(
-				this.orm,
-				author_id,
-				tweet_id,
-				tweet_body,
-				thread_id || undefined,
-				parent_tweet_id || undefined,
-				is_bot_response || undefined
-			);
-			return createApiResponse({
-				message: 'Successfully created tweet',
-				data: { tweet },
-			});
-		}
-
-		if (endpoint === '/twitter/logs/get') {
-			const tweetId = url.searchParams.get('tweetId');
-			if (!tweetId) {
-				return createApiResponse('Missing tweetId parameter', 400);
-			}
-			const logs = await getTweetLogs(this.orm, tweetId);
-			return createApiResponse({
-				message: 'Successfully retrieved tweet logs',
-				data: { logs },
-			});
-		}
-
-		if (endpoint === '/twitter/logs/add') {
-			if (request.method !== 'POST') {
-				return createApiResponse('Method not allowed', 405);
-			}
-			const { tweet_id, tweet_status, log_message } = (await request.json()) as XBotLogsTable;
-			if (!tweet_id || !tweet_status) {
-				return createApiResponse('Missing required fields: tweetId, status', 400);
-			}
-			const log = await addLog(this.orm, tweet_id, tweet_status, log_message || undefined);
-			return createApiResponse({
-				message: 'Successfully created log',
-				data: { log },
-			});
-		}
-
 
 		return createUnsupportedEndpointResponse(endpoint, this.SUPPORTED_ENDPOINTS);
 	}
