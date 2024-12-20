@@ -165,12 +165,7 @@ export class AuthDO extends DurableObject<Env> {
 			// get session key from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('data' in body)) {
-				return createJsonResponse(
-					{
-						error: 'Missing or invalid "data" in request body',
-					},
-					400
-				);
+				return createJsonResponse('Missing or invalid "data" in request body', 400);
 			}
 			const sessionToken = String(body.data);
 			// get address from kv key list

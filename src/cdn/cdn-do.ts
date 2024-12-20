@@ -51,7 +51,10 @@ export class CdnDO extends DurableObject<Env> {
 		// Handle root path
 		if (endpoint === '' || endpoint === '/') {
 			return createJsonResponse({
-				message: `Supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
+				message: 'Welcome to CDN service',
+				data: {
+					supportedEndpoints: this.SUPPORTED_ENDPOINTS
+				}
 			});
 		}
 
@@ -148,6 +151,6 @@ export class CdnDO extends DurableObject<Env> {
 			}
 		}
 
-		return createJsonResponse(`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`, 404);
+		return createJsonResponse(`Unsupported endpoint: ${endpoint}`, 404);
 	}
 }
