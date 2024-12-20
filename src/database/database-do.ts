@@ -297,11 +297,11 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/agents/get') {
 				const crewId = url.searchParams.get('crewId');
 				if (!crewId) {
-					return createJsonResponse('Missing crewId parameter', 400);
+					return createApiResponse('Missing crewId parameter', 400);
 				}
 				const agents = await getAgents(this.orm, parseInt(crewId));
 				return createApiResponse({
-					message: 'Successfully retrieved agents',
+					message: 'Successfully retrieved agents', 
 					data: { agents }
 				});
 			}
