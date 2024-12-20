@@ -162,7 +162,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		}
 
 		try {
-			// Handle conversations endpoints using the new handler system
+			// pass off to handler
 			if (endpoint.startsWith('/conversations')) {
 				const handler = getHandler(endpoint);
 				if (handler) {
@@ -170,7 +170,7 @@ export class DatabaseDO extends DurableObject<Env> {
 						orm: this.orm,
 						env: this.env,
 						request,
-						url
+						url,
 					});
 				}
 			}
@@ -562,7 +562,6 @@ export class DatabaseDO extends DurableObject<Env> {
 					data: { result },
 				});
 			}
-
 
 			// Profile endpoints
 			if (endpoint === '/profiles/role') {
