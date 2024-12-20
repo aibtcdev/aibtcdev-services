@@ -588,7 +588,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 				const { profile_id, conversation_name } = (await request.json()) as UserConversationsTable;
 				if (!profile_id) {
-					return createJsonResponse({ error: 'Missing required field: address' }, 400);
+					return createApiResponse('Missing required field: address', 400);
 				}
 
 				const result = await addConversation(this.orm, profile_id, conversation_name ? conversation_name : 'new conversation');
