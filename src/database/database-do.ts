@@ -738,7 +738,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		if (endpoint === '/twitter/tweets/thread') {
 			const threadId = url.searchParams.get('threadId');
 			if (!threadId) {
-				return createJsonResponse('Missing threadId parameter', 400);
+				return createApiResponse('Missing threadId parameter', 400);
 			}
 			const tweets = await getThreadTweets(this.orm, parseInt(threadId));
 			return createApiResponse({
