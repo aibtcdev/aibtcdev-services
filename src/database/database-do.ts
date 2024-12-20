@@ -226,100 +226,17 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 			}
 
-			// Profile endpoints
-			if (endpoint === '/profiles/role') {
-				const address = url.searchParams.get('address');
-				if (!address) {
-					return createApiResponse('Missing address parameter', 400);
+			// Pass off to profiles handler
+			if (endpoint.startsWith('/profiles')) {
+				const handler = getHandler(endpoint);
+				if (handler) {
+					return handler({
+						orm: this.orm,
+						env: this.env,
+						request,
+						url,
+					});
 				}
-				const role = await getUserRole(this.orm, address);
-				return createApiResponse({
-					message: 'Successfully retrieved user role',
-					data: { role },
-				});
-			}
-
-			if (endpoint === '/profiles/get') {
-				const address = url.searchParams.get('address');
-				if (!address) {
-					return createApiResponse('Missing address parameter', 400);
-				}
-				const profile = await getUserProfile(this.orm, address);
-				return createApiResponse({
-					message: 'Successfully retrieved user profile',
-					data: { profile },
-				});
-			}
-
-			if (endpoint === '/profiles/create') {
-				if (request.method !== 'POST') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const profileData = (await request.json()) as UserProfilesTable;
-				if (!profileData.stx_address || !profileData.user_role) {
-					return createApiResponse('Missing required fields: stx_address, user_role', 400);
-				}
-				const profile = await createUserProfile(this.orm, profileData);
-				return createApiResponse({
-					message: 'Successfully created user profile',
-					data: { profile },
-				});
-			}
-
-			if (endpoint === '/profiles/update') {
-				if (request.method !== 'PUT') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const address = url.searchParams.get('address');
-				if (!address) {
-					return createApiResponse('Missing address parameter', 400);
-				}
-				const profileData = (await request.json()) as UserProfilesTable;
-				const result = await updateUserProfile(this.orm, address, profileData);
-				return createApiResponse({
-					message: 'Successfully updated user profile',
-					data: { result },
-				});
-			}
-
-			if (endpoint === '/profiles/delete') {
-				if (request.method !== 'DELETE') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const address = url.searchParams.get('address');
-				if (!address) {
-					return createApiResponse('Missing address parameter', 400);
-				}
-				const result = await deleteUserProfile(this.orm, address);
-				return createApiResponse({
-					message: 'Successfully deleted user profile',
-					data: { result },
-				});
-			}
-
-			// Admin profile endpoints
-			if (endpoint === '/profiles/admin/list') {
-				const profiles = await getAllUserProfiles(this.orm);
-				return createApiResponse({
-					message: 'Successfully retrieved all user profiles',
-					data: { profiles },
-				});
-			}
-
-			if (endpoint === '/profiles/admin/update') {
-				if (request.method !== 'PUT') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const userId = url.searchParams.get('userId');
-				if (!userId) {
-					return createApiResponse('Missing userId parameter', 400);
-				}
-				const updates = (await request.json()) as UserProfilesTable;
-				const result = await updateUserProfileById(this.orm, parseInt(userId), updates);
-				return createApiResponse({
-					message: 'Successfully updated user profile',
-					data: { result },
-				});
 			}
 		} catch (error) {
 			console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
