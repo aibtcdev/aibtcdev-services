@@ -493,7 +493,10 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 
 				const execution = await addCrewExecution(this.orm, address, crewId, conversationId, input);
-				return createJsonResponse({ execution });
+				return createApiResponse({
+					message: 'Successfully created crew execution',
+					data: { execution }
+				});
 			}
 
 			// Cron endpoints
@@ -780,7 +783,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 		if (endpoint === '/twitter/logs/add') {
 			if (request.method !== 'POST') {
-				return createJsonResponse({ error: 'Method not allowed' }, 405);
+				return createApiResponse('Method not allowed', 405);
 			}
 			const { tweet_id, tweet_status, log_message } = (await request.json()) as XBotLogsTable;
 			if (!tweet_id || !tweet_status) {
