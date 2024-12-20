@@ -611,7 +611,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/profiles/get') {
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+					return createApiResponse('Missing address parameter', 400);
 				}
 				const profile = await getUserProfile(this.orm, address);
 				return createApiResponse({
