@@ -1,7 +1,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
-import { createJsonResponse } from '../utils/requests-responses';
+import { createApiResponse } from '../utils/requests-responses';
 
 /**
  * Durable Object class for running Typescript tools requested by the backend
@@ -43,12 +43,7 @@ export class ToolsDO extends DurableObject<Env> {
 		const path = url.pathname;
 
 		if (!path.startsWith(this.BASE_PATH)) {
-			return createJsonResponse(
-				{
-					error: `Request at ${path} does not start with base path ${this.BASE_PATH}`,
-				},
-				404
-			);
+			return createApiResponse(`Request at ${path} does not start with base path ${this.BASE_PATH}`, 404);
 		}
 
 		// Remove base path to get the endpoint
@@ -56,22 +51,18 @@ export class ToolsDO extends DurableObject<Env> {
 
 		// Handle root path
 		if (endpoint === '' || endpoint === '/') {
-			return createJsonResponse({
-				message: `Supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
+			return createApiResponse({
+				message: 'Available endpoints retrieved successfully',
+				data: { endpoints: this.SUPPORTED_ENDPOINTS }
 			});
 		}
 
 		if (endpoint === '/hello') {
-			return createJsonResponse({
-				message: 'hello from tools!',
+			return createApiResponse({
+				message: 'Hello from tools!'
 			});
 		}
 
-		return createJsonResponse(
-			{
-				error: `Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
-			},
-			404
-		);
+		return createApiResponse(`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`, 404);
 	}
 }
