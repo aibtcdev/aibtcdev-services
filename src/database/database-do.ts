@@ -499,22 +499,31 @@ export class DatabaseDO extends DurableObject<Env> {
 			// Cron endpoints
 			if (endpoint === '/crons/enabled') {
 				const crons = await getEnabledCrons(this.orm);
-				return createJsonResponse({ crons });
+				return createApiResponse({
+					message: 'Successfully retrieved enabled crons',
+					data: { crons }
+				});
 			}
 
 			if (endpoint === '/crons/enabled/detailed') {
 				const crons = await getEnabledCronsDetailed(this.orm);
-				return createJsonResponse({ crons });
+				return createApiResponse({
+					message: 'Successfully retrieved detailed cron information',
+					data: { crons }
+				});
 			}
 
 			// Cron management endpoints
 			if (endpoint === '/crons/get') {
 				const crewId = url.searchParams.get('crewId');
 				if (!crewId) {
-					return createJsonResponse({ error: 'Missing crewId parameter' }, 400);
+					return createApiResponse('Missing crewId parameter', 400);
 				}
 				const crons = await getCronsByCrew(this.orm, parseInt(crewId));
-				return createJsonResponse({ crons });
+				return createApiResponse({
+					message: 'Successfully retrieved crons for crew',
+					data: { crons }
+				});
 			}
 
 			if (endpoint === '/crons/create') {
