@@ -3,7 +3,7 @@ import { verifyMessageSignatureRsv } from '@stacks/encryption';
 import { getAddressFromPublicKey, validateStacksAddress } from '@stacks/transactions';
 import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
-import { createJsonResponse } from '../utils/requests-responses';
+import { createApiResponse } from '../utils/requests-responses';
 import { validateSharedKeyAuth } from '../utils/auth-helper';
 
 /**
@@ -48,7 +48,7 @@ export class AuthDO extends DurableObject<Env> {
 		const path = url.pathname;
 
 		if (!path.startsWith(this.BASE_PATH)) {
-			return createJsonResponse(`Request at ${path} does not start with base path ${this.BASE_PATH}`, 404);
+			return createApiResponse(`Request at ${path} does not start with base path ${this.BASE_PATH}`, 404);
 		}
 
 		// Remove base path to get the endpoint
@@ -56,7 +56,7 @@ export class AuthDO extends DurableObject<Env> {
 
 		// Handle root path
 		if (endpoint === '' || endpoint === '/') {
-			return createJsonResponse({
+			return createApiResponse({
 				message: `Supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
 			});
 		}
@@ -65,19 +65,19 @@ export class AuthDO extends DurableObject<Env> {
 		// frontend and backend each have their own stored in KV
 		const authResult = await validateSharedKeyAuth(this.env, request);
 		if (!authResult.success) {
-			return createJsonResponse({ error: authResult.error }, authResult.status);
+			return createApiResponse(authResult.error, authResult.status);
 		}
 
 		// all methods from this point forward are POST
 		if (request.method !== 'POST') {
-			return createJsonResponse(`Unsupported method: ${request.method}, supported method: POST`, 405);
+			return createApiResponse(`Unsupported method: ${request.method}, supported method: POST`, 405);
 		}
 
 		if (endpoint === '/request-auth-token') {
 			// get signature from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('signature' in body) || !('publicKey' in body)) {
-				return createJsonResponse('Missing required parameters: signature, publicKey', 400);
+				return createApiResponse('Missing required parameters: signature, publicKey', 400);
 			}
 			const signedMessage = String(body.signature);
 			const publicKey = String(body.publicKey);
@@ -93,14 +93,12 @@ export class AuthDO extends DurableObject<Env> {
 				const isAddressValid = validateStacksAddress(addressFromPubkey);
 				// check if signature is valid with the public key
 				if (!isSignatureVerified) {
-					return createJsonResponse(`Signature verification failed for public key ${publicKey}`, 401);
+					return createApiResponse(`Signature verification failed for public key ${publicKey}`, 401);
 				}
 				// check if address is valid
 				if (!isAddressValid) {
-					return createJsonResponse(
-						{
-							error: `Invalid address ${addressFromPubkey} from public key ${publicKey}`,
-						},
+					return createApiResponse(
+						`Invalid address ${addressFromPubkey} from public key ${publicKey}`,
 						400
 					);
 				}
@@ -123,7 +121,7 @@ export class AuthDO extends DurableObject<Env> {
 				// wait for all kv operations to complete
 				await Promise.all([savePubkey, saveSessionToken, saveAddress]);
 				// return 200 with session token
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully created auth token',
 					data: {
 						address: addressFromPubkey,
@@ -131,7 +129,7 @@ export class AuthDO extends DurableObject<Env> {
 					}
 				});
 			} catch (error) {
-				return createJsonResponse(`Failed to verify signature: ${error instanceof Error ? error.message : String(error)}`, 401);
+				return createApiResponse(`Failed to verify signature: ${error instanceof Error ? error.message : String(error)}`, 401);
 			}
 		}
 
@@ -139,20 +137,20 @@ export class AuthDO extends DurableObject<Env> {
 			// get address from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('data' in body)) {
-				return createJsonResponse('Missing required parameter: data', 400);
+				return createApiResponse('Missing required parameter: data', 400);
 			}
 			const address = String(body.data);
 			const validAddress = validateStacksAddress(address);
 			if (!validAddress) {
-				return createJsonResponse(`Invalid address: ${address}`, 400);
+				return createApiResponse(`Invalid address: ${address}`, 400);
 			}
 			// get session key from kv key list
 			const sessionKey = await this.env.AIBTCDEV_SERVICES_KV.get(`${this.KEY_PREFIX}:address:${address}`);
 			if (sessionKey === null) {
-				return createJsonResponse(`Address not found: ${address}`, 401);
+				return createApiResponse(`Address not found: ${address}`, 401);
 			}
 			// return 200 with session info
-			return createJsonResponse({
+			return createApiResponse({
 				message: 'Successfully verified address',
 				data: {
 					address,
@@ -165,16 +163,16 @@ export class AuthDO extends DurableObject<Env> {
 			// get session key from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('data' in body)) {
-				return createJsonResponse('Missing or invalid "data" in request body', 400);
+				return createApiResponse('Missing or invalid "data" in request body', 400);
 			}
 			const sessionToken = String(body.data);
 			// get address from kv key list
 			const address = await this.env.AIBTCDEV_SERVICES_KV.get(`${this.KEY_PREFIX}:session:${sessionToken}`);
 			if (address === null) {
-				return createJsonResponse(`Invalid session token: ${sessionToken}`, 401);
+				return createApiResponse(`Invalid session token: ${sessionToken}`, 401);
 			}
 			// return 200 with session info
-			return createJsonResponse({
+			return createApiResponse({
 				message: 'Successfully verified session token',
 				data: {
 					address,
@@ -185,6 +183,6 @@ export class AuthDO extends DurableObject<Env> {
 
 		// TODO: endpoint to revoke a session token
 
-		return createJsonResponse(`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`, 404);
+		return createApiResponse(`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`, 404);
 	}
 }
