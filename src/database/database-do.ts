@@ -199,103 +199,18 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 			}
 
-			// Task endpoints
-			if (endpoint === '/tasks/get') {
-				const taskId = url.searchParams.get('id');
-				if (!taskId) {
-					return createApiResponse('Missing id parameter', 400);
-				}
-				const task = await getTask(this.orm, parseInt(taskId));
-				return createApiResponse({
-					message: 'Successfully retrieved task',
-					data: { task },
-				});
-			}
-
-			if (endpoint === '/tasks/list') {
-				const agentId = url.searchParams.get('agentId');
-				if (!agentId) {
-					return createApiResponse('Missing agentId parameter', 400);
-				}
-				const tasks = await getTasks(this.orm, parseInt(agentId));
-				return createApiResponse({
-					message: 'Successfully retrieved tasks',
-					data: { tasks },
-				});
-			}
-
-			if (endpoint === '/tasks/create') {
-				if (request.method !== 'POST') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const taskData = (await request.json()) as UserTasksTable;
-				if (
-					!taskData.profile_id ||
-					!taskData.crew_id ||
-					!taskData.agent_id ||
-					!taskData.task_name ||
-					!taskData.task_description ||
-					!taskData.task_expected_output
-				) {
-					return createApiResponse(
-						'Missing required fields: profile_id, crew_id, agent_id, task_name, task_description, task_expected_output',
-						400
-					);
-				}
-				const task = await createTask(this.orm, taskData);
-				return createApiResponse({
-					message: 'Successfully created task',
-					data: { task },
-				});
-			}
-
-			if (endpoint === '/tasks/update') {
-				if (request.method !== 'PUT') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const taskId = url.searchParams.get('id');
-				if (!taskId) {
-					return createApiResponse('Missing id parameter', 400);
-				}
-				const updates = (await request.json()) as Partial<
-					Omit<UserTasksTable, 'id' | 'created_at' | 'updated_at' | 'profile_id' | 'crew_id' | 'agent_id'>
-				>;
-				const result = await updateTask(this.orm, parseInt(taskId), updates);
-				return createApiResponse({
-					message: 'Successfully updated task',
-					data: { result },
-				});
-			}
-
-			if (endpoint === '/tasks/delete') {
-				if (request.method !== 'DELETE') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const taskId = url.searchParams.get('id');
-				if (!taskId) {
-					return createApiResponse('Missing id parameter', 400);
-				}
-				const result = await deleteTask(this.orm, parseInt(taskId));
-				return createApiResponse({
-					message: 'Successfully deleted task',
-					data: { result },
-				});
-			}
-
-			if (endpoint === '/tasks/delete-all') {
-				if (request.method !== 'DELETE') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const agentId = url.searchParams.get('agentId');
-				if (!agentId) {
-					return createApiResponse('Missing agentId parameter', 400);
-				}
-				const result = await deleteTasks(this.orm, parseInt(agentId));
-				return createApiResponse({
-					message: 'Successfully deleted all tasks for agent',
-					data: { result },
-				});
-			}
+            // Pass off to tasks handler
+            if (endpoint.startsWith('/tasks')) {
+                const handler = getHandler(endpoint);
+                if (handler) {
+                    return handler({
+                        orm: this.orm,
+                        env: this.env,
+                        request,
+                        url,
+                    });
+                }
+            }
 
 			if (endpoint === '/crews/executions') {
 				const address = url.searchParams.get('address');
