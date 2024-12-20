@@ -15,14 +15,17 @@ export function corsHeaders(origin?: string): HeadersInit {
 
 export function createApiResponse(response: { message: string; data?: Record<string, unknown> } | string, status: number = 200): Response {
 	const isOk = status >= 200 && status < 300;
+	const isStringResponse = typeof response === 'string';
+
+	const responseData = isStringResponse
+		? { message: response }
+		: { message: response.message, ...(response.data || {}) };
+
 	const responseBody: ApiResponse = {
 		success: isOk,
-		...(isOk
-			? {
-					data: typeof response === 'string' ? { message: response } : { message: response.message, ...(response.data || {}) },
-			  }
-			: { error: response as string }),
+		...(isOk ? { data: responseData } : { error: response as string }),
 	};
+
 	return new Response(JSON.stringify(responseBody), {
 		status,
 		headers: {
