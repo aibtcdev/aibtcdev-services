@@ -554,7 +554,10 @@ export class DatabaseDO extends DurableObject<Env> {
 					return createJsonResponse({ error: 'Missing cron_input in request body' }, 400);
 				}
 				const result = await updateCronInput(this.orm, parseInt(cronId), cron_input);
-				return createJsonResponse({ result });
+				return createApiResponse({
+					message: 'Successfully updated user profile',
+					data: { result }
+				});
 			}
 
 			if (endpoint === '/crons/toggle') {
@@ -653,7 +656,10 @@ export class DatabaseDO extends DurableObject<Env> {
 			// Admin profile endpoints
 			if (endpoint === '/profiles/admin/list') {
 				const profiles = await getAllUserProfiles(this.orm);
-				return createJsonResponse({ profiles });
+				return createApiResponse({
+					message: 'Successfully retrieved all user profiles',
+					data: { profiles }
+				});
 			}
 
 			if (endpoint === '/profiles/admin/update') {
@@ -662,7 +668,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 				const userId = url.searchParams.get('userId');
 				if (!userId) {
-					return createJsonResponse({ error: 'Missing userId parameter' }, 400);
+					return createApiResponse('Missing userId parameter', 400);
 				}
 				const updates = (await request.json()) as UserProfilesTable;
 				const result = await updateUserProfileById(this.orm, parseInt(userId), updates);
@@ -739,7 +745,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 		if (endpoint === '/twitter/tweets/add') {
 			if (request.method !== 'POST') {
-				return createJsonResponse({ error: 'Method not allowed' }, 405);
+				return createApiResponse('Method not allowed', 405);
 			}
 			const { author_id, tweet_id, tweet_body, thread_id, parent_tweet_id, is_bot_response } = (await request.json()) as XBotTweetsTable;
 			if (!author_id || !tweet_id || !tweet_body) {
