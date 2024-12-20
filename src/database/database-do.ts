@@ -526,7 +526,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/crons/create') {
 				if (request.method !== 'POST') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const cronData = (await request.json()) as UserCronsTable;
 				if (!cronData.profile_id || !cronData.crew_id || cronData.cron_enabled === undefined) {
@@ -544,11 +544,11 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/crons/update') {
 				if (request.method !== 'PUT') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const cronId = url.searchParams.get('id');
 				if (!cronId) {
-					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+					return createApiResponse('Missing id parameter', 400);
 				}
 				const { cron_input } = (await request.json()) as UserCronsTable;
 				if (cron_input === undefined) {
