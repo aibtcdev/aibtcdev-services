@@ -1,7 +1,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
-import { createJsonResponse } from '../utils/requests-responses';
+import { createApiResponse } from '../utils/requests-responses';
 import { D1Orm } from 'd1-orm';
 import {
 	UserAgentsTable,
@@ -137,12 +137,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		const path = url.pathname;
 
 		if (!path.startsWith(this.BASE_PATH)) {
-			return createJsonResponse(
-				{
-					error: `Request at ${path} does not start with base path ${this.BASE_PATH}`,
-				},
-				404
-			);
+			return createApiResponse(`Request at ${path} does not start with base path ${this.BASE_PATH}`, 404);
 		}
 
 		// Remove base path to get the endpoint
@@ -150,7 +145,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 		// Handle root path
 		if (endpoint === '' || endpoint === '/') {
-			return createJsonResponse({
+			return createApiResponse({
 				message: 'Database service endpoints available',
 				data: {
 					endpoints: this.SUPPORTED_ENDPOINTS
@@ -162,7 +157,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		// frontend and backend each have their own stored in KV
 		const authResult = await validateSharedKeyAuth(this.env, request);
 		if (!authResult.success) {
-			return createJsonResponse(authResult.error, authResult.status);
+			return createApiResponse(authResult.error, authResult.status);
 		}
 
 		try {
@@ -170,10 +165,10 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/conversations') {
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse('Missing address parameter', 400);
+					return createApiResponse('Missing address parameter', 400);
 				}
 				const conversations = await getConversations(this.orm, address);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully retrieved conversations',
 					data: conversations
 				});
@@ -660,7 +655,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			}
 		} catch (error) {
 			console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
-			return createJsonResponse({ error: `Database error: ${error instanceof Error ? error.message : String(error)}` }, 500);
+			return createApiResponse(`Database error: ${error instanceof Error ? error.message : String(error)}`, 500);
 		}
 
 		// Twitter/X Bot endpoints
@@ -857,10 +852,8 @@ export class DatabaseDO extends DurableObject<Env> {
 			return createJsonResponse({ result });
 		}
 
-		return createJsonResponse(
-			{
-				error: `Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
-			},
+		return createApiResponse(
+			`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
 			404
 		);
 	}
