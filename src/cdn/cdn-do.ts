@@ -8,7 +8,7 @@ export class CdnDO extends DurableObject<Env> {
 	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH = '/cdn';
 	private readonly KEY_PREFIX = 'cdn';
-	private readonly SUPPORTED_ENDPOINTS: string[] = ['/get', '/put', '/delete', '/list'];
+	private readonly SUPPORTED_ENDPOINTS: string[] = ['/get', '/list', '/put', '/delete'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
