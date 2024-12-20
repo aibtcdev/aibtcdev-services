@@ -151,7 +151,10 @@ export class DatabaseDO extends DurableObject<Env> {
 		// Handle root path
 		if (endpoint === '' || endpoint === '/') {
 			return createJsonResponse({
-				message: `Supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
+				message: 'Database service endpoints available',
+				data: {
+					endpoints: this.SUPPORTED_ENDPOINTS
+				}
 			});
 		}
 
@@ -167,28 +170,37 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/conversations') {
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+					return createJsonResponse('Missing address parameter', 400);
 				}
 				const conversations = await getConversations(this.orm, address);
-				return createJsonResponse({ conversations });
+				return createJsonResponse({
+					message: 'Successfully retrieved conversations',
+					data: conversations
+				});
 			}
 
 			if (endpoint === '/conversations/latest') {
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+					return createJsonResponse('Missing address parameter', 400);
 				}
 				const conversation = await getLatestConversation(this.orm, address);
-				return createJsonResponse({ conversation });
+				return createJsonResponse({
+					message: 'Successfully retrieved latest conversation',
+					data: conversation
+				});
 			}
 
 			if (endpoint === '/conversations/history') {
 				const conversationId = url.searchParams.get('id');
 				if (!conversationId) {
-					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+					return createJsonResponse('Missing conversation ID parameter', 400);
 				}
 				const history = await getConversationHistory(this.orm, parseInt(conversationId));
-				return createJsonResponse({ history });
+				return createJsonResponse({
+					message: 'Successfully retrieved conversation history',
+					data: history
+				});
 			}
 
 			// Crew endpoints
