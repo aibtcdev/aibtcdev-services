@@ -223,7 +223,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const crews = await getCrewsByProfile(this.orm, address);
 				return createApiResponse({
 					message: 'Successfully retrieved profile crews',
-					data: crews
+					data: { crews }
 				});
 			}
 
