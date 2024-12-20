@@ -199,18 +199,18 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 			}
 
-            // Pass off to tasks handler
-            if (endpoint.startsWith('/tasks')) {
-                const handler = getHandler(endpoint);
-                if (handler) {
-                    return handler({
-                        orm: this.orm,
-                        env: this.env,
-                        request,
-                        url,
-                    });
-                }
-            }
+			// Pass off to tasks handler
+			if (endpoint.startsWith('/tasks')) {
+				const handler = getHandler(endpoint);
+				if (handler) {
+					return handler({
+						orm: this.orm,
+						env: this.env,
+						request,
+						url,
+					});
+				}
+			}
 
 			if (endpoint === '/crews/executions') {
 				const address = url.searchParams.get('address');
