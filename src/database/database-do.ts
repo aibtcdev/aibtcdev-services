@@ -308,7 +308,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/agents/create') {
 				if (request.method !== 'POST') {
-					return createJsonResponse('Method not allowed', 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const agentData = (await request.json()) as Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at'>;
 				if (
@@ -319,45 +319,45 @@ export class DatabaseDO extends DurableObject<Env> {
 					!agentData.agent_goal ||
 					!agentData.agent_backstory
 				) {
-					return createJsonResponse('Missing required fields: profile_id, crew_id, agent_name, agent_role, agent_goal, agent_backstory', 400);
+					return createApiResponse('Missing required fields: profile_id, crew_id, agent_name, agent_role, agent_goal, agent_backstory', 400);
 				}
 				const agent = await createAgent(this.orm, agentData);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully created agent',
-					data: agent
+					data: { agent }
 				});
 			}
 
 			if (endpoint === '/agents/update') {
 				if (request.method !== 'PUT') {
-					return createJsonResponse('Method not allowed', 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const agentId = url.searchParams.get('id');
 				if (!agentId) {
-					return createJsonResponse('Missing id parameter', 400);
+					return createApiResponse('Missing id parameter', 400);
 				}
 				const updates = (await request.json()) as Partial<
 					Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at' | 'profile_id' | 'crew_id'>
 				>;
 				const result = await updateAgent(this.orm, parseInt(agentId), updates);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully updated agent',
-					data: result
+					data: { result }
 				});
 			}
 
 			if (endpoint === '/agents/delete') {
 				if (request.method !== 'DELETE') {
-					return createJsonResponse('Method not allowed', 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const agentId = url.searchParams.get('id');
 				if (!agentId) {
-					return createJsonResponse('Missing id parameter', 400);
+					return createApiResponse('Missing id parameter', 400);
 				}
 				const result = await deleteAgent(this.orm, parseInt(agentId));
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully deleted agent',
-					data: result
+					data: { result }
 				});
 			}
 
@@ -365,24 +365,24 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/tasks/get') {
 				const taskId = url.searchParams.get('id');
 				if (!taskId) {
-					return createJsonResponse('Missing id parameter', 400);
+					return createApiResponse('Missing id parameter', 400);
 				}
 				const task = await getTask(this.orm, parseInt(taskId));
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully retrieved task',
-					data: task
+					data: { task }
 				});
 			}
 
 			if (endpoint === '/tasks/list') {
 				const agentId = url.searchParams.get('agentId');
 				if (!agentId) {
-					return createJsonResponse('Missing agentId parameter', 400);
+					return createApiResponse('Missing agentId parameter', 400);
 				}
 				const tasks = await getTasks(this.orm, parseInt(agentId));
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully retrieved tasks',
-					data: tasks
+					data: { tasks }
 				});
 			}
 
