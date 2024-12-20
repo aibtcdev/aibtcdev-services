@@ -53,8 +53,8 @@ export class CdnDO extends DurableObject<Env> {
 			return createApiResponse({
 				message: 'Welcome to CDN service',
 				data: {
-					supportedEndpoints: this.SUPPORTED_ENDPOINTS
-				}
+					supportedEndpoints: this.SUPPORTED_ENDPOINTS,
+				},
 			});
 		}
 
@@ -109,8 +109,8 @@ export class CdnDO extends DurableObject<Env> {
 							httpEtag: obj.httpEtag,
 						})),
 						truncated: objects.truncated,
-						cursor: objects.truncated ? objects.cursor : undefined
-					}
+						cursor: objects.truncated ? objects.cursor : undefined,
+					},
 				});
 			} catch (error) {
 				return createApiResponse('Failed to list objects', 500);
@@ -132,7 +132,7 @@ export class CdnDO extends DurableObject<Env> {
 
 				return createApiResponse({
 					message: 'Successfully stored object',
-					data: { r2ObjectKey, etag: object.httpEtag }
+					data: { r2ObjectKey, etag: object.httpEtag },
 				});
 			} catch (error) {
 				return createApiResponse('Failed to store object', 500);
@@ -144,7 +144,7 @@ export class CdnDO extends DurableObject<Env> {
 				await this.env.AIBTCDEV_SERVICES_BUCKET.delete(r2ObjectKey);
 				return createApiResponse({
 					message: 'Successfully deleted object',
-					data: { r2ObjectKey }
+					data: { r2ObjectKey },
 				});
 			} catch (error) {
 				return createApiResponse('Failed to delete object', 500);

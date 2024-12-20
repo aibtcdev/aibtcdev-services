@@ -67,7 +67,7 @@ export class MetadataGeneratorDO extends DurableObject<Env> {
 
 		if (endpoint.startsWith('/update/')) {
 			if (request.method !== 'POST' && request.method !== 'PATCH') {
-				return createJsonResponse({ error: 'Method not allowed' }, 405);
+				return createApiResponse('Method not allowed', 405);
 			}
 			return this.updateMetadata(contractId, request);
 		}
@@ -91,8 +91,8 @@ export class MetadataGeneratorDO extends DurableObject<Env> {
 			}
 
 			// Generate image using ImageGeneratorDO
-			const imageGeneratorId = this.env.IMAGES_DO.idFromName(this.IMAGE_DO_NAME);
-			const imageGenerator = this.env.IMAGES_DO.get(imageGeneratorId);
+			const imageGeneratorId = this.env.IMAGE_GENERATOR_DO.idFromName(this.IMAGE_DO_NAME);
+			const imageGenerator = this.env.IMAGE_GENERATOR_DO.get(imageGeneratorId);
 
 			// Create image prompt based on token details
 			const imagePrompt =
@@ -145,7 +145,7 @@ export class MetadataGeneratorDO extends DurableObject<Env> {
 
 			return createApiResponse({
 				message: 'Successfully generated metadata',
-				data: { contractId, metadata }
+				data: { contractId, metadata },
 			});
 		} catch (error) {
 			console.error('Failed to generate metadata:', error);
@@ -168,8 +168,8 @@ export class MetadataGeneratorDO extends DurableObject<Env> {
 				data: {
 					metadata,
 					contractId,
-					lastUpdated: object.uploaded
-				}
+					lastUpdated: object.uploaded,
+				},
 			});
 		} catch (error) {
 			console.error('Failed to get metadata:', error);
@@ -216,7 +216,7 @@ export class MetadataGeneratorDO extends DurableObject<Env> {
 
 			return createApiResponse({
 				message: 'Successfully updated metadata',
-				data: { contractId, metadata: newMetadata }
+				data: { contractId, metadata: newMetadata },
 			});
 		} catch (error) {
 			console.error('Failed to update metadata:', error);

@@ -97,10 +97,7 @@ export class AuthDO extends DurableObject<Env> {
 				}
 				// check if address is valid
 				if (!isAddressValid) {
-					return createApiResponse(
-						`Invalid address ${addressFromPubkey} from public key ${publicKey}`,
-						400
-					);
+					return createApiResponse(`Invalid address ${addressFromPubkey} from public key ${publicKey}`, 400);
 				}
 				// add address to kv key list with unique session key
 				// expires after 30 days and requires new signature from user
@@ -125,8 +122,8 @@ export class AuthDO extends DurableObject<Env> {
 					message: 'Successfully created auth token',
 					data: {
 						address: addressFromPubkey,
-						sessionToken
-					}
+						sessionToken,
+					},
 				});
 			} catch (error) {
 				return createApiResponse(`Failed to verify signature: ${error instanceof Error ? error.message : String(error)}`, 401);
@@ -154,8 +151,8 @@ export class AuthDO extends DurableObject<Env> {
 				message: 'Successfully verified address',
 				data: {
 					address,
-					sessionKey
-				}
+					sessionKey,
+				},
 			});
 		}
 
@@ -176,8 +173,8 @@ export class AuthDO extends DurableObject<Env> {
 				message: 'Successfully verified session token',
 				data: {
 					address,
-					sessionToken
-				}
+					sessionToken,
+				},
 			});
 		}
 

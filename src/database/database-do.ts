@@ -148,8 +148,8 @@ export class DatabaseDO extends DurableObject<Env> {
 			return createApiResponse({
 				message: 'Database service endpoints available',
 				data: {
-					endpoints: this.SUPPORTED_ENDPOINTS
-				}
+					endpoints: this.SUPPORTED_ENDPOINTS,
+				},
 			});
 		}
 
@@ -170,7 +170,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const conversations = await getConversations(this.orm, address);
 				return createApiResponse({
 					message: 'Successfully retrieved conversations',
-					data: conversations
+					data: conversations,
 				});
 			}
 
@@ -182,7 +182,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const conversation = await getLatestConversation(this.orm, address);
 				return createApiResponse({
 					message: 'Successfully retrieved latest conversation',
-					data: conversation
+					data: conversation,
 				});
 			}
 
@@ -194,7 +194,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const history = await getConversationHistory(this.orm, parseInt(conversationId));
 				return createApiResponse({
 					message: 'Successfully retrieved conversation history',
-					data: history
+					data: history,
 				});
 			}
 
@@ -223,7 +223,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const crews = await getCrewsByProfile(this.orm, address);
 				return createApiResponse({
 					message: 'Successfully retrieved profile crews',
-					data: { crews }
+					data: { crews },
 				});
 			}
 
@@ -231,7 +231,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const crews = await getPublicCrews(this.orm);
 				return createApiResponse({
 					message: 'Successfully retrieved public crews',
-					data: { crews }
+					data: { crews },
 				});
 			}
 
@@ -243,7 +243,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const crew = await getCrew(this.orm, parseInt(crewId));
 				return createApiResponse({
 					message: 'Successfully retrieved crew',
-					data: { crew }
+					data: { crew },
 				});
 			}
 
@@ -258,7 +258,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const crew = await createCrew(this.orm, crewData);
 				return createApiResponse({
 					message: 'Successfully created crew',
-					data: { crew }
+					data: { crew },
 				});
 			}
 
@@ -274,7 +274,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await updateCrew(this.orm, parseInt(crewId), updates);
 				return createApiResponse({
 					message: 'Successfully updated crew',
-					data: { result }
+					data: { result },
 				});
 			}
 
@@ -289,7 +289,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await deleteCrew(this.orm, parseInt(crewId));
 				return createApiResponse({
 					message: 'Successfully deleted crew',
-					data: { result }
+					data: { result },
 				});
 			}
 
@@ -301,8 +301,8 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 				const agents = await getAgents(this.orm, parseInt(crewId));
 				return createApiResponse({
-					message: 'Successfully retrieved agents', 
-					data: { agents }
+					message: 'Successfully retrieved agents',
+					data: { agents },
 				});
 			}
 
@@ -319,12 +319,15 @@ export class DatabaseDO extends DurableObject<Env> {
 					!agentData.agent_goal ||
 					!agentData.agent_backstory
 				) {
-					return createApiResponse('Missing required fields: profile_id, crew_id, agent_name, agent_role, agent_goal, agent_backstory', 400);
+					return createApiResponse(
+						'Missing required fields: profile_id, crew_id, agent_name, agent_role, agent_goal, agent_backstory',
+						400
+					);
 				}
 				const agent = await createAgent(this.orm, agentData);
 				return createApiResponse({
 					message: 'Successfully created agent',
-					data: { agent }
+					data: { agent },
 				});
 			}
 
@@ -342,7 +345,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await updateAgent(this.orm, parseInt(agentId), updates);
 				return createApiResponse({
 					message: 'Successfully updated agent',
-					data: { result }
+					data: { result },
 				});
 			}
 
@@ -357,7 +360,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await deleteAgent(this.orm, parseInt(agentId));
 				return createApiResponse({
 					message: 'Successfully deleted agent',
-					data: { result }
+					data: { result },
 				});
 			}
 
@@ -370,7 +373,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const task = await getTask(this.orm, parseInt(taskId));
 				return createApiResponse({
 					message: 'Successfully retrieved task',
-					data: { task }
+					data: { task },
 				});
 			}
 
@@ -382,7 +385,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const tasks = await getTasks(this.orm, parseInt(agentId));
 				return createApiResponse({
 					message: 'Successfully retrieved tasks',
-					data: { tasks }
+					data: { tasks },
 				});
 			}
 
@@ -399,12 +402,15 @@ export class DatabaseDO extends DurableObject<Env> {
 					!taskData.task_description ||
 					!taskData.task_expected_output
 				) {
-					return createApiResponse('Missing required fields: profile_id, crew_id, agent_id, task_name, task_description, task_expected_output', 400);
+					return createApiResponse(
+						'Missing required fields: profile_id, crew_id, agent_id, task_name, task_description, task_expected_output',
+						400
+					);
 				}
 				const task = await createTask(this.orm, taskData);
 				return createApiResponse({
 					message: 'Successfully created task',
-					data: { task }
+					data: { task },
 				});
 			}
 
@@ -422,7 +428,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await updateTask(this.orm, parseInt(taskId), updates);
 				return createApiResponse({
 					message: 'Successfully updated task',
-					data: { result }
+					data: { result },
 				});
 			}
 
@@ -437,7 +443,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await deleteTask(this.orm, parseInt(taskId));
 				return createApiResponse({
 					message: 'Successfully deleted task',
-					data: { result }
+					data: { result },
 				});
 			}
 
@@ -452,19 +458,19 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await deleteTasks(this.orm, parseInt(agentId));
 				return createApiResponse({
 					message: 'Successfully deleted all tasks for agent',
-					data: { result }
+					data: { result },
 				});
 			}
 
 			if (endpoint === '/crews/executions') {
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse('Missing address parameter', 400);
+					return createApiResponse('Missing address parameter', 400);
 				}
 				const executions = await getCrewExecutions(this.orm, address);
 				return createApiResponse({
 					message: 'Successfully retrieved crew executions',
-					data: { executions }
+					data: { executions },
 				});
 			}
 
@@ -490,7 +496,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const execution = await addCrewExecution(this.orm, address, crewId, conversationId, input);
 				return createApiResponse({
 					message: 'Successfully created crew execution',
-					data: { execution }
+					data: { execution },
 				});
 			}
 
@@ -499,7 +505,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const crons = await getEnabledCrons(this.orm);
 				return createApiResponse({
 					message: 'Successfully retrieved enabled crons',
-					data: { crons }
+					data: { crons },
 				});
 			}
 
@@ -507,7 +513,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const crons = await getEnabledCronsDetailed(this.orm);
 				return createApiResponse({
 					message: 'Successfully retrieved detailed cron information',
-					data: { crons }
+					data: { crons },
 				});
 			}
 
@@ -520,7 +526,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const crons = await getCronsByCrew(this.orm, parseInt(crewId));
 				return createApiResponse({
 					message: 'Successfully retrieved crons for crew',
-					data: { crons }
+					data: { crons },
 				});
 			}
 
@@ -538,7 +544,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const cron = await createCron(this.orm, cronData);
 				return createApiResponse({
 					message: 'Successfully created cron',
-					data: { cron }
+					data: { cron },
 				});
 			}
 
@@ -557,7 +563,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await updateCronInput(this.orm, parseInt(cronId), cron_input);
 				return createApiResponse({
 					message: 'Successfully updated user profile',
-					data: { result }
+					data: { result },
 				});
 			}
 
@@ -576,14 +582,14 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await toggleCronStatus(this.orm, parseInt(cronId), cron_enabled ? 1 : 0);
 				return createApiResponse({
 					message: 'Successfully toggled cron status',
-					data: { result }
+					data: { result },
 				});
 			}
 
 			// Conversation creation endpoint
 			if (endpoint === '/conversations/create') {
 				if (request.method !== 'POST') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 
 				const { profile_id, conversation_name } = (await request.json()) as UserConversationsTable;
@@ -594,7 +600,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await addConversation(this.orm, profile_id, conversation_name ? conversation_name : 'new conversation');
 				return createApiResponse({
 					message: 'Successfully updated user profile',
-					data: { result }
+					data: { result },
 				});
 			}
 
@@ -607,7 +613,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const role = await getUserRole(this.orm, address);
 				return createApiResponse({
 					message: 'Successfully retrieved user role',
-					data: { role }
+					data: { role },
 				});
 			}
 
@@ -619,7 +625,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const profile = await getUserProfile(this.orm, address);
 				return createApiResponse({
 					message: 'Successfully retrieved user profile',
-					data: { profile }
+					data: { profile },
 				});
 			}
 
@@ -634,7 +640,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const profile = await createUserProfile(this.orm, profileData);
 				return createApiResponse({
 					message: 'Successfully created user profile',
-					data: { profile }
+					data: { profile },
 				});
 			}
 
@@ -650,7 +656,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await updateUserProfile(this.orm, address, profileData);
 				return createApiResponse({
 					message: 'Successfully updated user profile',
-					data: { result }
+					data: { result },
 				});
 			}
 
@@ -665,7 +671,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await deleteUserProfile(this.orm, address);
 				return createApiResponse({
 					message: 'Successfully deleted user profile',
-					data: { result }
+					data: { result },
 				});
 			}
 
@@ -674,7 +680,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const profiles = await getAllUserProfiles(this.orm);
 				return createApiResponse({
 					message: 'Successfully retrieved all user profiles',
-					data: { profiles }
+					data: { profiles },
 				});
 			}
 
@@ -690,7 +696,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const result = await updateUserProfileById(this.orm, parseInt(userId), updates);
 				return createApiResponse({
 					message: 'Successfully updated user profile',
-					data: { result }
+					data: { result },
 				});
 			}
 		} catch (error) {
@@ -707,7 +713,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			const author = await getAuthor(this.orm, authorId);
 			return createApiResponse({
 				message: 'Successfully retrieved author',
-				data: { author }
+				data: { author },
 			});
 		}
 
@@ -722,7 +728,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			const author = await addAuthor(this.orm, author_id, realname || undefined, username || undefined);
 			return createApiResponse({
 				message: 'Successfully created author',
-				data: { author }
+				data: { author },
 			});
 		}
 
@@ -734,7 +740,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			const tweet = await getTweet(this.orm, tweetId);
 			return createApiResponse({
 				message: 'Successfully retrieved tweet',
-				data: { tweet }
+				data: { tweet },
 			});
 		}
 
@@ -746,7 +752,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			const tweets = await getThreadTweets(this.orm, parseInt(threadId));
 			return createApiResponse({
 				message: 'Successfully retrieved thread tweets',
-				data: { tweets }
+				data: { tweets },
 			});
 		}
 
@@ -758,7 +764,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			const tweets = await getAuthorTweets(this.orm, authorId);
 			return createApiResponse({
 				message: 'Successfully retrieved author tweets',
-				data: { tweets }
+				data: { tweets },
 			});
 		}
 
@@ -781,7 +787,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			);
 			return createApiResponse({
 				message: 'Successfully created tweet',
-				data: { tweet }
+				data: { tweet },
 			});
 		}
 
@@ -793,7 +799,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			const logs = await getTweetLogs(this.orm, tweetId);
 			return createApiResponse({
 				message: 'Successfully retrieved tweet logs',
-				data: { logs }
+				data: { logs },
 			});
 		}
 
@@ -808,7 +814,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			const log = await addLog(this.orm, tweet_id, tweet_status, log_message || undefined);
 			return createApiResponse({
 				message: 'Successfully created log',
-				data: { log }
+				data: { log },
 			});
 		}
 
@@ -837,7 +843,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			const steps = await getExecutionSteps(this.orm, parseInt(executionId));
 			return createApiResponse({
 				message: 'Successfully retrieved execution steps',
-				data: { steps }
+				data: { steps },
 			});
 		}
 
@@ -874,7 +880,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			const step = await createExecutionStep(this.orm, stepData);
 			return createApiResponse({
 				message: 'Successfully created execution step',
-				data: { step }
+				data: { step },
 			});
 		}
 
@@ -906,13 +912,10 @@ export class DatabaseDO extends DurableObject<Env> {
 			const result = await deleteExecutionSteps(this.orm, parseInt(executionId));
 			return createApiResponse({
 				message: 'Successfully deleted execution steps',
-				data: { result }
+				data: { result },
 			});
 		}
 
-		return createApiResponse(
-			`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
-			404
-		);
+		return createApiResponse(`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`, 404);
 	}
 }
