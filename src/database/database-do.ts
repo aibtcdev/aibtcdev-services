@@ -625,7 +625,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/profiles/create') {
 				if (request.method !== 'POST') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const profileData = (await request.json()) as UserProfilesTable;
 				if (!profileData.stx_address || !profileData.user_role) {
@@ -640,30 +640,33 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/profiles/update') {
 				if (request.method !== 'PUT') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+					return createApiResponse('Missing address parameter', 400);
 				}
 				const profileData = (await request.json()) as UserProfilesTable;
 				const result = await updateUserProfile(this.orm, address, profileData);
 				return createApiResponse({
-					message: 'Successfully created conversation',
+					message: 'Successfully updated user profile',
 					data: { result }
 				});
 			}
 
 			if (endpoint === '/profiles/delete') {
 				if (request.method !== 'DELETE') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+					return createApiResponse('Missing address parameter', 400);
 				}
 				const result = await deleteUserProfile(this.orm, address);
-				return createJsonResponse({ result });
+				return createApiResponse({
+					message: 'Successfully deleted user profile',
+					data: { result }
+				});
 			}
 
 			// Admin profile endpoints
