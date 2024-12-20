@@ -1,6 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
-import { createJsonResponse } from '../utils/requests-responses';
+import { createApiResponse } from '../utils/requests-responses';
 import { validateSharedKeyAuth } from '../utils/auth-helper';
 import { AppConfig } from '../config';
 
@@ -42,7 +42,7 @@ export class CdnDO extends DurableObject<Env> {
 		const path = url.pathname;
 
 		if (!path.startsWith(this.BASE_PATH)) {
-			return createJsonResponse(`Request at ${path} does not start with base path ${this.BASE_PATH}`, 404);
+			return createApiResponse(`Request at ${path} does not start with base path ${this.BASE_PATH}`, 404);
 		}
 
 		// Remove base path to get the endpoint
@@ -50,7 +50,7 @@ export class CdnDO extends DurableObject<Env> {
 
 		// Handle root path
 		if (endpoint === '' || endpoint === '/') {
-			return createJsonResponse({
+			return createApiResponse({
 				message: 'Welcome to CDN service',
 				data: {
 					supportedEndpoints: this.SUPPORTED_ENDPOINTS
@@ -66,7 +66,7 @@ export class CdnDO extends DurableObject<Env> {
 				const object = await this.env.AIBTCDEV_SERVICES_BUCKET.get(r2ObjectKey);
 
 				if (!object) {
-					return createJsonResponse('Object not found', 404);
+					return createApiResponse('Object not found', 404);
 				}
 
 				// Return the object with appropriate headers
@@ -78,7 +78,7 @@ export class CdnDO extends DurableObject<Env> {
 					},
 				});
 			} catch (error) {
-				return createJsonResponse('Failed to retrieve object', 500);
+				return createApiResponse('Failed to retrieve object', 500);
 			}
 		}
 
@@ -86,7 +86,7 @@ export class CdnDO extends DurableObject<Env> {
 		// frontend and backend each have their own stored in KV
 		const authResult = await validateSharedKeyAuth(this.env, request);
 		if (!authResult.success) {
-			return createJsonResponse({ error: authResult.error }, authResult.status);
+			return createApiResponse(authResult.error, authResult.status);
 		}
 
 		if (endpoint === '/list') {
@@ -98,7 +98,7 @@ export class CdnDO extends DurableObject<Env> {
 				};
 
 				const objects = await this.env.AIBTCDEV_SERVICES_BUCKET.list(options);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully listed objects',
 					data: {
 						objects: objects.objects.map((obj) => ({
@@ -109,17 +109,17 @@ export class CdnDO extends DurableObject<Env> {
 							httpEtag: obj.httpEtag,
 						})),
 						truncated: objects.truncated,
-						cursor: objects.truncated ? objects.cursor : undefined,
+						cursor: objects.truncated ? objects.cursor : undefined
 					}
 				});
 			} catch (error) {
-				return createJsonResponse('Failed to list objects', 500);
+				return createApiResponse('Failed to list objects', 500);
 			}
 		}
 
 		// all methods from this point forward are POST
 		if (request.method !== 'POST') {
-			return createJsonResponse(`Unsupported method: ${request.method}, supported method: POST`, 405);
+			return createApiResponse(`Unsupported method: ${request.method}, supported method: POST`, 405);
 		}
 
 		if (endpoint === '/put') {
@@ -130,27 +130,27 @@ export class CdnDO extends DurableObject<Env> {
 					},
 				});
 
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully stored object',
 					data: { r2ObjectKey, etag: object.httpEtag }
 				});
 			} catch (error) {
-				return createJsonResponse('Failed to store object', 500);
+				return createApiResponse('Failed to store object', 500);
 			}
 		}
 
 		if (endpoint === '/delete') {
 			try {
 				await this.env.AIBTCDEV_SERVICES_BUCKET.delete(r2ObjectKey);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully deleted object',
 					data: { r2ObjectKey }
 				});
 			} catch (error) {
-				return createJsonResponse('Failed to delete object', 500);
+				return createApiResponse('Failed to delete object', 500);
 			}
 		}
 
-		return createJsonResponse(`Unsupported endpoint: ${endpoint}`, 404);
+		return createApiResponse(`Unsupported endpoint: ${endpoint}`, 404);
 	}
 }
