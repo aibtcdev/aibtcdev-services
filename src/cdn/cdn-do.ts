@@ -110,18 +110,13 @@ export class CdnDO extends DurableObject<Env> {
 					}
 				});
 			} catch (error) {
-				return createJsonResponse({ error: 'Failed to list objects' }, 500);
+				return createJsonResponse('Failed to list objects', 500);
 			}
 		}
 
 		// all methods from this point forward are POST
 		if (request.method !== 'POST') {
-			return createJsonResponse(
-				{
-					error: `Unsupported method: ${request.method}, supported method: POST`,
-				},
-				405
-			);
+			return createJsonResponse(`Unsupported method: ${request.method}, supported method: POST`, 405);
 		}
 
 		if (endpoint === '/put') {

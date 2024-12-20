@@ -77,7 +77,7 @@ export class AuthDO extends DurableObject<Env> {
 			// get signature from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('signature' in body) || !('publicKey' in body)) {
-				return createJsonResponse('Missing or invalid "signature" or "publicKey" in request body', 400);
+				return createJsonResponse('Missing required parameters: signature, publicKey', 400);
 			}
 			const signedMessage = String(body.signature);
 			const publicKey = String(body.publicKey);
@@ -142,32 +142,17 @@ export class AuthDO extends DurableObject<Env> {
 			// get address from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('data' in body)) {
-				return createJsonResponse(
-					{
-						error: 'Missing or invalid "data" in request body',
-					},
-					400
-				);
+				return createJsonResponse('Missing required parameter: data', 400);
 			}
 			const address = String(body.data);
 			const validAddress = validateStacksAddress(address);
 			if (!validAddress) {
-				return createJsonResponse(
-					{
-						error: `Invalid address ${address}`,
-					},
-					400
-				);
+				return createJsonResponse(`Invalid address: ${address}`, 400);
 			}
 			// get session key from kv key list
 			const sessionKey = await this.env.AIBTCDEV_SERVICES_KV.get(`${this.KEY_PREFIX}:address:${address}`);
 			if (sessionKey === null) {
-				return createJsonResponse(
-					{
-						error: `Address ${address} not found in key list`,
-					},
-					401
-				);
+				return createJsonResponse(`Address not found: ${address}`, 401);
 			}
 			// return 200 with session info
 			return createJsonResponse({
@@ -192,12 +177,7 @@ export class AuthDO extends DurableObject<Env> {
 			// get address from kv key list
 			const address = await this.env.AIBTCDEV_SERVICES_KV.get(`${this.KEY_PREFIX}:session:${sessionToken}`);
 			if (address === null) {
-				return createJsonResponse(
-					{
-						error: `Session key ${sessionToken} not found in key list`,
-					},
-					401
-				);
+				return createJsonResponse(`Invalid session token: ${sessionToken}`, 401);
 			}
 			// return 200 with session info
 			return createJsonResponse({
