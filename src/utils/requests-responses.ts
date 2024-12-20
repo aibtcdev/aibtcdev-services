@@ -1,3 +1,9 @@
+type ApiResponse = {
+	success: boolean;
+	data?: any;
+	error?: string;
+};
+
 export function corsHeaders(origin?: string): HeadersInit {
 	return {
 		'Access-Control-Allow-Origin': origin || '*',
@@ -7,8 +13,17 @@ export function corsHeaders(origin?: string): HeadersInit {
 	};
 }
 
-export function createJsonResponse(body: unknown, status = 200): Response {
-	return new Response(typeof body === 'string' ? body : JSON.stringify(body), {
+export function createApiResponse(response: { message: string; data?: unknown } | string, status: number = 200): Response {
+	const isOk = status >= 200 && status < 300;
+	const responseBody: ApiResponse = {
+		success: isOk,
+		...(isOk
+			? {
+					data: typeof response === 'string' ? { message: response } : { message: response.message, ...response.data },
+			  }
+			: { error: response as string }),
+	};
+	return new Response(JSON.stringify(responseBody), {
 		status,
 		headers: {
 			'Content-Type': 'application/json',
