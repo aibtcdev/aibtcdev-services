@@ -470,7 +470,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/crews/executions/add') {
 				if (request.method !== 'POST') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 
 				type AddCrewExecutionRequest = {
@@ -530,7 +530,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 				const cronData = (await request.json()) as UserCronsTable;
 				if (!cronData.profile_id || !cronData.crew_id || cronData.cron_enabled === undefined) {
-					return createJsonResponse({ error: 'Missing required fields' }, 400);
+					return createApiResponse('Missing required fields: profile_id, crew_id, cron_enabled', 400);
 				}
 				// Set defaults if not provided
 				cronData.cron_interval = cronData.cron_interval || '0 * * * *'; // Default to hourly
@@ -648,7 +648,10 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 				const profileData = (await request.json()) as UserProfilesTable;
 				const result = await updateUserProfile(this.orm, address, profileData);
-				return createJsonResponse({ result });
+				return createApiResponse({
+					message: 'Successfully created conversation',
+					data: { result }
+				});
 			}
 
 			if (endpoint === '/profiles/delete') {
@@ -831,7 +834,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 		if (endpoint === '/crews/steps/create') {
 			if (request.method !== 'POST') {
-				return createJsonResponse({ error: 'Method not allowed' }, 405);
+				return createApiResponse('Method not allowed', 405);
 			}
 
 			// Get the session token from Authorization header
