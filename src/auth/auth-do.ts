@@ -87,12 +87,7 @@ export class AuthDO extends DurableObject<Env> {
 			// get signature from body
 			const body = await request.json();
 			if (!body || typeof body !== 'object' || !('signature' in body) || !('publicKey' in body)) {
-				return createJsonResponse(
-					{
-						error: 'Missing or invalid "signature" or "publicKey" in request body',
-					},
-					400
-				);
+				return createJsonResponse('Missing or invalid "signature" or "publicKey" in request body', 400);
 			}
 			const signedMessage = String(body.signature);
 			const publicKey = String(body.publicKey);
@@ -108,12 +103,7 @@ export class AuthDO extends DurableObject<Env> {
 				const isAddressValid = validateStacksAddress(addressFromPubkey);
 				// check if signature is valid with the public key
 				if (!isSignatureVerified) {
-					return createJsonResponse(
-						{
-							error: `Signature verification failed for public key ${publicKey}`,
-						},
-						401
-					);
+					return createJsonResponse(`Signature verification failed for public key ${publicKey}`, 401);
 				}
 				// check if address is valid
 				if (!isAddressValid) {

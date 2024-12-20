@@ -68,7 +68,7 @@ export class CdnDO extends DurableObject<Env> {
 				const object = await this.env.AIBTCDEV_SERVICES_BUCKET.get(r2ObjectKey);
 
 				if (!object) {
-					return createJsonResponse({ error: 'Object not found' }, 404);
+					return createJsonResponse('Object not found', 404);
 				}
 
 				// Return the object with appropriate headers
@@ -80,7 +80,7 @@ export class CdnDO extends DurableObject<Env> {
 					},
 				});
 			} catch (error) {
-				return createJsonResponse({ error: 'Failed to retrieve object' }, 500);
+				return createJsonResponse('Failed to retrieve object', 500);
 			}
 		}
 
@@ -101,15 +101,18 @@ export class CdnDO extends DurableObject<Env> {
 
 				const objects = await this.env.AIBTCDEV_SERVICES_BUCKET.list(options);
 				return createJsonResponse({
-					objects: objects.objects.map((obj) => ({
-						key: obj.key,
-						size: obj.size,
-						uploaded: obj.uploaded,
-						etag: obj.etag,
-						httpEtag: obj.httpEtag,
-					})),
-					truncated: objects.truncated,
-					cursor: objects.truncated ? objects.cursor : undefined,
+					message: 'Successfully listed objects',
+					data: {
+						objects: objects.objects.map((obj) => ({
+							key: obj.key,
+							size: obj.size,
+							uploaded: obj.uploaded,
+							etag: obj.etag,
+							httpEtag: obj.httpEtag,
+						})),
+						truncated: objects.truncated,
+						cursor: objects.truncated ? objects.cursor : undefined,
+					}
 				});
 			} catch (error) {
 				return createJsonResponse({ error: 'Failed to list objects' }, 500);
@@ -134,18 +137,24 @@ export class CdnDO extends DurableObject<Env> {
 					},
 				});
 
-				return createJsonResponse({ success: true, r2ObjectKey, etag: object.httpEtag });
+				return createJsonResponse({
+					message: 'Successfully stored object',
+					data: { r2ObjectKey, etag: object.httpEtag }
+				});
 			} catch (error) {
-				return createJsonResponse({ error: 'Failed to store object' }, 500);
+				return createJsonResponse('Failed to store object', 500);
 			}
 		}
 
 		if (endpoint === '/delete') {
 			try {
 				await this.env.AIBTCDEV_SERVICES_BUCKET.delete(r2ObjectKey);
-				return createJsonResponse({ success: true, r2ObjectKey });
+				return createJsonResponse({
+					message: 'Successfully deleted object',
+					data: { r2ObjectKey }
+				});
 			} catch (error) {
-				return createJsonResponse({ error: 'Failed to delete object' }, 500);
+				return createJsonResponse('Failed to delete object', 500);
 			}
 		}
 
