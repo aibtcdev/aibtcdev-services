@@ -4,47 +4,7 @@ import { AppConfig } from '../config';
 import { createApiResponse, createUnsupportedEndpointResponse } from '../utils/requests-responses';
 import { getHandler } from './handlers';
 import { D1Orm } from 'd1-orm';
-import {
-	UserAgentsTable,
-	UserConversationsTable,
-	UserCrewExecutionsTable,
-	UserCrewExecutionStepsTable,
-	UserCrewsTable,
-	UserCronsTable,
-	UserProfilesTable,
-	UserTasksTable,
-	XBotAuthorsTable,
-	XBotLogsTable,
-	XBotTweetsTable,
-} from './models';
-import { getAgents, createAgent, updateAgent, deleteAgent } from './helpers/agents';
-import { getAuthor, addAuthor, getTweet, getThreadTweets, getAuthorTweets, addTweet, getTweetLogs, addLog } from './helpers/twitter';
-import {
-	createCrew,
-	getCrew,
-	updateCrew,
-	deleteCrew,
-	getPublicCrews,
-	getCrewExecutions,
-	addCrewExecution,
-	getCrewsByProfile,
-	getExecutionSteps,
-	createExecutionStep,
-	deleteExecutionSteps,
-} from './helpers/crews';
-import { getCronsByCrew, createCron, updateCronInput, toggleCronStatus, getEnabledCrons, getEnabledCronsDetailed } from './helpers/crons';
-import {
-	getUserRole,
-	getUserProfile,
-	createUserProfile,
-	updateUserProfile,
-	deleteUserProfile,
-	getAllUserProfiles,
-	updateUserProfileById,
-} from './helpers/profiles';
-import { addConversation, getConversationHistory, getConversations, getLatestConversation } from './helpers/conversations';
-import { getTask, getTasks, createTask, updateTask, deleteTask, deleteTasks } from './helpers/tasks';
-import { validateSessionToken, validateSharedKeyAuth } from '../utils/auth-helper';
+import { validateSharedKeyAuth } from '../utils/auth-helper';
 
 /**
  * Durable Object class for backend database calls
