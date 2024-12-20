@@ -662,7 +662,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		if (endpoint === '/twitter/authors/get') {
 			const authorId = url.searchParams.get('authorId');
 			if (!authorId) {
-				return createJsonResponse('Missing authorId parameter', 400);
+				return createApiResponse('Missing authorId parameter', 400);
 			}
 			const author = await getAuthor(this.orm, authorId);
 			return createJsonResponse({
@@ -673,14 +673,17 @@ export class DatabaseDO extends DurableObject<Env> {
 
 		if (endpoint === '/twitter/authors/create') {
 			if (request.method !== 'POST') {
-				return createJsonResponse({ error: 'Method not allowed' }, 405);
+				return createApiResponse('Method not allowed', 405);
 			}
 			const { author_id, realname, username } = (await request.json()) as XBotAuthorsTable;
 			if (!author_id) {
-				return createJsonResponse({ error: 'Missing required fields: authorId' }, 400);
+				return createApiResponse('Missing required fields: authorId', 400);
 			}
 			const author = await addAuthor(this.orm, author_id, realname || undefined, username || undefined);
-			return createJsonResponse({ author });
+			return createApiResponse({
+				message: 'Successfully created author',
+				data: { author }
+			});
 		}
 
 		if (endpoint === '/twitter/tweets/get') {
@@ -736,7 +739,10 @@ export class DatabaseDO extends DurableObject<Env> {
 				parent_tweet_id || undefined,
 				is_bot_response || undefined
 			);
-			return createJsonResponse({ tweet });
+			return createApiResponse({
+				message: 'Successfully created tweet',
+				data: { tweet }
+			});
 		}
 
 		if (endpoint === '/twitter/logs/get') {
