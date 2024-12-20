@@ -188,75 +188,17 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 			}
 
-			// Agent endpoints
-			if (endpoint === '/agents/get') {
-				const crewId = url.searchParams.get('crewId');
-				if (!crewId) {
-					return createApiResponse('Missing crewId parameter', 400);
+			// pass off to handler
+			if (endpoint.startsWith('/agents')) {
+				const handler = getHandler(endpoint);
+				if (handler) {
+					return handler({
+						orm: this.orm,
+						env: this.env,
+						request,
+						url,
+					});
 				}
-				const agents = await getAgents(this.orm, parseInt(crewId));
-				return createApiResponse({
-					message: 'Successfully retrieved agents',
-					data: { agents },
-				});
-			}
-
-			if (endpoint === '/agents/create') {
-				if (request.method !== 'POST') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const agentData = (await request.json()) as Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at'>;
-				if (
-					!agentData.profile_id ||
-					!agentData.crew_id ||
-					!agentData.agent_name ||
-					!agentData.agent_role ||
-					!agentData.agent_goal ||
-					!agentData.agent_backstory
-				) {
-					return createApiResponse(
-						'Missing required fields: profile_id, crew_id, agent_name, agent_role, agent_goal, agent_backstory',
-						400
-					);
-				}
-				const agent = await createAgent(this.orm, agentData);
-				return createApiResponse({
-					message: 'Successfully created agent',
-					data: { agent },
-				});
-			}
-
-			if (endpoint === '/agents/update') {
-				if (request.method !== 'PUT') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const agentId = url.searchParams.get('id');
-				if (!agentId) {
-					return createApiResponse('Missing id parameter', 400);
-				}
-				const updates = (await request.json()) as Partial<
-					Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at' | 'profile_id' | 'crew_id'>
-				>;
-				const result = await updateAgent(this.orm, parseInt(agentId), updates);
-				return createApiResponse({
-					message: 'Successfully updated agent',
-					data: { result },
-				});
-			}
-
-			if (endpoint === '/agents/delete') {
-				if (request.method !== 'DELETE') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const agentId = url.searchParams.get('id');
-				if (!agentId) {
-					return createApiResponse('Missing id parameter', 400);
-				}
-				const result = await deleteAgent(this.orm, parseInt(agentId));
-				return createApiResponse({
-					message: 'Successfully deleted agent',
-					data: { result },
-				});
 			}
 
 			// Task endpoints
