@@ -250,90 +250,17 @@ export class DatabaseDO extends DurableObject<Env> {
 				});
 			}
 
-			// Cron endpoints
-			if (endpoint === '/crons/enabled') {
-				const crons = await getEnabledCrons(this.orm);
-				return createApiResponse({
-					message: 'Successfully retrieved enabled crons',
-					data: { crons },
-				});
-			}
-
-			if (endpoint === '/crons/enabled/detailed') {
-				const crons = await getEnabledCronsDetailed(this.orm);
-				return createApiResponse({
-					message: 'Successfully retrieved detailed cron information',
-					data: { crons },
-				});
-			}
-
-			// Cron management endpoints
-			if (endpoint === '/crons/get') {
-				const crewId = url.searchParams.get('crewId');
-				if (!crewId) {
-					return createApiResponse('Missing crewId parameter', 400);
+			// Pass off to crons handler
+			if (endpoint.startsWith('/crons')) {
+				const handler = getHandler(endpoint);
+				if (handler) {
+					return handler({
+						orm: this.orm,
+						env: this.env,
+						request,
+						url,
+					});
 				}
-				const crons = await getCronsByCrew(this.orm, parseInt(crewId));
-				return createApiResponse({
-					message: 'Successfully retrieved crons for crew',
-					data: { crons },
-				});
-			}
-
-			if (endpoint === '/crons/create') {
-				if (request.method !== 'POST') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const cronData = (await request.json()) as UserCronsTable;
-				if (!cronData.profile_id || !cronData.crew_id || cronData.cron_enabled === undefined) {
-					return createApiResponse('Missing required fields: profile_id, crew_id, cron_enabled', 400);
-				}
-				// Set defaults if not provided
-				cronData.cron_interval = cronData.cron_interval || '0 * * * *'; // Default to hourly
-				cronData.cron_input = cronData.cron_input || '';
-				const cron = await createCron(this.orm, cronData);
-				return createApiResponse({
-					message: 'Successfully created cron',
-					data: { cron },
-				});
-			}
-
-			if (endpoint === '/crons/update') {
-				if (request.method !== 'PUT') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const cronId = url.searchParams.get('id');
-				if (!cronId) {
-					return createApiResponse('Missing id parameter', 400);
-				}
-				const { cron_input } = (await request.json()) as UserCronsTable;
-				if (cron_input === undefined) {
-					return createApiResponse('Missing cron_input in request body', 400);
-				}
-				const result = await updateCronInput(this.orm, parseInt(cronId), cron_input);
-				return createApiResponse({
-					message: 'Successfully updated user profile',
-					data: { result },
-				});
-			}
-
-			if (endpoint === '/crons/toggle') {
-				if (request.method !== 'PUT') {
-					return createApiResponse('Method not allowed', 405);
-				}
-				const cronId = url.searchParams.get('id');
-				if (!cronId) {
-					return createApiResponse('Missing id parameter', 400);
-				}
-				const { cron_enabled } = (await request.json()) as UserCronsTable;
-				if (cron_enabled === undefined) {
-					return createApiResponse('Missing cron_enabled in request body', 400);
-				}
-				const result = await toggleCronStatus(this.orm, parseInt(cronId), cron_enabled ? 1 : 0);
-				return createApiResponse({
-					message: 'Successfully toggled cron status',
-					data: { result },
-				});
 			}
 
 			// Profile endpoints
