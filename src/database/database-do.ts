@@ -536,7 +536,10 @@ export class DatabaseDO extends DurableObject<Env> {
 				cronData.cron_interval = cronData.cron_interval || '0 * * * *'; // Default to hourly
 				cronData.cron_input = cronData.cron_input || '';
 				const cron = await createCron(this.orm, cronData);
-				return createJsonResponse({ cron });
+				return createApiResponse({
+					message: 'Successfully created cron',
+					data: { cron }
+				});
 			}
 
 			if (endpoint === '/crons/update') {
@@ -568,10 +571,13 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 				const { cron_enabled } = (await request.json()) as UserCronsTable;
 				if (cron_enabled === undefined) {
-					return createJsonResponse({ error: 'Missing enabled in request body' }, 400);
+					return createApiResponse('Missing cron_enabled in request body', 400);
 				}
 				const result = await toggleCronStatus(this.orm, parseInt(cronId), cron_enabled ? 1 : 0);
-				return createJsonResponse({ result });
+				return createApiResponse({
+					message: 'Successfully toggled cron status',
+					data: { result }
+				});
 			}
 
 			// Conversation creation endpoint
@@ -836,7 +842,7 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			const stepData = (await request.json()) as UserCrewExecutionStepsTable;
 			if (!stepData.profile_id || !stepData.crew_id || !stepData.execution_id || !stepData.step_type || !stepData.step_data) {
-				return createJsonResponse({ error: 'Missing required fields' }, 400);
+				return createApiResponse('Missing required fields: profile_id, crew_id, cron_enabled', 400);
 			}
 
 			// Verify the profile_id matches the token address
