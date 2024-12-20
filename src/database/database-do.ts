@@ -592,10 +592,13 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/profiles/role') {
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+					return createApiResponse('Missing address parameter', 400);
 				}
 				const role = await getUserRole(this.orm, address);
-				return createJsonResponse({ role });
+				return createApiResponse({
+					message: 'Successfully retrieved user role',
+					data: { role }
+				});
 			}
 
 			if (endpoint === '/profiles/get') {
@@ -604,7 +607,10 @@ export class DatabaseDO extends DurableObject<Env> {
 					return createJsonResponse({ error: 'Missing address parameter' }, 400);
 				}
 				const profile = await getUserProfile(this.orm, address);
-				return createJsonResponse({ profile });
+				return createApiResponse({
+					message: 'Successfully retrieved user profile',
+					data: { profile }
+				});
 			}
 
 			if (endpoint === '/profiles/create') {
@@ -613,7 +619,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 				const profileData = (await request.json()) as UserProfilesTable;
 				if (!profileData.stx_address || !profileData.user_role) {
-					return createJsonResponse({ error: 'Missing required fields: stx_address, user_role' }, 400);
+					return createApiResponse('Missing required fields: stx_address, user_role', 400);
 				}
 				const profile = await createUserProfile(this.orm, profileData);
 				return createJsonResponse({ profile });
