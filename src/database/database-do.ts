@@ -410,49 +410,49 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/tasks/update') {
 				if (request.method !== 'PUT') {
-					return createJsonResponse('Method not allowed', 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const taskId = url.searchParams.get('id');
 				if (!taskId) {
-					return createJsonResponse('Missing id parameter', 400);
+					return createApiResponse('Missing id parameter', 400);
 				}
 				const updates = (await request.json()) as Partial<
 					Omit<UserTasksTable, 'id' | 'created_at' | 'updated_at' | 'profile_id' | 'crew_id' | 'agent_id'>
 				>;
 				const result = await updateTask(this.orm, parseInt(taskId), updates);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully updated task',
-					data: result
+					data: { result }
 				});
 			}
 
 			if (endpoint === '/tasks/delete') {
 				if (request.method !== 'DELETE') {
-					return createJsonResponse('Method not allowed', 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const taskId = url.searchParams.get('id');
 				if (!taskId) {
-					return createJsonResponse('Missing id parameter', 400);
+					return createApiResponse('Missing id parameter', 400);
 				}
 				const result = await deleteTask(this.orm, parseInt(taskId));
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully deleted task',
-					data: result
+					data: { result }
 				});
 			}
 
 			if (endpoint === '/tasks/delete-all') {
 				if (request.method !== 'DELETE') {
-					return createJsonResponse('Method not allowed', 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const agentId = url.searchParams.get('agentId');
 				if (!agentId) {
-					return createJsonResponse('Missing agentId parameter', 400);
+					return createApiResponse('Missing agentId parameter', 400);
 				}
 				const result = await deleteTasks(this.orm, parseInt(agentId));
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully deleted all tasks for agent',
-					data: result
+					data: { result }
 				});
 			}
 
