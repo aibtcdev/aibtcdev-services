@@ -302,15 +302,18 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/agents/get') {
 				const crewId = url.searchParams.get('crewId');
 				if (!crewId) {
-					return createJsonResponse({ error: 'Missing crewId parameter' }, 400);
+					return createJsonResponse('Missing crewId parameter', 400);
 				}
 				const agents = await getAgents(this.orm, parseInt(crewId));
-				return createJsonResponse({ agents });
+				return createJsonResponse({
+					message: 'Successfully retrieved agents',
+					data: agents
+				});
 			}
 
 			if (endpoint === '/agents/create') {
 				if (request.method !== 'POST') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createJsonResponse('Method not allowed', 405);
 				}
 				const agentData = (await request.json()) as Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at'>;
 				if (
@@ -321,37 +324,46 @@ export class DatabaseDO extends DurableObject<Env> {
 					!agentData.agent_goal ||
 					!agentData.agent_backstory
 				) {
-					return createJsonResponse({ error: 'Missing required fields' }, 400);
+					return createJsonResponse('Missing required fields: profile_id, crew_id, agent_name, agent_role, agent_goal, agent_backstory', 400);
 				}
 				const agent = await createAgent(this.orm, agentData);
-				return createJsonResponse({ agent });
+				return createJsonResponse({
+					message: 'Successfully created agent',
+					data: agent
+				});
 			}
 
 			if (endpoint === '/agents/update') {
 				if (request.method !== 'PUT') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createJsonResponse('Method not allowed', 405);
 				}
 				const agentId = url.searchParams.get('id');
 				if (!agentId) {
-					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+					return createJsonResponse('Missing id parameter', 400);
 				}
 				const updates = (await request.json()) as Partial<
 					Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at' | 'profile_id' | 'crew_id'>
 				>;
 				const result = await updateAgent(this.orm, parseInt(agentId), updates);
-				return createJsonResponse({ result });
+				return createJsonResponse({
+					message: 'Successfully updated agent',
+					data: result
+				});
 			}
 
 			if (endpoint === '/agents/delete') {
 				if (request.method !== 'DELETE') {
-					return createJsonResponse({ error: 'Method not allowed' }, 405);
+					return createJsonResponse('Method not allowed', 405);
 				}
 				const agentId = url.searchParams.get('id');
 				if (!agentId) {
-					return createJsonResponse({ error: 'Missing id parameter' }, 400);
+					return createJsonResponse('Missing id parameter', 400);
 				}
 				const result = await deleteAgent(this.orm, parseInt(agentId));
-				return createJsonResponse({ result });
+				return createJsonResponse({
+					message: 'Successfully deleted agent',
+					data: result
+				});
 			}
 
 			// Task endpoints
