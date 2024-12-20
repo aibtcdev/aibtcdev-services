@@ -464,10 +464,13 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/crews/executions') {
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse({ error: 'Missing address parameter' }, 400);
+					return createJsonResponse('Missing address parameter', 400);
 				}
 				const executions = await getCrewExecutions(this.orm, address);
-				return createJsonResponse({ executions });
+				return createJsonResponse({
+					message: 'Successfully retrieved crew executions',
+					data: executions
+				});
 			}
 
 			if (endpoint === '/crews/executions/add') {
@@ -664,10 +667,13 @@ export class DatabaseDO extends DurableObject<Env> {
 		if (endpoint === '/twitter/authors/get') {
 			const authorId = url.searchParams.get('authorId');
 			if (!authorId) {
-				return createJsonResponse({ error: 'Missing authorId parameter' }, 400);
+				return createJsonResponse('Missing authorId parameter', 400);
 			}
 			const author = await getAuthor(this.orm, authorId);
-			return createJsonResponse({ author });
+			return createJsonResponse({
+				message: 'Successfully retrieved author',
+				data: author
+			});
 		}
 
 		if (endpoint === '/twitter/authors/create') {
@@ -685,28 +691,37 @@ export class DatabaseDO extends DurableObject<Env> {
 		if (endpoint === '/twitter/tweets/get') {
 			const tweetId = url.searchParams.get('tweetId');
 			if (!tweetId) {
-				return createJsonResponse({ error: 'Missing tweetId parameter' }, 400);
+				return createJsonResponse('Missing tweetId parameter', 400);
 			}
 			const tweet = await getTweet(this.orm, tweetId);
-			return createJsonResponse({ tweet });
+			return createJsonResponse({
+				message: 'Successfully retrieved tweet',
+				data: tweet
+			});
 		}
 
 		if (endpoint === '/twitter/tweets/thread') {
 			const threadId = url.searchParams.get('threadId');
 			if (!threadId) {
-				return createJsonResponse({ error: 'Missing threadId parameter' }, 400);
+				return createJsonResponse('Missing threadId parameter', 400);
 			}
 			const tweets = await getThreadTweets(this.orm, parseInt(threadId));
-			return createJsonResponse({ tweets });
+			return createJsonResponse({
+				message: 'Successfully retrieved thread tweets',
+				data: tweets
+			});
 		}
 
 		if (endpoint === '/twitter/tweets/author') {
 			const authorId = url.searchParams.get('authorId');
 			if (!authorId) {
-				return createJsonResponse({ error: 'Missing authorId parameter' }, 400);
+				return createJsonResponse('Missing authorId parameter', 400);
 			}
 			const tweets = await getAuthorTweets(this.orm, authorId);
-			return createJsonResponse({ tweets });
+			return createJsonResponse({
+				message: 'Successfully retrieved author tweets',
+				data: tweets
+			});
 		}
 
 		if (endpoint === '/twitter/tweets/add') {
@@ -732,10 +747,13 @@ export class DatabaseDO extends DurableObject<Env> {
 		if (endpoint === '/twitter/logs/get') {
 			const tweetId = url.searchParams.get('tweetId');
 			if (!tweetId) {
-				return createJsonResponse({ error: 'Missing tweetId parameter' }, 400);
+				return createJsonResponse('Missing tweetId parameter', 400);
 			}
 			const logs = await getTweetLogs(this.orm, tweetId);
-			return createJsonResponse({ logs });
+			return createJsonResponse({
+				message: 'Successfully retrieved tweet logs',
+				data: logs
+			});
 		}
 
 		if (endpoint === '/twitter/logs/add') {
