@@ -1,7 +1,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
-import { createApiResponse } from '../utils/requests-responses';
+import { createApiResponse, createUnsupportedEndpointResponse } from '../utils/requests-responses';
 
 /**
  * Durable Object class for providing transformed data as API endpoints
@@ -9,7 +9,7 @@ import { createApiResponse } from '../utils/requests-responses';
 export class ContextDO extends DurableObject<Env> {
 	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH: string = '/context';
-	private readonly SUPPORTED_ENDPOINTS: string[] = ['/hello'];
+	private readonly SUPPORTED_ENDPOINTS: string[] = ['not implemented yet'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
@@ -51,13 +51,9 @@ export class ContextDO extends DurableObject<Env> {
 
 		// Handle root path
 		if (endpoint === '' || endpoint === '/') {
-			return createApiResponse(`Supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`);
+			return createApiResponse('Not implemented yet', 405);
 		}
 
-		if (endpoint === '/hello') {
-			return createApiResponse('hello from context!');
-		}
-
-		return createApiResponse(`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`, 404);
+		return createUnsupportedEndpointResponse(endpoint, this.SUPPORTED_ENDPOINTS);
 	}
 }

@@ -1,6 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
-import { createJsonResponse } from '../utils/requests-responses';
+import { createApiResponse, createUnsupportedEndpointResponse } from '../utils/requests-responses';
 import { validateSharedKeyAuth } from '../utils/auth-helper';
 import OpenAI from 'openai';
 
@@ -30,6 +30,16 @@ export class ImageGeneratorDO extends DurableObject<Env> {
 		}
 
 		const endpoint = path.replace(this.BASE_PATH, '');
+
+		// Handle root path
+		if (endpoint === '' || endpoint === '/') {
+			return createApiResponse({
+				message: 'image generator service',
+				data: {
+					endpoints: this.SUPPORTED_ENDPOINTS,
+				},
+			});
+		}
 
 		// Require auth for all endpoints
 		const authResult = await validateSharedKeyAuth(this.env, request);
@@ -91,7 +101,7 @@ export class ImageGeneratorDO extends DurableObject<Env> {
 
 				return createApiResponse({
 					message: 'Successfully generated images',
-					data: { images: storedImages }
+					data: { images: storedImages },
 				});
 			} catch (error) {
 				console.error('Image generation failed:', error);
@@ -141,13 +151,13 @@ export class ImageGeneratorDO extends DurableObject<Env> {
 						})),
 						truncated: objects.truncated,
 						cursor: objects.truncated ? objects.cursor : undefined,
-					}
+					},
 				});
 			} catch (error) {
 				return createApiResponse('Failed to list images', 500);
 			}
 		}
 
-		return createApiResponse(`Unsupported endpoint: ${endpoint}`, 404);
+		return createUnsupportedEndpointResponse(endpoint, this.SUPPORTED_ENDPOINTS);
 	}
 }

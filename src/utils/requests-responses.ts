@@ -31,3 +31,7 @@ export function createApiResponse(response: { message: string; data?: unknown } 
 		},
 	});
 }
+
+export function createUnsupportedEndpointResponse(endpoint: string, supportedEndpoints: string[]): Response {
+	return createApiResponse(`Unsupported endpoint: ${endpoint}, supported endpoints: ${supportedEndpoints.join(', ')}`, 404);
+}

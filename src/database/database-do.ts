@@ -1,7 +1,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
-import { createApiResponse } from '../utils/requests-responses';
+import { createApiResponse, createUnsupportedEndpointResponse } from '../utils/requests-responses';
 import { D1Orm } from 'd1-orm';
 import {
 	UserAgentsTable,
@@ -146,7 +146,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		// Handle root path
 		if (endpoint === '' || endpoint === '/') {
 			return createApiResponse({
-				message: 'Database service endpoints available',
+				message: 'database service',
 				data: {
 					endpoints: this.SUPPORTED_ENDPOINTS,
 				},
@@ -916,6 +916,6 @@ export class DatabaseDO extends DurableObject<Env> {
 			});
 		}
 
-		return createApiResponse(`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`, 404);
+		return createUnsupportedEndpointResponse(endpoint, this.SUPPORTED_ENDPOINTS);
 	}
 }

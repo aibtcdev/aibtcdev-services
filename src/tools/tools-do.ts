@@ -1,7 +1,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
-import { createApiResponse } from '../utils/requests-responses';
+import { createApiResponse, createUnsupportedEndpointResponse } from '../utils/requests-responses';
 
 /**
  * Durable Object class for running Typescript tools requested by the backend
@@ -9,7 +9,7 @@ import { createApiResponse } from '../utils/requests-responses';
 export class ToolsDO extends DurableObject<Env> {
 	private readonly ALARM_INTERVAL_MS: number;
 	private readonly BASE_PATH: string = '/tools';
-	private readonly SUPPORTED_ENDPOINTS: string[] = ['/hello'];
+	private readonly SUPPORTED_ENDPOINTS: string[] = ['not implemented yet'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
@@ -51,18 +51,9 @@ export class ToolsDO extends DurableObject<Env> {
 
 		// Handle root path
 		if (endpoint === '' || endpoint === '/') {
-			return createApiResponse({
-				message: 'Available endpoints retrieved successfully',
-				data: { endpoints: this.SUPPORTED_ENDPOINTS }
-			});
+			return createApiResponse('Not implemented yet', 405);
 		}
 
-		if (endpoint === '/hello') {
-			return createApiResponse({
-				message: 'Hello from tools!'
-			});
-		}
-
-		return createApiResponse(`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`, 404);
+		return createUnsupportedEndpointResponse(endpoint, this.SUPPORTED_ENDPOINTS);
 	}
 }

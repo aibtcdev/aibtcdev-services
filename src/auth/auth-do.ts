@@ -3,7 +3,7 @@ import { verifyMessageSignatureRsv } from '@stacks/encryption';
 import { getAddressFromPublicKey, validateStacksAddress } from '@stacks/transactions';
 import { Env } from '../../worker-configuration';
 import { AppConfig } from '../config';
-import { createApiResponse } from '../utils/requests-responses';
+import { createApiResponse, createUnsupportedEndpointResponse } from '../utils/requests-responses';
 import { validateSharedKeyAuth } from '../utils/auth-helper';
 
 /**
@@ -57,7 +57,10 @@ export class AuthDO extends DurableObject<Env> {
 		// Handle root path
 		if (endpoint === '' || endpoint === '/') {
 			return createApiResponse({
-				message: `Supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`,
+				message: 'auth service',
+				data: {
+					endpoints: this.SUPPORTED_ENDPOINTS,
+				},
 			});
 		}
 
@@ -180,6 +183,6 @@ export class AuthDO extends DurableObject<Env> {
 
 		// TODO: endpoint to revoke a session token
 
-		return createApiResponse(`Unsupported endpoint: ${endpoint}, supported endpoints: ${this.SUPPORTED_ENDPOINTS.join(', ')}`, 404);
+		return createUnsupportedEndpointResponse(endpoint, this.SUPPORTED_ENDPOINTS);
 	}
 }

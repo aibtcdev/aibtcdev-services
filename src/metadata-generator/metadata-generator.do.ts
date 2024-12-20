@@ -1,6 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
-import { createApiResponse } from '../utils/requests-responses';
+import { createApiResponse, createUnsupportedEndpointResponse } from '../utils/requests-responses';
 import { validateSharedKeyAuth } from '../utils/auth-helper';
 
 interface TokenMetadata {
@@ -31,7 +31,7 @@ interface GenerateMetadataRequest {
 export class MetadataGeneratorDO extends DurableObject<Env> {
 	private readonly BASE_PATH = '/metadata';
 	private readonly KEY_PREFIX = 'sip10';
-	private readonly IMAGE_DO_NAME = 'IMAGE_GENERATOR';
+	private readonly SUPPORTED_ENDPOINTS = ['/generate', '/update'];
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
@@ -44,6 +44,16 @@ export class MetadataGeneratorDO extends DurableObject<Env> {
 		const path = url.pathname;
 
 		const endpoint = path.replace(this.BASE_PATH, '');
+
+		// Handle root path
+		if (endpoint === '' || endpoint === '/') {
+			return createApiResponse({
+				message: 'metadata generator service',
+				data: {
+					endpoints: this.SUPPORTED_ENDPOINTS,
+				},
+			});
+		}
 
 		// Require auth for all endpoints
 		const authResult = await validateSharedKeyAuth(this.env, request);
@@ -76,7 +86,7 @@ export class MetadataGeneratorDO extends DurableObject<Env> {
 			return this.getMetadata(contractId);
 		}
 
-		return createApiResponse(`Unsupported endpoint: ${endpoint}`, 404);
+		return createUnsupportedEndpointResponse(endpoint, this.SUPPORTED_ENDPOINTS);
 	}
 
 	private async generateMetadata(contractId: string, request: Request): Promise<Response> {
@@ -91,7 +101,7 @@ export class MetadataGeneratorDO extends DurableObject<Env> {
 			}
 
 			// Generate image using ImageGeneratorDO
-			const imageGeneratorId = this.env.IMAGE_GENERATOR_DO.idFromName(this.IMAGE_DO_NAME);
+			const imageGeneratorId = this.env.IMAGE_GENERATOR_DO.idFromName('image-generator-do');
 			const imageGenerator = this.env.IMAGE_GENERATOR_DO.get(imageGeneratorId);
 
 			// Create image prompt based on token details

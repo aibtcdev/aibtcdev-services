@@ -1,6 +1,6 @@
 import { Env } from '../worker-configuration';
 import { AppConfig } from './config';
-import { corsHeaders, createJsonResponse } from './utils/requests-responses';
+import { corsHeaders, createApiResponse, createUnsupportedEndpointResponse } from './utils/requests-responses';
 import { AuthDO } from './auth/auth-do';
 import { CdnDO } from './cdn/cdn-do';
 import { ContextDO } from './context/context-do';
@@ -35,9 +35,13 @@ export default {
 		const url = new URL(request.url);
 		const path = url.pathname;
 
-		if (path === '/') {
-			return createJsonResponse({
-				message: `Welcome to aibtcdev-services! Supported services: ${config.SUPPORTED_SERVICES.join(', ')}`,
+		// Handle root path
+		if (path === '' || path === '/') {
+			return createApiResponse({
+				message: 'aibtc.dev services online',
+				data: {
+					endpoints: config.SUPPORTED_SERVICES,
+				},
 			});
 		}
 
@@ -92,6 +96,6 @@ export default {
 		}
 
 		// Return 404 for any other path
-		return createJsonResponse(`Unsupported service at: ${path}, supported services: ${config.SUPPORTED_SERVICES.join(', ')}`, 404);
+		return createUnsupportedEndpointResponse(path, config.SUPPORTED_SERVICES);
 	},
 } satisfies ExportedHandler<Env>;

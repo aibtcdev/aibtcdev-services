@@ -1,6 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
-import { createApiResponse } from '../utils/requests-responses';
+import { createApiResponse, createUnsupportedEndpointResponse } from '../utils/requests-responses';
 import { validateSharedKeyAuth } from '../utils/auth-helper';
 import { AppConfig } from '../config';
 
@@ -51,9 +51,9 @@ export class CdnDO extends DurableObject<Env> {
 		// Handle root path
 		if (endpoint === '' || endpoint === '/') {
 			return createApiResponse({
-				message: 'Welcome to CDN service',
+				message: 'cdn service',
 				data: {
-					supportedEndpoints: this.SUPPORTED_ENDPOINTS,
+					endpoints: this.SUPPORTED_ENDPOINTS,
 				},
 			});
 		}
@@ -151,6 +151,6 @@ export class CdnDO extends DurableObject<Env> {
 			}
 		}
 
-		return createApiResponse(`Unsupported endpoint: ${endpoint}`, 404);
+		return createUnsupportedEndpointResponse(endpoint, this.SUPPORTED_ENDPOINTS);
 	}
 }
