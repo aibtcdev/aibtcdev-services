@@ -46,7 +46,11 @@ export default {
 				});
 			}
 
-			// For the Durable Object responses, the CORS headers will be added by the DO handlers
+			// Each service is represented by its own Durable Object
+			// - services are grouped by folder in the src directory
+			// - each service has its own reources and logic
+			// - we pass the request to the DO and it constructs the response
+			// - response headers and formatting are handled by shared utils
 
 			if (path.startsWith('/auth')) {
 				const id: DurableObjectId = env.AUTH_DO.idFromName('auth-do'); // create the instance
@@ -99,6 +103,7 @@ export default {
 			// Return 404 for any other path
 			return createUnsupportedEndpointResponse(path, config.SUPPORTED_SERVICES);
 		} catch (error) {
+			// Return 500 for any unhandled error
 			return createApiResponse(`Unknown error: ${error instanceof Error ? error.message : String(error)}`, 500);
 		}
 	},

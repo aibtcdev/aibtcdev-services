@@ -26,21 +26,7 @@ export class AuthDO extends DurableObject<Env> {
 		this.ALARM_INTERVAL_MS = config.ALARM_INTERVAL_MS;
 
 		// Set up alarm to run at configured interval
-		ctx.storage.setAlarm(Date.now() + this.ALARM_INTERVAL_MS);
-	}
-
-	async alarm(): Promise<void> {
-		try {
-			console.log(`AuthDO: alarm activated`);
-		} catch (error) {
-			console.error(`AuthDO: alarm execution failed: ${error instanceof Error ? error.message : String(error)}`);
-		} finally {
-			// Always schedule next alarm if one isn't set
-			const currentAlarm = await this.ctx.storage.getAlarm();
-			if (currentAlarm === null) {
-				this.ctx.storage.setAlarm(Date.now() + this.ALARM_INTERVAL_MS);
-			}
-		}
+		// ctx.storage.setAlarm(Date.now() + this.ALARM_INTERVAL_MS);
 	}
 
 	async fetch(request: Request): Promise<Response> {
