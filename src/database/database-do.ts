@@ -202,7 +202,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			if (endpoint === '/crews/profile') {
 				const address = url.searchParams.get('address');
 				if (!address) {
-					return createJsonResponse('Missing address parameter', 400);
+					return createApiResponse('Missing address parameter', 400);
 				}
 
 				// Get the session token from Authorization header
@@ -229,36 +229,36 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/crews/public') {
 				const crews = await getPublicCrews(this.orm);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully retrieved public crews',
-					data: crews
+					data: { crews }
 				});
 			}
 
 			if (endpoint === '/crews/get') {
 				const crewId = url.searchParams.get('id');
 				if (!crewId) {
-					return createJsonResponse('Missing id parameter', 400);
+					return createApiResponse('Missing id parameter', 400);
 				}
 				const crew = await getCrew(this.orm, parseInt(crewId));
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully retrieved crew',
-					data: crew
+					data: { crew }
 				});
 			}
 
 			if (endpoint === '/crews/create') {
 				if (request.method !== 'POST') {
-					return createJsonResponse('Method not allowed', 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const crewData = (await request.json()) as Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at'>;
 				if (!crewData.profile_id || !crewData.crew_name) {
-					return createJsonResponse('Missing required fields: profile_id, crew_name', 400);
+					return createApiResponse('Missing required fields: profile_id, crew_name', 400);
 				}
 				const crew = await createCrew(this.orm, crewData);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully created crew',
-					data: crew
+					data: { crew }
 				});
 			}
 
@@ -272,9 +272,9 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 				const updates = (await request.json()) as Partial<Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at' | 'profile_id'>>;
 				const result = await updateCrew(this.orm, parseInt(crewId), updates);
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully updated crew',
-					data: result
+					data: { result }
 				});
 			}
 
@@ -287,9 +287,9 @@ export class DatabaseDO extends DurableObject<Env> {
 					return createJsonResponse('Missing id parameter', 400);
 				}
 				const result = await deleteCrew(this.orm, parseInt(crewId));
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully deleted crew',
-					data: result
+					data: { result }
 				});
 			}
 
@@ -592,7 +592,10 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 
 				const result = await addConversation(this.orm, profile_id, conversation_name ? conversation_name : 'new conversation');
-				return createJsonResponse({ result });
+				return createApiResponse({
+					message: 'Successfully updated user profile',
+					data: { result }
+				});
 			}
 
 			// Profile endpoints
@@ -629,7 +632,10 @@ export class DatabaseDO extends DurableObject<Env> {
 					return createApiResponse('Missing required fields: stx_address, user_role', 400);
 				}
 				const profile = await createUserProfile(this.orm, profileData);
-				return createJsonResponse({ profile });
+				return createApiResponse({
+					message: 'Successfully created user profile',
+					data: { profile }
+				});
 			}
 
 			if (endpoint === '/profiles/update') {
@@ -817,7 +823,10 @@ export class DatabaseDO extends DurableObject<Env> {
 			}
 
 			const steps = await getExecutionSteps(this.orm, parseInt(executionId));
-			return createJsonResponse({ steps });
+			return createApiResponse({
+				message: 'Successfully retrieved execution steps',
+				data: { steps }
+			});
 		}
 
 		if (endpoint === '/crews/steps/create') {
