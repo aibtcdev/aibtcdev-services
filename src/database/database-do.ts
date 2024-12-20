@@ -264,11 +264,11 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/crews/update') {
 				if (request.method !== 'PUT') {
-					return createJsonResponse('Method not allowed', 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const crewId = url.searchParams.get('id');
 				if (!crewId) {
-					return createJsonResponse('Missing id parameter', 400);
+					return createApiResponse('Missing id parameter', 400);
 				}
 				const updates = (await request.json()) as Partial<Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at' | 'profile_id'>>;
 				const result = await updateCrew(this.orm, parseInt(crewId), updates);
@@ -280,11 +280,11 @@ export class DatabaseDO extends DurableObject<Env> {
 
 			if (endpoint === '/crews/delete') {
 				if (request.method !== 'DELETE') {
-					return createJsonResponse('Method not allowed', 405);
+					return createApiResponse('Method not allowed', 405);
 				}
 				const crewId = url.searchParams.get('id');
 				if (!crewId) {
-					return createJsonResponse('Missing id parameter', 400);
+					return createApiResponse('Missing id parameter', 400);
 				}
 				const result = await deleteCrew(this.orm, parseInt(crewId));
 				return createApiResponse({
@@ -300,9 +300,9 @@ export class DatabaseDO extends DurableObject<Env> {
 					return createJsonResponse('Missing crewId parameter', 400);
 				}
 				const agents = await getAgents(this.orm, parseInt(crewId));
-				return createJsonResponse({
+				return createApiResponse({
 					message: 'Successfully retrieved agents',
-					data: agents
+					data: { agents }
 				});
 			}
 
