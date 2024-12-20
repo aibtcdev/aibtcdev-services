@@ -750,7 +750,7 @@ export class DatabaseDO extends DurableObject<Env> {
 		if (endpoint === '/twitter/tweets/author') {
 			const authorId = url.searchParams.get('authorId');
 			if (!authorId) {
-				return createJsonResponse('Missing authorId parameter', 400);
+				return createApiResponse('Missing authorId parameter', 400);
 			}
 			const tweets = await getAuthorTweets(this.orm, authorId);
 			return createJsonResponse({
@@ -765,7 +765,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			}
 			const { author_id, tweet_id, tweet_body, thread_id, parent_tweet_id, is_bot_response } = (await request.json()) as XBotTweetsTable;
 			if (!author_id || !tweet_id || !tweet_body) {
-				return createJsonResponse({ error: 'Missing required fields: authorId, tweetId, tweetBody' }, 400);
+				return createApiResponse('Missing required fields: authorId, tweetId, tweetBody', 400);
 			}
 			const tweet = await addTweet(
 				this.orm,
@@ -800,23 +800,26 @@ export class DatabaseDO extends DurableObject<Env> {
 			}
 			const { tweet_id, tweet_status, log_message } = (await request.json()) as XBotLogsTable;
 			if (!tweet_id || !tweet_status) {
-				return createJsonResponse({ error: 'Missing required fields: tweetId, status' }, 400);
+				return createApiResponse('Missing required fields: tweetId, status', 400);
 			}
 			const log = await addLog(this.orm, tweet_id, tweet_status, log_message || undefined);
-			return createJsonResponse({ log });
+			return createApiResponse({
+				message: 'Successfully created log',
+				data: { log }
+			});
 		}
 
 		// Crew execution steps endpoints
 		if (endpoint === '/crews/steps/get') {
 			const executionId = url.searchParams.get('executionId');
 			if (!executionId) {
-				return createJsonResponse({ error: 'Missing executionId parameter' }, 400);
+				return createApiResponse('Missing executionId parameter', 400);
 			}
 
 			// Get the session token from Authorization header
 			const authHeader = request.headers.get('Authorization');
 			if (!authHeader) {
-				return createJsonResponse({ error: 'Missing authorization header' }, 401);
+				return createApiResponse('Missing authorization header', 401);
 			}
 
 			// Extract token from Bearer format
@@ -825,7 +828,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			// Verify the token matches the requested address
 			const tokenAddress = await validateSessionToken(this.env, token);
 			if (!tokenAddress.success) {
-				return createJsonResponse({ error: 'Unauthorized access' }, 403);
+				return createApiResponse('Unauthorized access', 403);
 			}
 
 			const steps = await getExecutionSteps(this.orm, parseInt(executionId));
@@ -843,7 +846,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			// Get the session token from Authorization header
 			const authHeader = request.headers.get('Authorization');
 			if (!authHeader) {
-				return createJsonResponse({ error: 'Missing authorization header' }, 401);
+				return createApiResponse('Missing authorization header', 401);
 			}
 
 			// Extract token from Bearer format
@@ -852,7 +855,7 @@ export class DatabaseDO extends DurableObject<Env> {
 			// Verify the token
 			const tokenAddress = await validateSessionToken(this.env, token);
 			if (!tokenAddress) {
-				return createJsonResponse({ error: 'Unauthorized access' }, 403);
+				return createApiResponse('Unauthorized access', 403);
 			}
 
 			const stepData = (await request.json()) as UserCrewExecutionStepsTable;
@@ -866,17 +869,20 @@ export class DatabaseDO extends DurableObject<Env> {
 			}
 
 			const step = await createExecutionStep(this.orm, stepData);
-			return createJsonResponse({ step });
+			return createApiResponse({
+				message: 'Successfully created execution step',
+				data: { step }
+			});
 		}
 
 		if (endpoint === '/crews/steps/delete') {
 			if (request.method !== 'DELETE') {
-				return createJsonResponse({ error: 'Method not allowed' }, 405);
+				return createApiResponse('Method not allowed', 405);
 			}
 
 			const executionId = url.searchParams.get('executionId');
 			if (!executionId) {
-				return createJsonResponse({ error: 'Missing executionId parameter' }, 400);
+				return createApiResponse('Missing executionId parameter', 400);
 			}
 
 			// Get the session token from Authorization header
@@ -895,7 +901,10 @@ export class DatabaseDO extends DurableObject<Env> {
 			}
 
 			const result = await deleteExecutionSteps(this.orm, parseInt(executionId));
-			return createJsonResponse({ result });
+			return createApiResponse({
+				message: 'Successfully deleted execution steps',
+				data: { result }
+			});
 		}
 
 		return createApiResponse(
