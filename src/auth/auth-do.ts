@@ -124,17 +124,14 @@ export class AuthDO extends DurableObject<Env> {
 				await Promise.all([savePubkey, saveSessionToken, saveAddress]);
 				// return 200 with session token
 				return createJsonResponse({
-					message: 'auth token successfully created',
-					address: addressFromPubkey,
-					sessionToken,
+					message: 'Successfully created auth token',
+					data: {
+						address: addressFromPubkey,
+						sessionToken
+					}
 				});
 			} catch (error) {
-				return createJsonResponse(
-					{
-						error: `Failed to verify signature ${signedMessage}: ${error instanceof Error ? error.message : String(error)}`,
-					},
-					401
-				);
+				return createJsonResponse(`Failed to verify signature: ${error instanceof Error ? error.message : String(error)}`, 401);
 			}
 		}
 
@@ -156,9 +153,11 @@ export class AuthDO extends DurableObject<Env> {
 			}
 			// return 200 with session info
 			return createJsonResponse({
-				message: 'address successfully verified',
-				address,
-				sessionKey,
+				message: 'Successfully verified address',
+				data: {
+					address,
+					sessionKey
+				}
 			});
 		}
 
@@ -181,9 +180,11 @@ export class AuthDO extends DurableObject<Env> {
 			}
 			// return 200 with session info
 			return createJsonResponse({
-				message: 'session token successfully verified',
-				address,
-				sessionToken,
+				message: 'Successfully verified session token',
+				data: {
+					address,
+					sessionToken
+				}
 			});
 		}
 
