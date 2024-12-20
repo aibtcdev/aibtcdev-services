@@ -484,12 +484,7 @@ export class DatabaseDO extends DurableObject<Env> {
 				const { address, crewId, conversationId, input } = body;
 
 				if (!address || !crewId || !conversationId || !input) {
-					return createJsonResponse(
-						{
-							error: 'Missing required parameters: address, crewId, conversationId, input',
-						},
-						400
-					);
+					return createApiResponse('Missing required parameters: address, crewId, conversationId, input', 400);
 				}
 
 				const execution = await addCrewExecution(this.orm, address, crewId, conversationId, input);
