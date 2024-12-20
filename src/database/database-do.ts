@@ -212,7 +212,6 @@ export class DatabaseDO extends DurableObject<Env> {
 				}
 			}
 
-
 			// Pass off to crons handler
 			if (endpoint.startsWith('/crons')) {
 				const handler = getHandler(endpoint);
@@ -238,22 +237,22 @@ export class DatabaseDO extends DurableObject<Env> {
 					});
 				}
 			}
+
+			// Pass off to twitter handler
+			if (endpoint.startsWith('/twitter')) {
+				const handler = getHandler(endpoint);
+				if (handler) {
+					return handler({
+						orm: this.orm,
+						env: this.env,
+						request,
+						url,
+					});
+				}
+			}
 		} catch (error) {
 			console.error(`Database error: ${error instanceof Error ? error.message : String(error)}`);
 			return createApiResponse(`Database error: ${error instanceof Error ? error.message : String(error)}`, 500);
-		}
-
-		// Pass off to twitter handler
-		if (endpoint.startsWith('/twitter')) {
-			const handler = getHandler(endpoint);
-			if (handler) {
-				return handler({
-					orm: this.orm,
-					env: this.env,
-					request,
-					url,
-				});
-			}
 		}
 
 		return createUnsupportedEndpointResponse(endpoint, this.SUPPORTED_ENDPOINTS);
