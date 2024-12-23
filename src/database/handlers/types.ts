@@ -4,7 +4,10 @@ import { Env } from '../../../worker-configuration';
 export interface HandlerEndpoint {
 	path: string;
 	methods: string[];
-	description?: string;
+	description: string;
+	requiresAuth?: boolean;
+	parameters?: Record<string, string>;
+	requestBody?: Record<string, string>;
 }
 
 export interface HandlerDefinition {

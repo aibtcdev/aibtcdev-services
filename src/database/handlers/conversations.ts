@@ -7,24 +7,41 @@ export const conversationsHandler: HandlerDefinition = {
 	baseRoute: 'conversations',
 	endpoints: [
 		{
-			path: '/conversations/conversations',
+			path: '/conversations/list',
 			methods: ['GET'],
 			description: 'Get all conversations for an address',
+			requiresAuth: true,
+			parameters: {
+				address: 'STX address of the user'
+			}
 		},
 		{
 			path: '/conversations/latest',
-			methods: ['GET'],
+			methods: ['GET'], 
 			description: 'Get latest conversation for an address',
+			requiresAuth: true,
+			parameters: {
+				address: 'STX address of the user'
+			}
 		},
 		{
 			path: '/conversations/history',
 			methods: ['GET'],
 			description: 'Get conversation history by ID',
+			requiresAuth: true,
+			parameters: {
+				id: 'Conversation ID'
+			}
 		},
 		{
 			path: '/conversations/create',
 			methods: ['POST'],
 			description: 'Create a new conversation',
+			requiresAuth: true,
+			requestBody: {
+				profile_id: 'STX address of the user',
+				conversation_name: 'Optional name for the conversation'
+			}
 		},
 	],
 	handler: async ({ orm, request, url }) => {
