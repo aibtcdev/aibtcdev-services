@@ -23,21 +23,37 @@ export const crewsHandler: HandlerDefinition = {
 			path: '/crews/profile',
 			methods: ['GET'],
 			description: 'Get crews for a specific profile',
+			requiresAuth: true,
+			parameters: {
+				address: 'STX address of the user'
+			}
 		},
 		{
 			path: '/crews/public',
 			methods: ['GET'],
 			description: 'Get all public crews',
+			requiresAuth: false
 		},
 		{
 			path: '/crews/get',
 			methods: ['GET'],
 			description: 'Get a specific crew by ID',
+			requiresAuth: true,
+			parameters: {
+				id: 'ID of the crew to retrieve'
+			}
 		},
 		{
 			path: '/crews/create',
 			methods: ['POST'],
 			description: 'Create a new crew',
+			requiresAuth: true,
+			requestBody: {
+				profile_id: 'STX address of the user',
+				crew_name: 'Name of the crew',
+				crew_description: 'Optional description of the crew',
+				is_public: 'Optional boolean indicating if crew is public'
+			}
 		},
 		{
 			path: '/crews/update',
