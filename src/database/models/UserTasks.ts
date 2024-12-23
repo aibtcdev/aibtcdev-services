@@ -1,4 +1,5 @@
 import { Model, DataTypes, Infer } from 'd1-orm';
+import { toCamelCase, toSnakeCase } from '../../utils/case-transformers';
 
 export const userTasksModel = new Model(
 	{
@@ -20,4 +21,23 @@ export const userTasksModel = new Model(
 	}
 );
 
+// Original type for ORM operations
 export type UserTasksTable = Infer<typeof userTasksModel>;
+
+// CamelCase interface for application use
+export interface UserTask {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    profileId: string;
+    crewId: number;
+    agentId: number;
+    taskName: string;
+    taskDescription: string;
+    taskExpectedOutput: string;
+}
+
+// Transform functions using generic utility
+export const transformToCamelCase = (task: UserTasksTable): UserTask => toCamelCase(task);
+export const transformToSnakeCase = (task: Partial<UserTask>): Partial<Omit<UserTasksTable, 'id' | 'created_at' | 'updated_at'>> => 
+    toSnakeCase(task);
