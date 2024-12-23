@@ -42,6 +42,6 @@ export interface XBotTweet {
 }
 
 // Transform functions using generic utility
-export const transformToCamelCase = (tweet: XBotTweetsTable): XBotTweet => toCamelCase(tweet);
-export const transformToSnakeCase = (tweet: Partial<XBotTweet>): Partial<Omit<XBotTweetsTable, 'id' | 'created_at' | 'updated_at'>> => 
+export const transformXBotTweetToCamelCase = (tweet: XBotTweetsTable): XBotTweet => toCamelCase(tweet);
+export const transformXBotTweetToSnakeCase = (tweet: Partial<XBotTweet>): Partial<Omit<XBotTweetsTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(tweet);

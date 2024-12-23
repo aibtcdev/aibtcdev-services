@@ -32,6 +32,6 @@ export interface XBotLog {
 }
 
 // Transform functions using generic utility
-export const transformToCamelCase = (log: XBotLogsTable): XBotLog => toCamelCase(log);
-export const transformToSnakeCase = (log: Partial<XBotLog>): Partial<Omit<XBotLogsTable, 'id' | 'created_at' | 'updated_at'>> => 
+export const transformXBotLogToCamelCase = (log: XBotLogsTable): XBotLog => toCamelCase(log);
+export const transformXBotLogToSnakeCase = (log: Partial<XBotLog>): Partial<Omit<XBotLogsTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(log);

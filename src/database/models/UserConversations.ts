@@ -30,6 +30,6 @@ export interface UserConversation {
 }
 
 // Transform functions using generic utility
-export const transformToCamelCase = (conversation: UserConversationsTable): UserConversation => toCamelCase(conversation);
-export const transformToSnakeCase = (conversation: Partial<UserConversation>): Partial<Omit<UserConversationsTable, 'id' | 'created_at' | 'updated_at'>> => 
+export const transformUserConversationToCamelCase = (conversation: UserConversationsTable): UserConversation => toCamelCase(conversation);
+export const transformUserConversationToSnakeCase = (conversation: Partial<UserConversation>): Partial<Omit<UserConversationsTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(conversation);

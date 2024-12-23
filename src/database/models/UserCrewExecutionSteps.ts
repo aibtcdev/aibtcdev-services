@@ -36,6 +36,6 @@ export interface UserCrewExecutionStep {
 }
 
 // Transform functions using generic utility
-export const transformToCamelCase = (step: UserCrewExecutionStepsTable): UserCrewExecutionStep => toCamelCase(step);
-export const transformToSnakeCase = (step: Partial<UserCrewExecutionStep>): Partial<Omit<UserCrewExecutionStepsTable, 'id' | 'created_at' | 'updated_at'>> => 
+export const transformUserCrewExecutionStepToCamelCase = (step: UserCrewExecutionStepsTable): UserCrewExecutionStep => toCamelCase(step);
+export const transformUserCrewExecutionStepToSnakeCase = (step: Partial<UserCrewExecutionStep>): Partial<Omit<UserCrewExecutionStepsTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(step);

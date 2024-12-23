@@ -38,6 +38,6 @@ export interface UserTask {
 }
 
 // Transform functions using generic utility
-export const transformToCamelCase = (task: UserTasksTable): UserTask => toCamelCase(task);
-export const transformToSnakeCase = (task: Partial<UserTask>): Partial<Omit<UserTasksTable, 'id' | 'created_at' | 'updated_at'>> => 
+export const transformUserTaskToCamelCase = (task: UserTasksTable): UserTask => toCamelCase(task);
+export const transformUserTaskToSnakeCase = (task: Partial<UserTask>): Partial<Omit<UserTasksTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(task);

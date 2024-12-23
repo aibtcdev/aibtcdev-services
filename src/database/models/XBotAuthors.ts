@@ -32,6 +32,6 @@ export interface XBotAuthor {
 }
 
 // Transform functions using generic utility
-export const transformToCamelCase = (author: XBotAuthorsTable): XBotAuthor => toCamelCase(author);
-export const transformToSnakeCase = (author: Partial<XBotAuthor>): Partial<Omit<XBotAuthorsTable, 'id' | 'created_at' | 'updated_at'>> => 
+export const transformXBotAuthorToCamelCase = (author: XBotAuthorsTable): XBotAuthor => toCamelCase(author);
+export const transformXBotAuthorToSnakeCase = (author: Partial<XBotAuthor>): Partial<Omit<XBotAuthorsTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(author);

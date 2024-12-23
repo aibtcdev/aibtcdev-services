@@ -35,6 +35,6 @@ export interface UserProfile {
 }
 
 // Transform functions using generic utility
-export const transformToCamelCase = (profile: UserProfilesTable): UserProfile => toCamelCase(profile);
-export const transformToSnakeCase = (profile: Partial<UserProfile>): Partial<Omit<UserProfilesTable, 'id' | 'created_at' | 'updated_at'>> => 
+export const transformUserProfileToCamelCase = (profile: UserProfilesTable): UserProfile => toCamelCase(profile);
+export const transformUserProfileToSnakeCase = (profile: Partial<UserProfile>): Partial<Omit<UserProfilesTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(profile);

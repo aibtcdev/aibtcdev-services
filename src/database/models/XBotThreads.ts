@@ -26,6 +26,6 @@ export interface XBotThread {
 }
 
 // Transform functions using generic utility
-export const transformToCamelCase = (thread: XBotThreadsTable): XBotThread => toCamelCase(thread);
-export const transformToSnakeCase = (thread: Partial<XBotThread>): Partial<Omit<XBotThreadsTable, 'id' | 'created_at' | 'updated_at'>> => 
+export const transformXBotThreadToCamelCase = (thread: XBotThreadsTable): XBotThread => toCamelCase(thread);
+export const transformXBotThreadToSnakeCase = (thread: Partial<XBotThread>): Partial<Omit<XBotThreadsTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(thread);

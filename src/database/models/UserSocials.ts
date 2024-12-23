@@ -32,6 +32,6 @@ export interface UserSocial {
 }
 
 // Transform functions using generic utility
-export const transformToCamelCase = (social: UserSocialsTable): UserSocial => toCamelCase(social);
-export const transformToSnakeCase = (social: Partial<UserSocial>): Partial<Omit<UserSocialsTable, 'id' | 'created_at' | 'updated_at'>> => 
+export const transformUserSocialToCamelCase = (social: UserSocialsTable): UserSocial => toCamelCase(social);
+export const transformUserSocialToSnakeCase = (social: Partial<UserSocial>): Partial<Omit<UserSocialsTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(social);

@@ -36,6 +36,6 @@ export interface UserCron {
 }
 
 // Transform functions using generic utility
-export const transformToCamelCase = (cron: UserCronsTable): UserCron => toCamelCase(cron);
-export const transformToSnakeCase = (cron: Partial<UserCron>): Partial<Omit<UserCronsTable, 'id' | 'created_at' | 'updated_at'>> => 
+export const transformUserCronToCamelCase = (cron: UserCronsTable): UserCron => toCamelCase(cron);
+export const transformUserCronToSnakeCase = (cron: Partial<UserCron>): Partial<Omit<UserCronsTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(cron);

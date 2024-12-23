@@ -38,6 +38,6 @@ export interface UserCrew {
 }
 
 // Transform functions using generic utility
-export const transformToCamelCase = (crew: UserCrewsTable): UserCrew => toCamelCase(crew);
-export const transformToSnakeCase = (crew: Partial<UserCrew>): Partial<Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at'>> => 
+export const transformUserCrewToCamelCase = (crew: UserCrewsTable): UserCrew => toCamelCase(crew);
+export const transformUserCrewToSnakeCase = (crew: Partial<UserCrew>): Partial<Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(crew);
