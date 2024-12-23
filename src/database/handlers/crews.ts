@@ -59,36 +59,76 @@ export const crewsHandler: HandlerDefinition = {
 			path: '/crews/update',
 			methods: ['PUT'],
 			description: 'Update an existing crew',
+			requiresAuth: true,
+			parameters: {
+				id: 'ID of the crew to update'
+			},
+			requestBody: {
+				crew_name: 'Optional: New name of the crew',
+				crew_description: 'Optional: New description of the crew',
+				is_public: 'Optional: Boolean indicating if crew should be public'
+			}
 		},
 		{
 			path: '/crews/delete',
 			methods: ['DELETE'],
 			description: 'Delete a crew',
+			requiresAuth: true,
+			parameters: {
+				id: 'ID of the crew to delete'
+			}
 		},
 		{
 			path: '/crews/executions',
 			methods: ['GET'],
 			description: 'Get crew executions for an address',
+			requiresAuth: true,
+			parameters: {
+				address: 'STX address to get executions for'
+			}
 		},
 		{
 			path: '/crews/executions/add',
 			methods: ['POST'],
 			description: 'Add a new crew execution',
+			requiresAuth: true,
+			requestBody: {
+				address: 'STX address of the user',
+				crewId: 'ID of the crew',
+				conversationId: 'ID of the conversation',
+				input: 'Input data for the execution'
+			}
 		},
 		{
 			path: '/crews/steps/get',
 			methods: ['GET'],
 			description: 'Get execution steps',
+			requiresAuth: true,
+			parameters: {
+				executionId: 'ID of the execution to get steps for'
+			}
 		},
 		{
 			path: '/crews/steps/create',
 			methods: ['POST'],
 			description: 'Create a new execution step',
+			requiresAuth: true,
+			requestBody: {
+				profile_id: 'STX address of the user',
+				crew_id: 'ID of the crew',
+				execution_id: 'ID of the execution',
+				step_type: 'Type of execution step',
+				step_data: 'Data for the execution step'
+			}
 		},
 		{
 			path: '/crews/steps/delete',
 			methods: ['DELETE'],
 			description: 'Delete execution steps',
+			requiresAuth: true,
+			parameters: {
+				executionId: 'ID of the execution to delete steps for'
+			}
 		},
 	],
 	handler: async ({ orm, env, request, url }) => {
