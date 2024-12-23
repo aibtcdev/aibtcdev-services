@@ -35,7 +35,22 @@ export interface UserCrewExecutionStep {
 	stepData: string;
 }
 
-// Transform functions using generic utility
-export const transformUserCrewExecutionStepToCamelCase = (step: UserCrewExecutionStepsTable): UserCrewExecutionStep => toCamelCase(step);
-export const transformUserCrewExecutionStepToSnakeCase = (step: Partial<UserCrewExecutionStep>): Partial<Omit<UserCrewExecutionStepsTable, 'id' | 'created_at' | 'updated_at'>> => 
-    toSnakeCase(step);
+// Transform functions with explicit mapping
+export const transformUserCrewExecutionStepToCamelCase = (step: UserCrewExecutionStepsTable): UserCrewExecutionStep => ({
+    id: step.id,
+    createdAt: step.created_at || '',
+    updatedAt: step.updated_at || '',
+    profileId: step.profile_id,
+    crewId: step.crew_id,
+    executionId: step.execution_id,
+    stepType: step.step_type,
+    stepData: step.step_data
+});
+
+export const transformUserCrewExecutionStepToSnakeCase = (step: Partial<UserCrewExecutionStep>): Partial<Omit<UserCrewExecutionStepsTable, 'id' | 'created_at' | 'updated_at'>> => ({
+    profile_id: step.profileId,
+    crew_id: step.crewId,
+    execution_id: step.executionId,
+    step_type: step.stepType,
+    step_data: step.stepData
+});

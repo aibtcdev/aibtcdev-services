@@ -41,7 +41,28 @@ export interface XBotTweet {
     isBotResponse?: boolean;
 }
 
-// Transform functions using generic utility
-export const transformXBotTweetToCamelCase = (tweet: XBotTweetsTable): XBotTweet => toCamelCase(tweet);
-export const transformXBotTweetToSnakeCase = (tweet: Partial<XBotTweet>): Partial<Omit<XBotTweetsTable, 'id' | 'created_at' | 'updated_at'>> => 
-    toSnakeCase(tweet);
+// Transform functions with explicit mapping
+export const transformXBotTweetToCamelCase = (tweet: XBotTweetsTable): XBotTweet => ({
+    id: tweet.id,
+    createdAt: tweet.created_at || '',
+    updatedAt: tweet.updated_at || '',
+    authorId: tweet.author_id,
+    threadId: tweet.thread_id,
+    parentTweetId: tweet.parent_tweet_id,
+    tweetId: tweet.tweet_id,
+    tweetCreatedAt: tweet.tweet_created_at,
+    tweetUpdatedAt: tweet.tweet_updated_at,
+    tweetBody: tweet.tweet_body,
+    isBotResponse: tweet.is_bot_response
+});
+
+export const transformXBotTweetToSnakeCase = (tweet: Partial<XBotTweet>): Partial<Omit<XBotTweetsTable, 'id' | 'created_at' | 'updated_at'>> => ({
+    author_id: tweet.authorId,
+    thread_id: tweet.threadId,
+    parent_tweet_id: tweet.parentTweetId,
+    tweet_id: tweet.tweetId,
+    tweet_created_at: tweet.tweetCreatedAt,
+    tweet_updated_at: tweet.tweetUpdatedAt,
+    tweet_body: tweet.tweetBody,
+    is_bot_response: tweet.isBotResponse
+});

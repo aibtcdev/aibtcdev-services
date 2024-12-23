@@ -37,7 +37,24 @@ export interface UserCrew {
     crewIsCron?: boolean;
 }
 
-// Transform functions using generic utility
-export const transformUserCrewToCamelCase = (crew: UserCrewsTable): UserCrew => toCamelCase(crew);
-export const transformUserCrewToSnakeCase = (crew: Partial<UserCrew>): Partial<Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at'>> => 
-    toSnakeCase(crew);
+// Transform functions with explicit mapping
+export const transformUserCrewToCamelCase = (crew: UserCrewsTable): UserCrew => ({
+    id: crew.id,
+    createdAt: crew.created_at || '',
+    updatedAt: crew.updated_at || '',
+    profileId: crew.profile_id,
+    crewName: crew.crew_name,
+    crewDescription: crew.crew_description,
+    crewExecutions: crew.crew_executions,
+    crewIsPublic: crew.crew_is_public,
+    crewIsCron: crew.crew_is_cron
+});
+
+export const transformUserCrewToSnakeCase = (crew: Partial<UserCrew>): Partial<Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at'>> => ({
+    profile_id: crew.profileId,
+    crew_name: crew.crewName,
+    crew_description: crew.crewDescription,
+    crew_executions: crew.crewExecutions,
+    crew_is_public: crew.crewIsPublic,
+    crew_is_cron: crew.crewIsCron
+});

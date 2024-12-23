@@ -31,7 +31,18 @@ export interface XBotAuthor {
     username?: string;
 }
 
-// Transform functions using generic utility
-export const transformXBotAuthorToCamelCase = (author: XBotAuthorsTable): XBotAuthor => toCamelCase(author);
-export const transformXBotAuthorToSnakeCase = (author: Partial<XBotAuthor>): Partial<Omit<XBotAuthorsTable, 'id' | 'created_at' | 'updated_at'>> => 
-    toSnakeCase(author);
+// Transform functions with explicit mapping
+export const transformXBotAuthorToCamelCase = (author: XBotAuthorsTable): XBotAuthor => ({
+    id: author.id,
+    createdAt: author.created_at || '',
+    updatedAt: author.updated_at || '',
+    authorId: author.author_id,
+    realname: author.realname,
+    username: author.username
+});
+
+export const transformXBotAuthorToSnakeCase = (author: Partial<XBotAuthor>): Partial<Omit<XBotAuthorsTable, 'id' | 'created_at' | 'updated_at'>> => ({
+    author_id: author.authorId,
+    realname: author.realname,
+    username: author.username
+});

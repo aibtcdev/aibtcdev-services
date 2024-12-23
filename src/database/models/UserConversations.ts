@@ -29,7 +29,16 @@ export interface UserConversation {
     conversationName: string;
 }
 
-// Transform functions using generic utility
-export const transformUserConversationToCamelCase = (conversation: UserConversationsTable): UserConversation => toCamelCase(conversation);
-export const transformUserConversationToSnakeCase = (conversation: Partial<UserConversation>): Partial<Omit<UserConversationsTable, 'id' | 'created_at' | 'updated_at'>> => 
-    toSnakeCase(conversation);
+// Transform functions with explicit mapping
+export const transformUserConversationToCamelCase = (conversation: UserConversationsTable): UserConversation => ({
+    id: conversation.id,
+    createdAt: conversation.created_at || '',
+    updatedAt: conversation.updated_at || '',
+    profileId: conversation.profile_id,
+    conversationName: conversation.conversation_name
+});
+
+export const transformUserConversationToSnakeCase = (conversation: Partial<UserConversation>): Partial<Omit<UserConversationsTable, 'id' | 'created_at' | 'updated_at'>> => ({
+    profile_id: conversation.profileId,
+    conversation_name: conversation.conversationName
+});

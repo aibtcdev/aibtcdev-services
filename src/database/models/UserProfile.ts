@@ -34,7 +34,20 @@ export interface UserProfile {
     bnsAddress?: string;
 }
 
-// Transform functions using generic utility
-export const transformUserProfileToCamelCase = (profile: UserProfilesTable): UserProfile => toCamelCase(profile);
-export const transformUserProfileToSnakeCase = (profile: Partial<UserProfile>): Partial<Omit<UserProfilesTable, 'id' | 'created_at' | 'updated_at'>> => 
-    toSnakeCase(profile);
+// Transform functions with explicit mapping
+export const transformUserProfileToCamelCase = (profile: UserProfilesTable): UserProfile => ({
+    id: profile.id,
+    createdAt: profile.created_at || '',
+    updatedAt: profile.updated_at || '',
+    userRole: profile.user_role,
+    accountIndex: profile.account_index,
+    stxAddress: profile.stx_address,
+    bnsAddress: profile.bns_address
+});
+
+export const transformUserProfileToSnakeCase = (profile: Partial<UserProfile>): Partial<Omit<UserProfilesTable, 'id' | 'created_at' | 'updated_at'>> => ({
+    user_role: profile.userRole,
+    account_index: profile.accountIndex,
+    stx_address: profile.stxAddress,
+    bns_address: profile.bnsAddress
+});
