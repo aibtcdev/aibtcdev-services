@@ -1,4 +1,5 @@
 import { Model, DataTypes, Infer } from 'd1-orm';
+import { toCamelCase, toSnakeCase } from '../../utils/case-transformers';
 
 export const xBotTweetsModel = new Model(
     {
@@ -22,4 +23,25 @@ export const xBotTweetsModel = new Model(
     }
 );
 
+// Original type for ORM operations
 export type XBotTweetsTable = Infer<typeof xBotTweetsModel>;
+
+// CamelCase interface for application use
+export interface XBotTweet {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    authorId: string;
+    threadId?: number;
+    parentTweetId?: string;
+    tweetId: string;
+    tweetCreatedAt?: string;
+    tweetUpdatedAt?: string;
+    tweetBody?: string;
+    isBotResponse?: boolean;
+}
+
+// Transform functions using generic utility
+export const transformToCamelCase = (tweet: XBotTweetsTable): XBotTweet => toCamelCase(tweet);
+export const transformToSnakeCase = (tweet: Partial<XBotTweet>): Partial<Omit<XBotTweetsTable, 'id' | 'created_at' | 'updated_at'>> => 
+    toSnakeCase(tweet);
