@@ -1,4 +1,4 @@
-import { Handler } from './types';
+import { Handler, HandlerDefinition } from './types';
 import { createApiResponse } from '../../utils/requests-responses';
 import {
 	getUserRole,
@@ -11,7 +11,46 @@ import {
 } from '../helpers/profiles';
 import { UserProfilesTable } from '../models';
 
-export const handleProfiles: Handler = async ({ orm, env, request, url }) => {
+export const profilesHandler: HandlerDefinition = {
+    baseRoute: 'profiles',
+    endpoints: [
+        { 
+            path: '/profiles/role', 
+            methods: ['GET'],
+            description: 'Get user role by address'
+        },
+        {
+            path: '/profiles/get',
+            methods: ['GET'],
+            description: 'Get user profile by address'
+        },
+        {
+            path: '/profiles/create',
+            methods: ['POST'],
+            description: 'Create new user profile'
+        },
+        {
+            path: '/profiles/update',
+            methods: ['PUT'],
+            description: 'Update existing user profile'
+        },
+        {
+            path: '/profiles/delete',
+            methods: ['DELETE'],
+            description: 'Delete user profile'
+        },
+        {
+            path: '/profiles/list',
+            methods: ['GET'],
+            description: 'Get all user profiles'
+        },
+        {
+            path: '/profiles/admin-update',
+            methods: ['PUT'],
+            description: 'Admin update of user profile by ID'
+        }
+    ],
+    handler: async ({ orm, env, request, url }) => {
 	const endpoint = url.pathname.split('/').pop();
 
 	switch (endpoint) {
