@@ -10,41 +10,82 @@ export const twitterHandler: HandlerDefinition = {
 			path: '/twitter/get',
 			methods: ['GET'],
 			description: 'Get author by ID',
+			requiresAuth: true,
+			parameters: {
+				authorId: 'Twitter author ID to retrieve'
+			}
 		},
 		{
 			path: '/twitter/create',
 			methods: ['POST'],
 			description: 'Create a new author',
+			requiresAuth: true,
+			requestBody: {
+				author_id: 'Twitter author ID',
+				realname: 'Optional: Real name of the author',
+				username: 'Optional: Twitter username'
+			}
 		},
 		{
 			path: '/twitter/tweet',
 			methods: ['GET'],
 			description: 'Get tweet by ID',
+			requiresAuth: true,
+			parameters: {
+				tweetId: 'Twitter tweet ID to retrieve'
+			}
 		},
 		{
 			path: '/twitter/thread',
 			methods: ['GET'],
 			description: 'Get tweets in a thread',
+			requiresAuth: true,
+			parameters: {
+				threadId: 'Thread ID to retrieve tweets from'
+			}
 		},
 		{
 			path: '/twitter/author-tweets',
 			methods: ['GET'],
 			description: 'Get tweets by author',
+			requiresAuth: true,
+			parameters: {
+				authorId: 'Twitter author ID to get tweets for'
+			}
 		},
 		{
 			path: '/twitter/add-tweet',
 			methods: ['POST'],
 			description: 'Add a new tweet',
+			requiresAuth: true,
+			requestBody: {
+				author_id: 'Twitter author ID',
+				tweet_id: 'Twitter tweet ID',
+				tweet_body: 'Content of the tweet',
+				thread_id: 'Optional: Thread ID if part of a thread',
+				parent_tweet_id: 'Optional: ID of parent tweet if reply',
+				is_bot_response: 'Optional: Boolean indicating if tweet is bot response'
+			}
 		},
 		{
 			path: '/twitter/logs',
 			methods: ['GET'],
 			description: 'Get logs for a tweet',
+			requiresAuth: true,
+			parameters: {
+				tweetId: 'Tweet ID to get logs for'
+			}
 		},
 		{
 			path: '/twitter/add-log',
 			methods: ['POST'],
 			description: 'Add a new log entry',
+			requiresAuth: true,
+			requestBody: {
+				tweet_id: 'Tweet ID to add log for',
+				tweet_status: 'Status of the tweet',
+				log_message: 'Optional: Additional log message'
+			}
 		},
 	],
 	handler: async ({ orm, request, url }) => {
