@@ -38,27 +38,9 @@ export interface UserAgent {
     agentTools?: string;
 }
 
-// Transform from snake_case to camelCase
-export const toCamelCase = (agent: UserAgentsTable): UserAgent => ({
-    id: agent.id,
-    createdAt: agent.created_at,
-    updatedAt: agent.updated_at,
-    profileId: agent.profile_id,
-    crewId: agent.crew_id,
-    agentName: agent.agent_name,
-    agentRole: agent.agent_role,
-    agentGoal: agent.agent_goal,
-    agentBackstory: agent.agent_backstory,
-    agentTools: agent.agent_tools,
-});
+import { toCamelCase, toSnakeCase } from '../../utils/case-transformers';
 
-// Transform from camelCase to snake_case
-export const toSnakeCase = (agent: Partial<UserAgent>): Partial<Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at'>> => ({
-    ...(agent.profileId && { profile_id: agent.profileId }),
-    ...(agent.crewId && { crew_id: agent.crewId }),
-    ...(agent.agentName && { agent_name: agent.agentName }),
-    ...(agent.agentRole && { agent_role: agent.agentRole }),
-    ...(agent.agentGoal && { agent_goal: agent.agentGoal }),
-    ...(agent.agentBackstory && { agent_backstory: agent.agentBackstory }),
-    ...(agent.agentTools && { agent_tools: agent.agentTools }),
-});
+// Transform functions using generic utility
+export const transformToCamelCase = (agent: UserAgentsTable): UserAgent => toCamelCase(agent);
+export const transformToSnakeCase = (agent: Partial<UserAgent>): Partial<Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at'>> => 
+    toSnakeCase(agent);
