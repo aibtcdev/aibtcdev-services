@@ -41,24 +41,26 @@ export interface UserAgent {
 
 // Transform functions using generic utility
 export const transformUserAgentToCamelCase = (agent: UserAgentsTable): UserAgent => ({
-    id: agent.id,
-    createdAt: agent.created_at || '',
-    updatedAt: agent.updated_at || '',
-    profileId: agent.profile_id,
-    crewId: agent.crew_id,
-    agentName: agent.agent_name,
-    agentRole: agent.agent_role,
-    agentGoal: agent.agent_goal,
-    agentBackstory: agent.agent_backstory,
-    agentTools: agent.agent_tools,
+	id: agent.id,
+	createdAt: agent.created_at || '',
+	updatedAt: agent.updated_at || '',
+	profileId: agent.profile_id,
+	crewId: agent.crew_id,
+	agentName: agent.agent_name,
+	agentRole: agent.agent_role,
+	agentGoal: agent.agent_goal,
+	agentBackstory: agent.agent_backstory,
+	agentTools: agent.agent_tools ?? undefined,
 });
 
-export const transformUserAgentToSnakeCase = (agent: Partial<UserAgent>): Partial<Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at'>> => ({
-    profile_id: agent.profileId,
-    crew_id: agent.crewId,
-    agent_name: agent.agentName,
-    agent_role: agent.agentRole,
-    agent_goal: agent.agentGoal,
-    agent_backstory: agent.agentBackstory,
-    agent_tools: agent.agentTools,
+export const transformUserAgentToSnakeCase = (
+	agent: Partial<UserAgent>
+): Partial<Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at'>> => ({
+	profile_id: agent.profileId,
+	crew_id: agent.crewId,
+	agent_name: agent.agentName,
+	agent_role: agent.agentRole,
+	agent_goal: agent.agentGoal,
+	agent_backstory: agent.agentBackstory,
+	agent_tools: agent.agentTools,
 });
