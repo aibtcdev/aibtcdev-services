@@ -11,7 +11,3 @@ export * from './XBotAuthors';
 export * from './XBotThreads';
 export * from './XBotTweets';
 export * from './XBotLogs';
-export * from './XBotAuthors';
-export * from './XBotThreads';
-export * from './XBotTweets';
-export * from './XBotLogs';
