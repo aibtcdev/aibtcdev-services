@@ -122,8 +122,8 @@ export const profilesHandler: HandlerDefinition = {
 					return createApiResponse('Method not allowed', 405);
 				}
 				const profileData = (await request.json()) as UserProfilesTable;
-				if (!profileData.stx_address || !profileData.user_role) {
-					return createApiResponse('Missing required fields: stx_address, user_role', 400);
+				if (!profileData.stxAddress || !profileData.userRole) {
+					return createApiResponse('Missing required fields: stxAddress, userRole', 400);
 				}
 				const profile = await createUserProfile(orm, profileData);
 				return createApiResponse({

@@ -85,11 +85,11 @@ export const conversationsHandler: HandlerDefinition = {
 				if (request.method !== 'POST') {
 					return createApiResponse('Method not allowed', 405);
 				}
-				const { profile_id, conversation_name } = (await request.json()) as UserConversationsTable;
-				if (!profile_id) {
+				const { profileId, conversationName } = (await request.json()) as UserConversationsTable;
+				if (!profileId) {
 					return createApiResponse('Missing required field: address', 400);
 				}
-				const result = await addConversation(orm, profile_id, conversation_name ? conversation_name : 'new conversation');
+				const result = await addConversation(orm, profileId, conversationName ? conversationName : 'new conversation');
 				return createApiResponse({
 					message: 'Successfully created conversation',
 					data: { result },

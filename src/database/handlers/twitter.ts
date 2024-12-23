@@ -108,11 +108,11 @@ export const twitterHandler: HandlerDefinition = {
 				if (request.method !== 'POST') {
 					return createApiResponse('Method not allowed', 405);
 				}
-				const { author_id, realname, username } = (await request.json()) as XBotAuthorsTable;
-				if (!author_id) {
+				const { authorId, realName, username } = (await request.json()) as XBotAuthorsTable;
+				if (!authorId) {
 					return createApiResponse('Missing required fields: authorId', 400);
 				}
-				const author = await addAuthor(orm, author_id, realname || undefined, username || undefined);
+				const author = await addAuthor(orm, authorId, realName || undefined, username || undefined);
 				return createApiResponse({
 					message: 'Successfully created author',
 					data: { author },
@@ -159,18 +159,18 @@ export const twitterHandler: HandlerDefinition = {
 				if (request.method !== 'POST') {
 					return createApiResponse('Method not allowed', 405);
 				}
-				const { author_id, tweet_id, tweet_body, thread_id, parent_tweet_id, is_bot_response } = (await request.json()) as XBotTweetsTable;
-				if (!author_id || !tweet_id || !tweet_body) {
+				const { authorId, tweetId, tweetBody, threadId, parentTweetId, isBotResponse } = (await request.json()) as XBotTweetsTable;
+				if (!authorId || !tweetId || !tweetBody) {
 					return createApiResponse('Missing required fields: authorId, tweetId, tweetBody', 400);
 				}
 				const tweet = await addTweet(
 					orm,
-					author_id,
-					tweet_id,
-					tweet_body,
-					thread_id || undefined,
-					parent_tweet_id || undefined,
-					is_bot_response || undefined
+					authorId,
+					tweetId,
+					tweetBody,
+					threadId || undefined,
+					parentTweetId || undefined,
+					isBotResponse || undefined
 				);
 				return createApiResponse({
 					message: 'Successfully created tweet',
@@ -194,11 +194,11 @@ export const twitterHandler: HandlerDefinition = {
 				if (request.method !== 'POST') {
 					return createApiResponse('Method not allowed', 405);
 				}
-				const { tweet_id, tweet_status, log_message } = (await request.json()) as XBotLogsTable;
-				if (!tweet_id || !tweet_status) {
+				const { tweetId, tweetStatus, logMessage } = (await request.json()) as XBotLogsTable;
+				if (!tweetId || !tweetStatus) {
 					return createApiResponse('Missing required fields: tweetId, status', 400);
 				}
-				const log = await addLog(orm, tweet_id, tweet_status, log_message || undefined);
+				const log = await addLog(orm, tweetId, tweetStatus, logMessage || undefined);
 				return createApiResponse({
 					message: 'Successfully created log',
 					data: { log },

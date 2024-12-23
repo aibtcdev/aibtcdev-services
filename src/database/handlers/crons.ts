@@ -103,12 +103,12 @@ export const cronsHandler: HandlerDefinition = {
 					return createApiResponse('Method not allowed', 405);
 				}
 				const cronData = (await request.json()) as UserCronsTable;
-				if (!cronData.profile_id || !cronData.crew_id || cronData.cron_enabled === undefined) {
-					return createApiResponse('Missing required fields: profile_id, crew_id, cron_enabled', 400);
+				if (!cronData.profileId || !cronData.crewId || cronData.cronEnabled === undefined) {
+					return createApiResponse('Missing required fields: profileId, crewId, cronEnabled', 400);
 				}
 				// Set defaults if not provided
-				cronData.cron_interval = cronData.cron_interval || '0 * * * *'; // Default to hourly
-				cronData.cron_input = cronData.cron_input || '';
+				cronData.cronInterval = cronData.cronInterval || '0 * * * *'; // Default to hourly
+				cronData.cronInput = cronData.cronInput || '';
 				const cron = await createCron(orm, cronData);
 				return createApiResponse({
 					message: 'Successfully created cron',
@@ -124,11 +124,11 @@ export const cronsHandler: HandlerDefinition = {
 				if (!cronId) {
 					return createApiResponse('Missing id parameter', 400);
 				}
-				const { cron_input } = (await request.json()) as UserCronsTable;
-				if (cron_input === undefined) {
-					return createApiResponse('Missing cron_input in request body', 400);
+				const { cronInput } = (await request.json()) as UserCronsTable;
+				if (cronInput === undefined) {
+					return createApiResponse('Missing cronInput in request body', 400);
 				}
-				const result = await updateCronInput(orm, parseInt(cronId), cron_input);
+				const result = await updateCronInput(orm, parseInt(cronId), cronInput);
 				return createApiResponse({
 					message: 'Successfully updated cron input',
 					data: { result },
@@ -143,11 +143,11 @@ export const cronsHandler: HandlerDefinition = {
 				if (!cronId) {
 					return createApiResponse('Missing id parameter', 400);
 				}
-				const { cron_enabled } = (await request.json()) as UserCronsTable;
-				if (cron_enabled === undefined) {
-					return createApiResponse('Missing cron_enabled in request body', 400);
+				const { cronEnabled } = (await request.json()) as UserCronsTable;
+				if (cronEnabled === undefined) {
+					return createApiResponse('Missing cronEnabled in request body', 400);
 				}
-				const result = await toggleCronStatus(orm, parseInt(cronId), cron_enabled ? 1 : 0);
+				const result = await toggleCronStatus(orm, parseInt(cronId), cronEnabled ? 1 : 0);
 				return createApiResponse({
 					message: 'Successfully toggled cron status',
 					data: { result },
