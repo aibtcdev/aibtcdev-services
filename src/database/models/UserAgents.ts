@@ -27,19 +27,19 @@ export type UserAgentsTable = Infer<typeof userAgentsModel>;
 
 // CamelCase interface for application use
 export interface UserAgent {
-    id: number;
-    createdAt: string;
-    updatedAt: string;
-    profileId: string;
-    crewId: number;
-    agentName: string;
-    agentRole: string;
-    agentGoal: string;
-    agentBackstory: string;
-    agentTools?: string;
+	id: number;
+	createdAt: string;
+	updatedAt: string;
+	profileId: string;
+	crewId: number;
+	agentName: string;
+	agentRole: string;
+	agentGoal: string;
+	agentBackstory: string;
+	agentTools?: string;
 }
 
 // Transform functions using generic utility
 export const transformToCamelCase = (agent: UserAgentsTable): UserAgent => toCamelCase(agent);
-export const transformToSnakeCase = (agent: Partial<UserAgent>): Partial<Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at'>> => 
-    toSnakeCase(agent);
+export const transformToSnakeCase = (agent: Partial<UserAgent>): Partial<Omit<UserAgentsTable, 'id' | 'created_at' | 'updated_at'>> =>
+	toSnakeCase(agent);
