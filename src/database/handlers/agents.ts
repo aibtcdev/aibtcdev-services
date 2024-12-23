@@ -13,8 +13,8 @@ export const agentsHandler: HandlerDefinition = {
 			description: 'Get all agents for a crew',
 			requiresAuth: true,
 			parameters: {
-				crewId: 'ID of the crew to get agents for'
-			}
+				crewId: 'ID of the crew to get agents for',
+			},
 		},
 		{
 			path: '/agents/create',
@@ -27,8 +27,8 @@ export const agentsHandler: HandlerDefinition = {
 				agentName: 'Name of the agent',
 				agentRole: 'Role of the agent',
 				agentGoal: 'Goal of the agent',
-				agentBackstory: 'Backstory of the agent'
-			}
+				agentBackstory: 'Backstory of the agent',
+			},
 		},
 		{
 			path: '/agents/update',
@@ -36,14 +36,14 @@ export const agentsHandler: HandlerDefinition = {
 			description: 'Update an existing agent',
 			requiresAuth: true,
 			parameters: {
-				id: 'ID of the agent to update'
+				id: 'ID of the agent to update',
 			},
 			requestBody: {
 				agentName: 'Optional: New name of the agent',
 				agentRole: 'Optional: New role of the agent',
 				agentGoal: 'Optional: New goal of the agent',
-				agentBackstory: 'Optional: New backstory of the agent'
-			}
+				agentBackstory: 'Optional: New backstory of the agent',
+			},
 		},
 		{
 			path: '/agents/delete',
@@ -51,8 +51,8 @@ export const agentsHandler: HandlerDefinition = {
 			description: 'Delete an agent',
 			requiresAuth: true,
 			parameters: {
-				id: 'ID of the agent to delete'
-			}
+				id: 'ID of the agent to delete',
+			},
 		},
 	],
 	handler: async ({ orm, env, request, url }) => {
