@@ -18,36 +18,75 @@ export const profilesHandler: HandlerDefinition = {
 			path: '/profiles/role',
 			methods: ['GET'],
 			description: 'Get user role by address',
+			requiresAuth: true,
+			parameters: {
+				address: 'STX address of the user'
+			}
 		},
 		{
 			path: '/profiles/get',
 			methods: ['GET'],
 			description: 'Get user profile by address',
+			requiresAuth: true,
+			parameters: {
+				address: 'STX address of the user'
+			}
 		},
 		{
 			path: '/profiles/create',
 			methods: ['POST'],
 			description: 'Create new user profile',
+			requiresAuth: true,
+			requestBody: {
+				stx_address: 'STX address of the user',
+				user_role: 'Role of the user (admin/user)',
+				user_name: 'Optional: Display name of the user',
+				user_avatar: 'Optional: Avatar URL for the user'
+			}
 		},
 		{
 			path: '/profiles/update',
 			methods: ['PUT'],
 			description: 'Update existing user profile',
+			requiresAuth: true,
+			parameters: {
+				address: 'STX address of the user'
+			},
+			requestBody: {
+				user_role: 'Optional: New role of the user',
+				user_name: 'Optional: New display name',
+				user_avatar: 'Optional: New avatar URL'
+			}
 		},
 		{
 			path: '/profiles/delete',
 			methods: ['DELETE'],
 			description: 'Delete user profile',
+			requiresAuth: true,
+			parameters: {
+				address: 'STX address of the user'
+			}
 		},
 		{
 			path: '/profiles/list',
 			methods: ['GET'],
 			description: 'Get all user profiles',
+			requiresAuth: true
 		},
 		{
 			path: '/profiles/admin-update',
 			methods: ['PUT'],
 			description: 'Admin update of user profile by ID',
+			requiresAuth: true,
+			parameters: {
+				userId: 'ID of the user to update'
+			},
+			requestBody: {
+				stx_address: 'Optional: New STX address',
+				user_role: 'Optional: New user role',
+				user_name: 'Optional: New display name',
+				user_avatar: 'Optional: New avatar URL'
+			}
 		},
 	],
 	handler: async ({ orm, env, request, url }) => {
