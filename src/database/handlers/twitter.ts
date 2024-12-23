@@ -12,8 +12,8 @@ export const twitterHandler: HandlerDefinition = {
 			description: 'Get author by ID',
 			requiresAuth: true,
 			parameters: {
-				authorId: 'Twitter author ID to retrieve'
-			}
+				authorId: 'Twitter author ID to retrieve',
+			},
 		},
 		{
 			path: '/twitter/create',
@@ -23,8 +23,8 @@ export const twitterHandler: HandlerDefinition = {
 			requestBody: {
 				authorId: 'Twitter author ID',
 				realName: 'Optional: Real name of the author',
-				username: 'Optional: Twitter username'
-			}
+				username: 'Optional: Twitter username',
+			},
 		},
 		{
 			path: '/twitter/tweet',
@@ -32,8 +32,8 @@ export const twitterHandler: HandlerDefinition = {
 			description: 'Get tweet by ID',
 			requiresAuth: true,
 			parameters: {
-				tweetId: 'Twitter tweet ID to retrieve'
-			}
+				tweetId: 'Twitter tweet ID to retrieve',
+			},
 		},
 		{
 			path: '/twitter/thread',
@@ -41,8 +41,8 @@ export const twitterHandler: HandlerDefinition = {
 			description: 'Get tweets in a thread',
 			requiresAuth: true,
 			parameters: {
-				threadId: 'Thread ID to retrieve tweets from'
-			}
+				threadId: 'Thread ID to retrieve tweets from',
+			},
 		},
 		{
 			path: '/twitter/author-tweets',
@@ -50,8 +50,8 @@ export const twitterHandler: HandlerDefinition = {
 			description: 'Get tweets by author',
 			requiresAuth: true,
 			parameters: {
-				authorId: 'Twitter author ID to get tweets for'
-			}
+				authorId: 'Twitter author ID to get tweets for',
+			},
 		},
 		{
 			path: '/twitter/add-tweet',
@@ -64,8 +64,8 @@ export const twitterHandler: HandlerDefinition = {
 				tweetBody: 'Content of the tweet',
 				threadId: 'Optional: Thread ID if part of a thread',
 				parentTweetId: 'Optional: ID of parent tweet if reply',
-				isBotResponse: 'Optional: Boolean indicating if tweet is bot response'
-			}
+				isBotResponse: 'Optional: Boolean indicating if tweet is bot response',
+			},
 		},
 		{
 			path: '/twitter/logs',
@@ -73,8 +73,8 @@ export const twitterHandler: HandlerDefinition = {
 			description: 'Get logs for a tweet',
 			requiresAuth: true,
 			parameters: {
-				tweetId: 'Tweet ID to get logs for'
-			}
+				tweetId: 'Tweet ID to get logs for',
+			},
 		},
 		{
 			path: '/twitter/add-log',
@@ -84,8 +84,8 @@ export const twitterHandler: HandlerDefinition = {
 			requestBody: {
 				tweetId: 'Tweet ID to add log for',
 				tweetStatus: 'Status of the tweet',
-				logMessage: 'Optional: Additional log message'
-			}
+				logMessage: 'Optional: Additional log message',
+			},
 		},
 	],
 	handler: async ({ orm, request, url }) => {
@@ -108,11 +108,11 @@ export const twitterHandler: HandlerDefinition = {
 				if (request.method !== 'POST') {
 					return createApiResponse('Method not allowed', 405);
 				}
-				const { authorId, realName, username } = (await request.json()) as XBotAuthorsTable;
+				const { author_id: authorId, realname, username } = (await request.json()) as XBotAuthorsTable;
 				if (!authorId) {
 					return createApiResponse('Missing required fields: authorId', 400);
 				}
-				const author = await addAuthor(orm, authorId, realName || undefined, username || undefined);
+				const author = await addAuthor(orm, authorId, realname || undefined, username || undefined);
 				return createApiResponse({
 					message: 'Successfully created author',
 					data: { author },
@@ -159,7 +159,14 @@ export const twitterHandler: HandlerDefinition = {
 				if (request.method !== 'POST') {
 					return createApiResponse('Method not allowed', 405);
 				}
-				const { authorId, tweetId, tweetBody, threadId, parentTweetId, isBotResponse } = (await request.json()) as XBotTweetsTable;
+				const {
+					author_id: authorId,
+					tweet_id: tweetId,
+					tweet_body: tweetBody,
+					thread_id: threadId,
+					parent_tweet_id: parentTweetId,
+					is_bot_response: isBotResponse,
+				} = (await request.json()) as XBotTweetsTable;
 				if (!authorId || !tweetId || !tweetBody) {
 					return createApiResponse('Missing required fields: authorId, tweetId, tweetBody', 400);
 				}
@@ -194,7 +201,7 @@ export const twitterHandler: HandlerDefinition = {
 				if (request.method !== 'POST') {
 					return createApiResponse('Method not allowed', 405);
 				}
-				const { tweetId, tweetStatus, logMessage } = (await request.json()) as XBotLogsTable;
+				const { tweet_id: tweetId, tweet_status: tweetStatus, log_message: logMessage } = (await request.json()) as XBotLogsTable;
 				if (!tweetId || !tweetStatus) {
 					return createApiResponse('Missing required fields: tweetId, status', 400);
 				}

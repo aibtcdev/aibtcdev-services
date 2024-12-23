@@ -11,13 +11,13 @@ export const cronsHandler: HandlerDefinition = {
 			path: '/crons/enabled',
 			methods: ['GET'],
 			description: 'Get all enabled crons',
-			requiresAuth: true
+			requiresAuth: true,
 		},
 		{
 			path: '/crons/enabled-detailed',
 			methods: ['GET'],
 			description: 'Get detailed information about enabled crons',
-			requiresAuth: true
+			requiresAuth: true,
 		},
 		{
 			path: '/crons/get',
@@ -25,8 +25,8 @@ export const cronsHandler: HandlerDefinition = {
 			description: 'Get crons for a specific crew',
 			requiresAuth: true,
 			parameters: {
-				crewId: 'ID of the crew to get crons for'
-			}
+				crewId: 'ID of the crew to get crons for',
+			},
 		},
 		{
 			path: '/crons/create',
@@ -38,8 +38,8 @@ export const cronsHandler: HandlerDefinition = {
 				crewId: 'ID of the crew',
 				cronEnabled: 'Boolean indicating if cron is enabled',
 				cronInterval: 'Optional: Cron schedule expression (default: "0 * * * *")',
-				cronInput: 'Optional: Input data for the cron job'
-			}
+				cronInput: 'Optional: Input data for the cron job',
+			},
 		},
 		{
 			path: '/crons/update',
@@ -47,11 +47,11 @@ export const cronsHandler: HandlerDefinition = {
 			description: 'Update cron input',
 			requiresAuth: true,
 			parameters: {
-				id: 'ID of the cron to update'
+				id: 'ID of the cron to update',
 			},
 			requestBody: {
-				cronInput: 'New input data for the cron job'
-			}
+				cronInput: 'New input data for the cron job',
+			},
 		},
 		{
 			path: '/crons/toggle',
@@ -59,11 +59,11 @@ export const cronsHandler: HandlerDefinition = {
 			description: 'Toggle cron status',
 			requiresAuth: true,
 			parameters: {
-				id: 'ID of the cron to toggle'
+				id: 'ID of the cron to toggle',
 			},
 			requestBody: {
-				cronEnabled: 'Boolean indicating desired cron status'
-			}
+				cronEnabled: 'Boolean indicating desired cron status',
+			},
 		},
 	],
 	handler: async ({ orm, env, request, url }) => {
@@ -103,12 +103,12 @@ export const cronsHandler: HandlerDefinition = {
 					return createApiResponse('Method not allowed', 405);
 				}
 				const cronData = (await request.json()) as UserCronsTable;
-				if (!cronData.profileId || !cronData.crewId || cronData.cronEnabled === undefined) {
+				if (!cronData.profile_id || !cronData.crew_id || cronData.cron_enabled === undefined) {
 					return createApiResponse('Missing required fields: profileId, crewId, cronEnabled', 400);
 				}
 				// Set defaults if not provided
-				cronData.cronInterval = cronData.cronInterval || '0 * * * *'; // Default to hourly
-				cronData.cronInput = cronData.cronInput || '';
+				cronData.cron_interval = cronData.cron_interval || '0 * * * *'; // Default to hourly
+				cronData.cron_input = cronData.cron_input || '';
 				const cron = await createCron(orm, cronData);
 				return createApiResponse({
 					message: 'Successfully created cron',
@@ -124,7 +124,7 @@ export const cronsHandler: HandlerDefinition = {
 				if (!cronId) {
 					return createApiResponse('Missing id parameter', 400);
 				}
-				const { cronInput } = (await request.json()) as UserCronsTable;
+				const { cron_input: cronInput } = (await request.json()) as UserCronsTable;
 				if (cronInput === undefined) {
 					return createApiResponse('Missing cronInput in request body', 400);
 				}
@@ -143,7 +143,7 @@ export const cronsHandler: HandlerDefinition = {
 				if (!cronId) {
 					return createApiResponse('Missing id parameter', 400);
 				}
-				const { cronEnabled } = (await request.json()) as UserCronsTable;
+				const { cron_enabled: cronEnabled } = (await request.json()) as UserCronsTable;
 				if (cronEnabled === undefined) {
 					return createApiResponse('Missing cronEnabled in request body', 400);
 				}

@@ -13,8 +13,8 @@ export const tasksHandler: HandlerDefinition = {
 			description: 'Get a specific task by ID',
 			requiresAuth: true,
 			parameters: {
-				id: 'ID of the task to retrieve'
-			}
+				id: 'ID of the task to retrieve',
+			},
 		},
 		{
 			path: '/tasks/list',
@@ -22,8 +22,8 @@ export const tasksHandler: HandlerDefinition = {
 			description: 'Get all tasks for an agent',
 			requiresAuth: true,
 			parameters: {
-				agentId: 'ID of the agent to get tasks for'
-			}
+				agentId: 'ID of the agent to get tasks for',
+			},
 		},
 		{
 			path: '/tasks/create',
@@ -36,8 +36,8 @@ export const tasksHandler: HandlerDefinition = {
 				agent_id: 'ID of the agent',
 				task_name: 'Name of the task',
 				task_description: 'Description of the task',
-				task_expected_output: 'Expected output of the task'
-			}
+				task_expected_output: 'Expected output of the task',
+			},
 		},
 		{
 			path: '/tasks/update',
@@ -45,13 +45,13 @@ export const tasksHandler: HandlerDefinition = {
 			description: 'Update an existing task',
 			requiresAuth: true,
 			parameters: {
-				id: 'ID of the task to update'
+				id: 'ID of the task to update',
 			},
 			requestBody: {
 				task_name: 'Optional: New name of the task',
 				task_description: 'Optional: New description of the task',
-				task_expected_output: 'Optional: New expected output of the task'
-			}
+				task_expected_output: 'Optional: New expected output of the task',
+			},
 		},
 		{
 			path: '/tasks/delete',
@@ -59,8 +59,8 @@ export const tasksHandler: HandlerDefinition = {
 			description: 'Delete a specific task',
 			requiresAuth: true,
 			parameters: {
-				id: 'ID of the task to delete'
-			}
+				id: 'ID of the task to delete',
+			},
 		},
 		{
 			path: '/tasks/delete-all',
@@ -68,8 +68,8 @@ export const tasksHandler: HandlerDefinition = {
 			description: 'Delete all tasks for an agent',
 			requiresAuth: true,
 			parameters: {
-				agentId: 'ID of the agent to delete all tasks for'
-			}
+				agentId: 'ID of the agent to delete all tasks for',
+			},
 		},
 	],
 	handler: async ({ orm, env, request, url }) => {

@@ -20,8 +20,8 @@ export const profilesHandler: HandlerDefinition = {
 			description: 'Get user role by address',
 			requiresAuth: true,
 			parameters: {
-				address: 'STX address of the user'
-			}
+				address: 'STX address of the user',
+			},
 		},
 		{
 			path: '/profiles/get',
@@ -29,8 +29,8 @@ export const profilesHandler: HandlerDefinition = {
 			description: 'Get user profile by address',
 			requiresAuth: true,
 			parameters: {
-				address: 'STX address of the user'
-			}
+				address: 'STX address of the user',
+			},
 		},
 		{
 			path: '/profiles/create',
@@ -41,8 +41,8 @@ export const profilesHandler: HandlerDefinition = {
 				stxAddress: 'STX address of the user',
 				userRole: 'Role of the user (admin/user)',
 				userName: 'Optional: Display name of the user',
-				userAvatar: 'Optional: Avatar URL for the user'
-			}
+				userAvatar: 'Optional: Avatar URL for the user',
+			},
 		},
 		{
 			path: '/profiles/update',
@@ -50,13 +50,13 @@ export const profilesHandler: HandlerDefinition = {
 			description: 'Update existing user profile',
 			requiresAuth: true,
 			parameters: {
-				address: 'STX address of the user'
+				address: 'STX address of the user',
 			},
 			requestBody: {
 				userRole: 'Optional: New role of the user',
 				userName: 'Optional: New display name',
-				userAvatar: 'Optional: New avatar URL'
-			}
+				userAvatar: 'Optional: New avatar URL',
+			},
 		},
 		{
 			path: '/profiles/delete',
@@ -64,14 +64,14 @@ export const profilesHandler: HandlerDefinition = {
 			description: 'Delete user profile',
 			requiresAuth: true,
 			parameters: {
-				address: 'STX address of the user'
-			}
+				address: 'STX address of the user',
+			},
 		},
 		{
 			path: '/profiles/list',
 			methods: ['GET'],
 			description: 'Get all user profiles',
-			requiresAuth: true
+			requiresAuth: true,
 		},
 		{
 			path: '/profiles/admin-update',
@@ -79,14 +79,14 @@ export const profilesHandler: HandlerDefinition = {
 			description: 'Admin update of user profile by ID',
 			requiresAuth: true,
 			parameters: {
-				userId: 'ID of the user to update'
+				userId: 'ID of the user to update',
 			},
 			requestBody: {
 				stxAddress: 'Optional: New STX address',
 				userRole: 'Optional: New user role',
 				userName: 'Optional: New display name',
-				userAvatar: 'Optional: New avatar URL'
-			}
+				userAvatar: 'Optional: New avatar URL',
+			},
 		},
 	],
 	handler: async ({ orm, env, request, url }) => {
@@ -122,7 +122,7 @@ export const profilesHandler: HandlerDefinition = {
 					return createApiResponse('Method not allowed', 405);
 				}
 				const profileData = (await request.json()) as UserProfilesTable;
-				if (!profileData.stxAddress || !profileData.userRole) {
+				if (!profileData.stx_address || !profileData.user_role) {
 					return createApiResponse('Missing required fields: stxAddress, userRole', 400);
 				}
 				const profile = await createUserProfile(orm, profileData);

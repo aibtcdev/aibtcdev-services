@@ -25,14 +25,14 @@ export const crewsHandler: HandlerDefinition = {
 			description: 'Get crews for a specific profile',
 			requiresAuth: true,
 			parameters: {
-				address: 'STX address of the user'
-			}
+				address: 'STX address of the user',
+			},
 		},
 		{
 			path: '/crews/public',
 			methods: ['GET'],
 			description: 'Get all public crews',
-			requiresAuth: false
+			requiresAuth: false,
 		},
 		{
 			path: '/crews/get',
@@ -40,8 +40,8 @@ export const crewsHandler: HandlerDefinition = {
 			description: 'Get a specific crew by ID',
 			requiresAuth: true,
 			parameters: {
-				id: 'ID of the crew to retrieve'
-			}
+				id: 'ID of the crew to retrieve',
+			},
 		},
 		{
 			path: '/crews/create',
@@ -52,8 +52,8 @@ export const crewsHandler: HandlerDefinition = {
 				profile_id: 'STX address of the user',
 				crew_name: 'Name of the crew',
 				crew_description: 'Optional description of the crew',
-				is_public: 'Optional boolean indicating if crew is public'
-			}
+				is_public: 'Optional boolean indicating if crew is public',
+			},
 		},
 		{
 			path: '/crews/update',
@@ -61,13 +61,13 @@ export const crewsHandler: HandlerDefinition = {
 			description: 'Update an existing crew',
 			requiresAuth: true,
 			parameters: {
-				id: 'ID of the crew to update'
+				id: 'ID of the crew to update',
 			},
 			requestBody: {
 				crew_name: 'Optional: New name of the crew',
 				crew_description: 'Optional: New description of the crew',
-				is_public: 'Optional: Boolean indicating if crew should be public'
-			}
+				is_public: 'Optional: Boolean indicating if crew should be public',
+			},
 		},
 		{
 			path: '/crews/delete',
@@ -75,8 +75,8 @@ export const crewsHandler: HandlerDefinition = {
 			description: 'Delete a crew',
 			requiresAuth: true,
 			parameters: {
-				id: 'ID of the crew to delete'
-			}
+				id: 'ID of the crew to delete',
+			},
 		},
 		{
 			path: '/crews/executions',
@@ -84,8 +84,8 @@ export const crewsHandler: HandlerDefinition = {
 			description: 'Get crew executions for an address',
 			requiresAuth: true,
 			parameters: {
-				address: 'STX address to get executions for'
-			}
+				address: 'STX address to get executions for',
+			},
 		},
 		{
 			path: '/crews/executions/add',
@@ -96,8 +96,8 @@ export const crewsHandler: HandlerDefinition = {
 				address: 'STX address of the user',
 				crewId: 'ID of the crew',
 				conversationId: 'ID of the conversation',
-				input: 'Input data for the execution'
-			}
+				input: 'Input data for the execution',
+			},
 		},
 		{
 			path: '/crews/steps/get',
@@ -105,8 +105,8 @@ export const crewsHandler: HandlerDefinition = {
 			description: 'Get execution steps',
 			requiresAuth: true,
 			parameters: {
-				executionId: 'ID of the execution to get steps for'
-			}
+				executionId: 'ID of the execution to get steps for',
+			},
 		},
 		{
 			path: '/crews/steps/create',
@@ -118,8 +118,8 @@ export const crewsHandler: HandlerDefinition = {
 				crew_id: 'ID of the crew',
 				execution_id: 'ID of the execution',
 				step_type: 'Type of execution step',
-				step_data: 'Data for the execution step'
-			}
+				step_data: 'Data for the execution step',
+			},
 		},
 		{
 			path: '/crews/steps/delete',
@@ -127,8 +127,8 @@ export const crewsHandler: HandlerDefinition = {
 			description: 'Delete execution steps',
 			requiresAuth: true,
 			parameters: {
-				executionId: 'ID of the execution to delete steps for'
-			}
+				executionId: 'ID of the execution to delete steps for',
+			},
 		},
 	],
 	handler: async ({ orm, env, request, url }) => {

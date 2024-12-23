@@ -12,17 +12,17 @@ export const conversationsHandler: HandlerDefinition = {
 			description: 'Get all conversations for an address',
 			requiresAuth: true,
 			parameters: {
-				address: 'STX address of the user'
-			}
+				address: 'STX address of the user',
+			},
 		},
 		{
 			path: '/conversations/latest',
-			methods: ['GET'], 
+			methods: ['GET'],
 			description: 'Get latest conversation for an address',
 			requiresAuth: true,
 			parameters: {
-				address: 'STX address of the user'
-			}
+				address: 'STX address of the user',
+			},
 		},
 		{
 			path: '/conversations/history',
@@ -30,8 +30,8 @@ export const conversationsHandler: HandlerDefinition = {
 			description: 'Get conversation history by ID',
 			requiresAuth: true,
 			parameters: {
-				id: 'Conversation ID'
-			}
+				id: 'Conversation ID',
+			},
 		},
 		{
 			path: '/conversations/create',
@@ -40,8 +40,8 @@ export const conversationsHandler: HandlerDefinition = {
 			requiresAuth: true,
 			requestBody: {
 				profileId: 'STX address of the user',
-				conversationName: 'Optional name for the conversation'
-			}
+				conversationName: 'Optional name for the conversation',
+			},
 		},
 	],
 	handler: async ({ orm, request, url }) => {
@@ -85,7 +85,7 @@ export const conversationsHandler: HandlerDefinition = {
 				if (request.method !== 'POST') {
 					return createApiResponse('Method not allowed', 405);
 				}
-				const { profileId, conversationName } = (await request.json()) as UserConversationsTable;
+				const { profile_id: profileId, conversation_name: conversationName } = (await request.json()) as UserConversationsTable;
 				if (!profileId) {
 					return createApiResponse('Missing required field: address', 400);
 				}
