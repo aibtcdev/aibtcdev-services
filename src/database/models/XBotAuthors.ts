@@ -1,4 +1,5 @@
 import { Model, DataTypes, Infer } from 'd1-orm';
+import { toCamelCase, toSnakeCase } from '../../utils/case-transformers';
 
 export const xBotAuthorsModel = new Model(
     {
@@ -17,4 +18,20 @@ export const xBotAuthorsModel = new Model(
     }
 );
 
+// Original type for ORM operations
 export type XBotAuthorsTable = Infer<typeof xBotAuthorsModel>;
+
+// CamelCase interface for application use
+export interface XBotAuthor {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    authorId: string;
+    realname?: string;
+    username?: string;
+}
+
+// Transform functions using generic utility
+export const transformToCamelCase = (author: XBotAuthorsTable): XBotAuthor => toCamelCase(author);
+export const transformToSnakeCase = (author: Partial<XBotAuthor>): Partial<Omit<XBotAuthorsTable, 'id' | 'created_at' | 'updated_at'>> => 
+    toSnakeCase(author);
