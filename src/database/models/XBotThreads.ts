@@ -1,4 +1,5 @@
 import { Model, DataTypes, Infer } from 'd1-orm';
+import { toCamelCase, toSnakeCase } from '../../utils/case-transformers';
 
 export const xBotThreadsModel = new Model(
     {
@@ -13,4 +14,16 @@ export const xBotThreadsModel = new Model(
     }
 );
 
+// Original type for ORM operations
 export type XBotThreadsTable = Infer<typeof xBotThreadsModel>;
+
+// CamelCase interface for application use
+export interface XBotThread {
+    id: number;
+    createdAt: string;
+}
+
+// Transform functions using generic utility
+export const transformToCamelCase = (thread: XBotThreadsTable): XBotThread => toCamelCase(thread);
+export const transformToSnakeCase = (thread: Partial<XBotThread>): Partial<Omit<XBotThreadsTable, 'id' | 'created_at'>> => 
+    toSnakeCase(thread);
