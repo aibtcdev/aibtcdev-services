@@ -1,4 +1,5 @@
 import { Model, DataTypes, Infer } from 'd1-orm';
+import { toCamelCase, toSnakeCase } from '../../utils/case-transformers';
 
 export const userCronsModel = new Model(
 	{
@@ -19,4 +20,22 @@ export const userCronsModel = new Model(
 	}
 );
 
+// Original type for ORM operations
 export type UserCronsTable = Infer<typeof userCronsModel>;
+
+// CamelCase interface for application use
+export interface UserCron {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    profileId: string;
+    crewId: number;
+    cronEnabled: boolean;
+    cronInterval: string;
+    cronInput: string;
+}
+
+// Transform functions using generic utility
+export const transformToCamelCase = (cron: UserCronsTable): UserCron => toCamelCase(cron);
+export const transformToSnakeCase = (cron: Partial<UserCron>): Partial<Omit<UserCronsTable, 'id' | 'created_at' | 'updated_at'>> => 
+    toSnakeCase(cron);
