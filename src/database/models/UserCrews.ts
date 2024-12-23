@@ -1,5 +1,4 @@
 import { Model, DataTypes, Infer } from 'd1-orm';
-import { toCamelCase, toSnakeCase } from '../../utils/case-transformers';
 
 export const userCrewsModel = new Model(
 	{
