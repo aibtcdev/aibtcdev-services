@@ -24,29 +24,31 @@ export type UserProfilesTable = Infer<typeof userProfilesModel>;
 
 // CamelCase interface for application use
 export interface UserProfile {
-    id: number;
-    createdAt: string;
-    updatedAt: string;
-    userRole: string;
-    accountIndex?: number;
-    stxAddress: string;
-    bnsAddress?: string;
+	id: number;
+	createdAt: string;
+	updatedAt: string;
+	userRole: string;
+	accountIndex?: number;
+	stxAddress: string;
+	bnsAddress?: string;
 }
 
 // Transform functions with explicit mapping
 export const transformUserProfileToCamelCase = (profile: UserProfilesTable): UserProfile => ({
-    id: profile.id,
-    createdAt: profile.created_at || '',
-    updatedAt: profile.updated_at || '',
-    userRole: profile.user_role,
-    accountIndex: profile.account_index,
-    stxAddress: profile.stx_address,
-    bnsAddress: profile.bns_address
+	id: profile.id,
+	createdAt: profile.created_at || '',
+	updatedAt: profile.updated_at || '',
+	userRole: profile.user_role,
+	accountIndex: profile.account_index ?? undefined,
+	stxAddress: profile.stx_address,
+	bnsAddress: profile.bns_address ?? undefined,
 });
 
-export const transformUserProfileToSnakeCase = (profile: Partial<UserProfile>): Partial<Omit<UserProfilesTable, 'id' | 'created_at' | 'updated_at'>> => ({
-    user_role: profile.userRole,
-    account_index: profile.accountIndex,
-    stx_address: profile.stxAddress,
-    bns_address: profile.bnsAddress
+export const transformUserProfileToSnakeCase = (
+	profile: Partial<UserProfile>
+): Partial<Omit<UserProfilesTable, 'id' | 'created_at' | 'updated_at'>> => ({
+	user_role: profile.userRole,
+	account_index: profile.accountIndex,
+	stx_address: profile.stxAddress,
+	bns_address: profile.bnsAddress,
 });

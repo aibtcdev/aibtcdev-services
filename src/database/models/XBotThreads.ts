@@ -1,17 +1,17 @@
 import { Model, DataTypes, Infer } from 'd1-orm';
 
 export const xBotThreadsModel = new Model(
-    {
-        D1Orm: undefined,
-        tableName: 'x_bot_threads',
-        primaryKeys: 'id',
-        autoIncrement: 'id',
-    },
-    {
-        id: { type: DataTypes.INTEGER, notNull: true },
-        created_at: { type: DataTypes.STRING },
-        updated_at: { type: DataTypes.STRING },
-    }
+	{
+		D1Orm: undefined,
+		tableName: 'x_bot_threads',
+		primaryKeys: 'id',
+		autoIncrement: 'id',
+	},
+	{
+		id: { type: DataTypes.INTEGER, notNull: true },
+		created_at: { type: DataTypes.STRING },
+		updated_at: { type: DataTypes.STRING },
+	}
 );
 
 // Original type for ORM operations
@@ -19,16 +19,18 @@ export type XBotThreadsTable = Infer<typeof xBotThreadsModel>;
 
 // CamelCase interface for application use
 export interface XBotThread {
-    id: number;
-    createdAt: string;
-    updatedAt: string;
+	id: number;
+	createdAt: string;
+	updatedAt: string;
 }
 
 // Transform functions with explicit mapping
 export const transformXBotThreadToCamelCase = (thread: XBotThreadsTable): XBotThread => ({
-    id: thread.id,
-    createdAt: thread.created_at || '',
-    updatedAt: thread.updated_at || ''
+	id: thread.id,
+	createdAt: thread.created_at || '',
+	updatedAt: thread.updated_at || '',
 });
 
-export const transformXBotThreadToSnakeCase = (thread: Partial<XBotThread>): Partial<Omit<XBotThreadsTable, 'id' | 'created_at' | 'updated_at'>> => ({});
+export const transformXBotThreadToSnakeCase = (
+	thread: Partial<XBotThread>
+): Partial<Omit<XBotThreadsTable, 'id' | 'created_at' | 'updated_at'>> => ({});
