@@ -1,10 +1,44 @@
-import { Handler } from './types';
+import { Handler, HandlerDefinition } from './types';
 import { createApiResponse } from '../../utils/requests-responses';
 import { validateSessionToken } from '../../utils/auth-helper';
 import { getCronsByCrew, createCron, updateCronInput, toggleCronStatus, getEnabledCrons, getEnabledCronsDetailed } from '../helpers/crons';
 import { UserCronsTable } from '../models';
 
-export const handleCrons: Handler = async ({ orm, env, request, url }) => {
+export const cronsHandler: HandlerDefinition = {
+    baseRoute: 'crons',
+    endpoints: [
+        {
+            path: '/crons/enabled',
+            methods: ['GET'],
+            description: 'Get all enabled crons'
+        },
+        {
+            path: '/crons/enabled-detailed',
+            methods: ['GET'],
+            description: 'Get detailed information about enabled crons'
+        },
+        {
+            path: '/crons/get',
+            methods: ['GET'],
+            description: 'Get crons for a specific crew'
+        },
+        {
+            path: '/crons/create',
+            methods: ['POST'],
+            description: 'Create a new cron'
+        },
+        {
+            path: '/crons/update',
+            methods: ['PUT'],
+            description: 'Update cron input'
+        },
+        {
+            path: '/crons/toggle',
+            methods: ['PUT'],
+            description: 'Toggle cron status'
+        }
+    ],
+    handler: async ({ orm, env, request, url }) => {
 	const endpoint = url.pathname.split('/').pop();
 
 	switch (endpoint) {
