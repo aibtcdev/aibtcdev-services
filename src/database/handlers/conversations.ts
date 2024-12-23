@@ -48,7 +48,7 @@ export const conversationsHandler: HandlerDefinition = {
 		const endpoint = url.pathname.split('/').pop();
 
 		switch (endpoint) {
-			case 'conversations':
+			case 'list':
 				const address = url.searchParams.get('address');
 				if (!address) {
 					return createApiResponse('Missing address parameter', 400);
@@ -56,7 +56,7 @@ export const conversationsHandler: HandlerDefinition = {
 				const conversations = await getConversations(orm, address);
 				return createApiResponse({
 					message: 'Successfully retrieved conversations',
-					data: conversations,
+					data: { conversations },
 				});
 
 			case 'latest':

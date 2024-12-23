@@ -11,26 +11,63 @@ export const agentsHandler: HandlerDefinition = {
 			path: '/agents/get',
 			methods: ['GET'],
 			description: 'Get all agents for a crew',
+			requiresAuth: true,
+			parameters: {
+				crewId: 'ID of the crew to get agents for'
+			}
 		},
 		{
 			path: '/agents/create',
 			methods: ['POST'],
 			description: 'Create a new agent',
+			requiresAuth: true,
+			requestBody: {
+				profile_id: 'STX address of the user',
+				crew_id: 'ID of the crew',
+				agent_name: 'Name of the agent',
+				agent_role: 'Role of the agent',
+				agent_goal: 'Goal of the agent',
+				agent_backstory: 'Backstory of the agent'
+			}
 		},
 		{
 			path: '/agents/update',
 			methods: ['PUT'],
 			description: 'Update an existing agent',
+			requiresAuth: true,
+			parameters: {
+				id: 'ID of the agent to update'
+			},
+			requestBody: {
+				agent_name: 'Optional: New name of the agent',
+				agent_role: 'Optional: New role of the agent',
+				agent_goal: 'Optional: New goal of the agent',
+				agent_backstory: 'Optional: New backstory of the agent'
+			}
 		},
 		{
 			path: '/agents/delete',
 			methods: ['DELETE'],
 			description: 'Delete an agent',
+			requiresAuth: true,
+			parameters: {
+				id: 'ID of the agent to delete'
+			}
 		},
 	],
 	handler: async ({ orm, env, request, url }) => {
-		const endpoint = url.pathname.split('/').pop();
+		// Verify authentication for all endpoints
+		const authHeader = request.headers.get('Authorization');
+		if (!authHeader) {
+			return createApiResponse('Missing authorization header', 401);
+		}
+		const token = authHeader.replace('Bearer ', '');
+		const tokenAddress = await validateSessionToken(env, token);
+		if (!tokenAddress.success) {
+			return createApiResponse('Unauthorized access', 403);
+		}
 
+		const endpoint = url.pathname.split('/').pop();
 		switch (endpoint) {
 			case 'get': {
 				const crewId = url.searchParams.get('crewId');
