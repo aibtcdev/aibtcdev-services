@@ -24,13 +24,14 @@ export type UserCrewExecutionStepsTable = Infer<typeof userCrewExecutionStepsMod
 
 // CamelCase interface for application use
 export interface UserCrewExecutionStep {
-    id: number;
-    createdAt: string;
-    profileId: string;
-    crewId: number;
-    executionId: number;
-    stepType: string;
-    stepData: string;
+	id: number;
+	createdAt: string;
+	updatedAt: string;
+	profileId: string;
+	crewId: number;
+	executionId: number;
+	stepType: string;
+	stepData: string;
 }
 
 // Transform functions using generic utility
