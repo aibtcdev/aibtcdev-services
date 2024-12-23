@@ -1,10 +1,34 @@
-import { Handler } from './types';
+import { Handler, HandlerDefinition } from './types';
 import { createApiResponse } from '../../utils/requests-responses';
 import { validateSessionToken } from '../../utils/auth-helper';
 import { getAgents, createAgent, updateAgent, deleteAgent } from '../helpers/agents';
 import { UserAgentsTable } from '../models';
 
-export const handleAgents: Handler = async ({ orm, env, request, url }) => {
+export const agentsHandler: HandlerDefinition = {
+    baseRoute: 'agents',
+    endpoints: [
+        {
+            path: '/agents/get',
+            methods: ['GET'],
+            description: 'Get all agents for a crew'
+        },
+        {
+            path: '/agents/create',
+            methods: ['POST'],
+            description: 'Create a new agent'
+        },
+        {
+            path: '/agents/update',
+            methods: ['PUT'],
+            description: 'Update an existing agent'
+        },
+        {
+            path: '/agents/delete',
+            methods: ['DELETE'],
+            description: 'Delete an agent'
+        }
+    ],
+    handler: async ({ orm, env, request, url }) => {
 	const endpoint = url.pathname.split('/').pop();
 
 	switch (endpoint) {
