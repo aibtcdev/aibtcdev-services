@@ -1,4 +1,4 @@
-import { Handler } from './types';
+import { Handler, HandlerDefinition } from './types';
 import { createApiResponse } from '../../utils/requests-responses';
 import { validateSessionToken } from '../../utils/auth-helper';
 import {
@@ -16,7 +16,66 @@ import {
 } from '../helpers/crews';
 import { UserCrewsTable, UserCrewExecutionStepsTable } from '../models';
 
-export const handleCrews: Handler = async ({ orm, env, request, url }) => {
+export const crewsHandler: HandlerDefinition = {
+    baseRoute: 'crews',
+    endpoints: [
+        {
+            path: '/crews/profile',
+            methods: ['GET'],
+            description: 'Get crews for a specific profile'
+        },
+        {
+            path: '/crews/public',
+            methods: ['GET'],
+            description: 'Get all public crews'
+        },
+        {
+            path: '/crews/get',
+            methods: ['GET'],
+            description: 'Get a specific crew by ID'
+        },
+        {
+            path: '/crews/create',
+            methods: ['POST'],
+            description: 'Create a new crew'
+        },
+        {
+            path: '/crews/update',
+            methods: ['PUT'],
+            description: 'Update an existing crew'
+        },
+        {
+            path: '/crews/delete',
+            methods: ['DELETE'],
+            description: 'Delete a crew'
+        },
+        {
+            path: '/crews/executions',
+            methods: ['GET'],
+            description: 'Get crew executions for an address'
+        },
+        {
+            path: '/crews/executions/add',
+            methods: ['POST'],
+            description: 'Add a new crew execution'
+        },
+        {
+            path: '/crews/steps/get',
+            methods: ['GET'],
+            description: 'Get execution steps'
+        },
+        {
+            path: '/crews/steps/create',
+            methods: ['POST'],
+            description: 'Create a new execution step'
+        },
+        {
+            path: '/crews/steps/delete',
+            methods: ['DELETE'],
+            description: 'Delete execution steps'
+        }
+    ],
+    handler: async ({ orm, env, request, url }) => {
 	const endpoint = url.pathname.split('/').pop();
 
 	switch (endpoint) {
