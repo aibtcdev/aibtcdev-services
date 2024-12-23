@@ -41,7 +41,7 @@ export const transformUserCronToCamelCase = (cron: UserCronsTable): UserCron => 
     updatedAt: cron.updated_at || '',
     profileId: cron.profile_id,
     crewId: cron.crew_id,
-    cronEnabled: cron.cron_enabled,
+    cronEnabled: Boolean(cron.cron_enabled),
     cronInterval: cron.cron_interval,
     cronInput: cron.cron_input
 });
@@ -49,7 +49,7 @@ export const transformUserCronToCamelCase = (cron: UserCronsTable): UserCron => 
 export const transformUserCronToSnakeCase = (cron: Partial<UserCron>): Partial<Omit<UserCronsTable, 'id' | 'created_at' | 'updated_at'>> => ({
     profile_id: cron.profileId,
     crew_id: cron.crewId,
-    cron_enabled: cron.cronEnabled,
+    cron_enabled: cron.cronEnabled ? 1 : 0,
     cron_interval: cron.cronInterval,
     cron_input: cron.cronInput
 });

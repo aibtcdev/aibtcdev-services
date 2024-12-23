@@ -45,8 +45,8 @@ export const transformUserCrewToCamelCase = (crew: UserCrewsTable): UserCrew => 
 	crewName: crew.crew_name,
 	crewDescription: crew.crew_description ?? undefined,
 	crewExecutions: crew.crew_executions ?? undefined,
-	crewIsPublic: crew.crew_is_public ?? undefined,
-	crewIsCron: crew.crew_is_cron ?? undefined,
+	crewIsPublic: crew.crew_is_public !== null ? Boolean(crew.crew_is_public) : undefined,
+	crewIsCron: crew.crew_is_cron !== null ? Boolean(crew.crew_is_cron) : undefined,
 });
 
 export const transformUserCrewToSnakeCase = (
@@ -56,6 +56,6 @@ export const transformUserCrewToSnakeCase = (
 	crew_name: crew.crewName,
 	crew_description: crew.crewDescription,
 	crew_executions: crew.crewExecutions,
-	crew_is_public: crew.crewIsPublic ?? undefined,
-	crew_is_cron: crew.crewIsCron ?? undefined,
+	crew_is_public: crew.crewIsPublic !== undefined ? (crew.crewIsPublic ? 1 : 0) : undefined,
+	crew_is_cron: crew.crewIsCron !== undefined ? (crew.crewIsCron ? 1 : 0) : undefined,
 });

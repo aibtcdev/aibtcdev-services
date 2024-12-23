@@ -52,7 +52,7 @@ export const transformXBotTweetToCamelCase = (tweet: XBotTweetsTable): XBotTweet
 	tweetCreatedAt: tweet.tweet_created_at ?? undefined,
 	tweetUpdatedAt: tweet.tweet_updated_at ?? undefined,
 	tweetBody: tweet.tweet_body ?? undefined,
-	isBotResponse: tweet.is_bot_response,
+	isBotResponse: Boolean(tweet.is_bot_response),
 });
 
 export const transformXBotTweetToSnakeCase = (
@@ -65,5 +65,5 @@ export const transformXBotTweetToSnakeCase = (
 	tweet_created_at: tweet.tweetCreatedAt,
 	tweet_updated_at: tweet.tweetUpdatedAt,
 	tweet_body: tweet.tweetBody,
-	is_bot_response: tweet.isBotResponse,
+	is_bot_response: tweet.isBotResponse ? 1 : 0,
 });
