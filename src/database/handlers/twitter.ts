@@ -21,8 +21,8 @@ export const twitterHandler: HandlerDefinition = {
 			description: 'Create a new author',
 			requiresAuth: true,
 			requestBody: {
-				author_id: 'Twitter author ID',
-				realname: 'Optional: Real name of the author',
+				authorId: 'Twitter author ID',
+				realName: 'Optional: Real name of the author',
 				username: 'Optional: Twitter username'
 			}
 		},
@@ -59,12 +59,12 @@ export const twitterHandler: HandlerDefinition = {
 			description: 'Add a new tweet',
 			requiresAuth: true,
 			requestBody: {
-				author_id: 'Twitter author ID',
-				tweet_id: 'Twitter tweet ID',
-				tweet_body: 'Content of the tweet',
-				thread_id: 'Optional: Thread ID if part of a thread',
-				parent_tweet_id: 'Optional: ID of parent tweet if reply',
-				is_bot_response: 'Optional: Boolean indicating if tweet is bot response'
+				authorId: 'Twitter author ID',
+				tweetId: 'Twitter tweet ID',
+				tweetBody: 'Content of the tweet',
+				threadId: 'Optional: Thread ID if part of a thread',
+				parentTweetId: 'Optional: ID of parent tweet if reply',
+				isBotResponse: 'Optional: Boolean indicating if tweet is bot response'
 			}
 		},
 		{
@@ -82,9 +82,9 @@ export const twitterHandler: HandlerDefinition = {
 			description: 'Add a new log entry',
 			requiresAuth: true,
 			requestBody: {
-				tweet_id: 'Tweet ID to add log for',
-				tweet_status: 'Status of the tweet',
-				log_message: 'Optional: Additional log message'
+				tweetId: 'Tweet ID to add log for',
+				tweetStatus: 'Status of the tweet',
+				logMessage: 'Optional: Additional log message'
 			}
 		},
 	],

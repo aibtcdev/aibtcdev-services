@@ -34,11 +34,11 @@ export const cronsHandler: HandlerDefinition = {
 			description: 'Create a new cron',
 			requiresAuth: true,
 			requestBody: {
-				profile_id: 'STX address of the user',
-				crew_id: 'ID of the crew',
-				cron_enabled: 'Boolean indicating if cron is enabled',
-				cron_interval: 'Optional: Cron schedule expression (default: "0 * * * *")',
-				cron_input: 'Optional: Input data for the cron job'
+				profileId: 'STX address of the user',
+				crewId: 'ID of the crew',
+				cronEnabled: 'Boolean indicating if cron is enabled',
+				cronInterval: 'Optional: Cron schedule expression (default: "0 * * * *")',
+				cronInput: 'Optional: Input data for the cron job'
 			}
 		},
 		{
@@ -50,7 +50,7 @@ export const cronsHandler: HandlerDefinition = {
 				id: 'ID of the cron to update'
 			},
 			requestBody: {
-				cron_input: 'New input data for the cron job'
+				cronInput: 'New input data for the cron job'
 			}
 		},
 		{
@@ -62,7 +62,7 @@ export const cronsHandler: HandlerDefinition = {
 				id: 'ID of the cron to toggle'
 			},
 			requestBody: {
-				cron_enabled: 'Boolean indicating desired cron status'
+				cronEnabled: 'Boolean indicating desired cron status'
 			}
 		},
 	],

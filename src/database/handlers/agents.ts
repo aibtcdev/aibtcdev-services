@@ -22,12 +22,12 @@ export const agentsHandler: HandlerDefinition = {
 			description: 'Create a new agent',
 			requiresAuth: true,
 			requestBody: {
-				profile_id: 'STX address of the user',
-				crew_id: 'ID of the crew',
-				agent_name: 'Name of the agent',
-				agent_role: 'Role of the agent',
-				agent_goal: 'Goal of the agent',
-				agent_backstory: 'Backstory of the agent'
+				profileId: 'STX address of the user',
+				crewId: 'ID of the crew',
+				agentName: 'Name of the agent',
+				agentRole: 'Role of the agent',
+				agentGoal: 'Goal of the agent',
+				agentBackstory: 'Backstory of the agent'
 			}
 		},
 		{
@@ -39,10 +39,10 @@ export const agentsHandler: HandlerDefinition = {
 				id: 'ID of the agent to update'
 			},
 			requestBody: {
-				agent_name: 'Optional: New name of the agent',
-				agent_role: 'Optional: New role of the agent',
-				agent_goal: 'Optional: New goal of the agent',
-				agent_backstory: 'Optional: New backstory of the agent'
+				agentName: 'Optional: New name of the agent',
+				agentRole: 'Optional: New role of the agent',
+				agentGoal: 'Optional: New goal of the agent',
+				agentBackstory: 'Optional: New backstory of the agent'
 			}
 		},
 		{

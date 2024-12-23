@@ -39,8 +39,8 @@ export const conversationsHandler: HandlerDefinition = {
 			description: 'Create a new conversation',
 			requiresAuth: true,
 			requestBody: {
-				profile_id: 'STX address of the user',
-				conversation_name: 'Optional name for the conversation'
+				profileId: 'STX address of the user',
+				conversationName: 'Optional name for the conversation'
 			}
 		},
 	],

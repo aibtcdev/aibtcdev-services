@@ -38,10 +38,10 @@ export const profilesHandler: HandlerDefinition = {
 			description: 'Create new user profile',
 			requiresAuth: true,
 			requestBody: {
-				stx_address: 'STX address of the user',
-				user_role: 'Role of the user (admin/user)',
-				user_name: 'Optional: Display name of the user',
-				user_avatar: 'Optional: Avatar URL for the user'
+				stxAddress: 'STX address of the user',
+				userRole: 'Role of the user (admin/user)',
+				userName: 'Optional: Display name of the user',
+				userAvatar: 'Optional: Avatar URL for the user'
 			}
 		},
 		{
@@ -53,9 +53,9 @@ export const profilesHandler: HandlerDefinition = {
 				address: 'STX address of the user'
 			},
 			requestBody: {
-				user_role: 'Optional: New role of the user',
-				user_name: 'Optional: New display name',
-				user_avatar: 'Optional: New avatar URL'
+				userRole: 'Optional: New role of the user',
+				userName: 'Optional: New display name',
+				userAvatar: 'Optional: New avatar URL'
 			}
 		},
 		{
@@ -82,10 +82,10 @@ export const profilesHandler: HandlerDefinition = {
 				userId: 'ID of the user to update'
 			},
 			requestBody: {
-				stx_address: 'Optional: New STX address',
-				user_role: 'Optional: New user role',
-				user_name: 'Optional: New display name',
-				user_avatar: 'Optional: New avatar URL'
+				stxAddress: 'Optional: New STX address',
+				userRole: 'Optional: New user role',
+				userName: 'Optional: New display name',
+				userAvatar: 'Optional: New avatar URL'
 			}
 		},
 	],
