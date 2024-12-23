@@ -11,31 +11,59 @@ export const cronsHandler: HandlerDefinition = {
 			path: '/crons/enabled',
 			methods: ['GET'],
 			description: 'Get all enabled crons',
+			requiresAuth: true
 		},
 		{
 			path: '/crons/enabled-detailed',
 			methods: ['GET'],
 			description: 'Get detailed information about enabled crons',
+			requiresAuth: true
 		},
 		{
 			path: '/crons/get',
 			methods: ['GET'],
 			description: 'Get crons for a specific crew',
+			requiresAuth: true,
+			parameters: {
+				crewId: 'ID of the crew to get crons for'
+			}
 		},
 		{
 			path: '/crons/create',
 			methods: ['POST'],
 			description: 'Create a new cron',
+			requiresAuth: true,
+			requestBody: {
+				profile_id: 'STX address of the user',
+				crew_id: 'ID of the crew',
+				cron_enabled: 'Boolean indicating if cron is enabled',
+				cron_interval: 'Optional: Cron schedule expression (default: "0 * * * *")',
+				cron_input: 'Optional: Input data for the cron job'
+			}
 		},
 		{
 			path: '/crons/update',
 			methods: ['PUT'],
 			description: 'Update cron input',
+			requiresAuth: true,
+			parameters: {
+				id: 'ID of the cron to update'
+			},
+			requestBody: {
+				cron_input: 'New input data for the cron job'
+			}
 		},
 		{
 			path: '/crons/toggle',
 			methods: ['PUT'],
 			description: 'Toggle cron status',
+			requiresAuth: true,
+			parameters: {
+				id: 'ID of the cron to toggle'
+			},
+			requestBody: {
+				cron_enabled: 'Boolean indicating desired cron status'
+			}
 		},
 	],
 	handler: async ({ orm, env, request, url }) => {
