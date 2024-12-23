@@ -11,31 +11,65 @@ export const tasksHandler: HandlerDefinition = {
 			path: '/tasks/get',
 			methods: ['GET'],
 			description: 'Get a specific task by ID',
+			requiresAuth: true,
+			parameters: {
+				id: 'ID of the task to retrieve'
+			}
 		},
 		{
 			path: '/tasks/list',
 			methods: ['GET'],
 			description: 'Get all tasks for an agent',
+			requiresAuth: true,
+			parameters: {
+				agentId: 'ID of the agent to get tasks for'
+			}
 		},
 		{
 			path: '/tasks/create',
 			methods: ['POST'],
 			description: 'Create a new task',
+			requiresAuth: true,
+			requestBody: {
+				profile_id: 'STX address of the user',
+				crew_id: 'ID of the crew',
+				agent_id: 'ID of the agent',
+				task_name: 'Name of the task',
+				task_description: 'Description of the task',
+				task_expected_output: 'Expected output of the task'
+			}
 		},
 		{
 			path: '/tasks/update',
 			methods: ['PUT'],
 			description: 'Update an existing task',
+			requiresAuth: true,
+			parameters: {
+				id: 'ID of the task to update'
+			},
+			requestBody: {
+				task_name: 'Optional: New name of the task',
+				task_description: 'Optional: New description of the task',
+				task_expected_output: 'Optional: New expected output of the task'
+			}
 		},
 		{
 			path: '/tasks/delete',
 			methods: ['DELETE'],
 			description: 'Delete a specific task',
+			requiresAuth: true,
+			parameters: {
+				id: 'ID of the task to delete'
+			}
 		},
 		{
 			path: '/tasks/delete-all',
 			methods: ['DELETE'],
 			description: 'Delete all tasks for an agent',
+			requiresAuth: true,
+			parameters: {
+				agentId: 'ID of the agent to delete all tasks for'
+			}
 		},
 	],
 	handler: async ({ orm, env, request, url }) => {
