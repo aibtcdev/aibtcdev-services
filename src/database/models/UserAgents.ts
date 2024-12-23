@@ -1,4 +1,5 @@
 import { Model, DataTypes, Infer } from 'd1-orm';
+import { toCamelCase, toSnakeCase } from '../../utils/case-transformers';
 
 export const userAgentsModel = new Model(
 	{
@@ -37,8 +38,6 @@ export interface UserAgent {
     agentBackstory: string;
     agentTools?: string;
 }
-
-import { toCamelCase, toSnakeCase } from '../../utils/case-transformers';
 
 // Transform functions using generic utility
 export const transformToCamelCase = (agent: UserAgentsTable): UserAgent => toCamelCase(agent);
