@@ -1,9 +1,33 @@
-import { Handler } from './types';
+import { Handler, HandlerDefinition } from './types';
 import { createApiResponse } from '../../utils/requests-responses';
 import { getConversations, getLatestConversation, getConversationHistory, addConversation } from '../helpers/conversations';
 import { UserConversationsTable } from '../models';
 
-export const handleConversations: Handler = async ({ orm, request, url }) => {
+export const conversationsHandler: HandlerDefinition = {
+    baseRoute: 'conversations',
+    endpoints: [
+        {
+            path: '/conversations/conversations',
+            methods: ['GET'],
+            description: 'Get all conversations for an address'
+        },
+        {
+            path: '/conversations/latest',
+            methods: ['GET'],
+            description: 'Get latest conversation for an address'
+        },
+        {
+            path: '/conversations/history',
+            methods: ['GET'],
+            description: 'Get conversation history by ID'
+        },
+        {
+            path: '/conversations/create',
+            methods: ['POST'],
+            description: 'Create a new conversation'
+        }
+    ],
+    handler: async ({ orm, request, url }) => {
 	const endpoint = url.pathname.split('/').pop();
 
 	switch (endpoint) {
