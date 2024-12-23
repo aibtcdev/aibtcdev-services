@@ -1,9 +1,53 @@
-import { Handler } from './types';
+import { Handler, HandlerDefinition } from './types';
 import { createApiResponse } from '../../utils/requests-responses';
 import { getAuthor, addAuthor, getTweet, getThreadTweets, getAuthorTweets, addTweet, getTweetLogs, addLog } from '../helpers/twitter';
 import { XBotAuthorsTable, XBotTweetsTable, XBotLogsTable } from '../models';
 
-export const handleTwitter: Handler = async ({ orm, request, url }) => {
+export const twitterHandler: HandlerDefinition = {
+    baseRoute: 'twitter',
+    endpoints: [
+        {
+            path: '/twitter/get',
+            methods: ['GET'],
+            description: 'Get author by ID'
+        },
+        {
+            path: '/twitter/create',
+            methods: ['POST'],
+            description: 'Create a new author'
+        },
+        {
+            path: '/twitter/tweet',
+            methods: ['GET'],
+            description: 'Get tweet by ID'
+        },
+        {
+            path: '/twitter/thread',
+            methods: ['GET'],
+            description: 'Get tweets in a thread'
+        },
+        {
+            path: '/twitter/author-tweets',
+            methods: ['GET'],
+            description: 'Get tweets by author'
+        },
+        {
+            path: '/twitter/add-tweet',
+            methods: ['POST'],
+            description: 'Add a new tweet'
+        },
+        {
+            path: '/twitter/logs',
+            methods: ['GET'],
+            description: 'Get logs for a tweet'
+        },
+        {
+            path: '/twitter/add-log',
+            methods: ['POST'],
+            description: 'Add a new log entry'
+        }
+    ],
+    handler: async ({ orm, request, url }) => {
 	const endpoint = url.pathname.split('/').pop();
 
 	switch (endpoint) {
