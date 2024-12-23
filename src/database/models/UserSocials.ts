@@ -17,4 +17,33 @@ export const userSocialsModel = new Model(
 	}
 );
 
+// Original type for ORM operations
 export type UserSocialsTable = Infer<typeof userSocialsModel>;
+
+// CamelCase interface for application use
+export interface UserSocial {
+	id: number;
+	createdAt: string;
+	updatedAt: string;
+	profileId: string;
+	platform: string;
+	platformId: string;
+}
+
+// Transform functions with explicit mapping
+export const transformUserSocialToCamelCase = (social: UserSocialsTable): UserSocial => ({
+	id: social.id,
+	createdAt: social.created_at || '',
+	updatedAt: social.updated_at || '',
+	profileId: social.profile_id,
+	platform: social.platform,
+	platformId: social.platform_id,
+});
+
+export const transformUserSocialToSnakeCase = (
+	social: Partial<UserSocial>
+): Partial<Omit<UserSocialsTable, 'id' | 'created_at' | 'updated_at'>> => ({
+	profile_id: social.profileId,
+	platform: social.platform,
+	platform_id: social.platformId,
+});

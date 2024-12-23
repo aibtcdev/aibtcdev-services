@@ -4,12 +4,12 @@ import { userCrewExecutionsModel, userCrewsModel, UserCrewsTable, UserCrewExecut
 /** CREW MANAGEMENT */
 
 interface CrewResult {
-    crew?: UserCrewsTable;
-    crews?: UserCrewsTable[];
-    execution?: UserCrewExecutionsTable;
-    executions?: UserCrewExecutionsTable[];
-    success: boolean;
-    error?: string;
+	crew?: UserCrewsTable;
+	crews?: UserCrewsTable[];
+	execution?: UserCrewExecutionsTable;
+	executions?: UserCrewExecutionsTable[];
+	success: boolean;
+	error?: string;
 }
 
 /**
@@ -23,33 +23,33 @@ interface CrewResult {
  * @throws Error if database insertion fails
  */
 export async function addCrewExecution(
-    orm: D1Orm, 
-    address: string, 
-    crewId: number, 
-    conversationId: number, 
-    input?: string
+	orm: D1Orm,
+	address: string,
+	crewId: number,
+	conversationId: number,
+	input?: string
 ): Promise<CrewResult> {
-    try {
-        userCrewExecutionsModel.SetOrm(orm);
-        const execution = await userCrewExecutionsModel.InsertOne({
-            profile_id: address,
-            crew_id: crewId,
-            conversation_id: conversationId,
-            user_input: input,
-            total_tokens: 0,
-            successful_requests: 0,
-        });
-        return {
-            execution: execution as unknown as UserCrewExecutionsTable,
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in addCrewExecution: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            success: false,
-            error: `Failed to create crew execution: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCrewExecutionsModel.SetOrm(orm);
+		const execution = await userCrewExecutionsModel.InsertOne({
+			profile_id: address,
+			crew_id: crewId,
+			conversation_id: conversationId,
+			user_input: input,
+			total_tokens: 0,
+			successful_requests: 0,
+		});
+		return {
+			execution: execution as unknown as UserCrewExecutionsTable,
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in addCrewExecution: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			success: false,
+			error: `Failed to create crew execution: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -60,31 +60,31 @@ export async function addCrewExecution(
  * @throws Error if database query fails
  */
 export async function getCrewExecutions(orm: D1Orm, address: string): Promise<CrewResult> {
-    try {
-        userCrewExecutionsModel.SetOrm(orm);
-        const result = await userCrewExecutionsModel.All({
-            where: {
-                profile_id: address,
-            },
-            orderBy: [
-                {
-                    column: 'created_at',
-                    descending: true,
-                },
-            ],
-        });
-        return {
-            executions: result.results as unknown as UserCrewExecutionsTable[],
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in getCrewExecutions: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            executions: [],
-            success: false,
-            error: `Failed to get crew executions: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCrewExecutionsModel.SetOrm(orm);
+		const result = await userCrewExecutionsModel.All({
+			where: {
+				profile_id: address,
+			},
+			orderBy: [
+				{
+					column: 'created_at',
+					descending: true,
+				},
+			],
+		});
+		return {
+			executions: result.results as unknown as UserCrewExecutionsTable[],
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in getCrewExecutions: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			executions: [],
+			success: false,
+			error: `Failed to get crew executions: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -94,31 +94,31 @@ export async function getCrewExecutions(orm: D1Orm, address: string): Promise<Cr
  * @throws Error if database query fails
  */
 export async function getPublicCrews(orm: D1Orm): Promise<CrewResult> {
-    try {
-        userCrewsModel.SetOrm(orm);
-        const result = await userCrewsModel.All({
-            where: {
-                crew_is_public: 1,
-            },
-            orderBy: [
-                {
-                    column: 'created_at',
-                    descending: true,
-                },
-            ],
-        });
-        return {
-            crews: result.results as unknown as UserCrewsTable[],
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in getPublicCrews: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            crews: [],
-            success: false,
-            error: `Failed to get public crews: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCrewsModel.SetOrm(orm);
+		const result = await userCrewsModel.All({
+			where: {
+				crew_is_public: 1,
+			},
+			orderBy: [
+				{
+					column: 'created_at',
+					descending: true,
+				},
+			],
+		});
+		return {
+			crews: result.results as unknown as UserCrewsTable[],
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in getPublicCrews: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			crews: [],
+			success: false,
+			error: `Failed to get public crews: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -129,24 +129,24 @@ export async function getPublicCrews(orm: D1Orm): Promise<CrewResult> {
  * @throws Error if database query fails
  */
 export async function getCrew(orm: D1Orm, crewId: number): Promise<CrewResult> {
-    try {
-        userCrewsModel.SetOrm(orm);
-        const crew = await userCrewsModel.First({
-            where: {
-                id: crewId
-            }
-        });
-        return {
-            crew: crew as unknown as UserCrewsTable,
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in getCrew: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            success: false,
-            error: `Failed to get crew: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCrewsModel.SetOrm(orm);
+		const crew = await userCrewsModel.First({
+			where: {
+				id: crewId,
+			},
+		});
+		return {
+			crew: crew as unknown as UserCrewsTable,
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in getCrew: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			success: false,
+			error: `Failed to get crew: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -156,21 +156,24 @@ export async function getCrew(orm: D1Orm, crewId: number): Promise<CrewResult> {
  * @returns Promise containing the created crew or error details
  * @throws Error if database insertion fails
  */
-export async function createCrew(orm: D1Orm, crewData: Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at' | 'crew_executions' | 'crew_is_cron'>): Promise<CrewResult> {
-    try {
-        userCrewsModel.SetOrm(orm);
-        const crew = await userCrewsModel.InsertOne(crewData);
-        return {
-            crew: crew as unknown as UserCrewsTable,
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in createCrew: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            success: false,
-            error: `Failed to create crew: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+export async function createCrew(
+	orm: D1Orm,
+	crewData: Omit<UserCrewsTable, 'id' | 'created_at' | 'updated_at' | 'crew_executions' | 'crew_is_cron'>
+): Promise<CrewResult> {
+	try {
+		userCrewsModel.SetOrm(orm);
+		const crew = await userCrewsModel.InsertOne(crewData);
+		return {
+			crew: crew as unknown as UserCrewsTable,
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in createCrew: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			success: false,
+			error: `Failed to create crew: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -182,28 +185,28 @@ export async function createCrew(orm: D1Orm, crewData: Omit<UserCrewsTable, 'id'
  * @throws Error if database update fails
  */
 export async function updateCrew(
-    orm: D1Orm, 
-    crewId: number, 
-    updates: Partial<Pick<UserCrewsTable, 'crew_name' | 'crew_description' | 'crew_is_public'>>
+	orm: D1Orm,
+	crewId: number,
+	updates: Partial<Pick<UserCrewsTable, 'crew_name' | 'crew_description' | 'crew_is_public'>>
 ): Promise<CrewResult> {
-    try {
-        userCrewsModel.SetOrm(orm);
-        await userCrewsModel.Update({
-            where: {
-                id: crewId
-            },
-            data: updates
-        });
-        return {
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in updateCrew: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            success: false,
-            error: `Failed to update crew: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCrewsModel.SetOrm(orm);
+		await userCrewsModel.Update({
+			where: {
+				id: crewId,
+			},
+			data: updates,
+		});
+		return {
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in updateCrew: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			success: false,
+			error: `Failed to update crew: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -214,29 +217,29 @@ export async function updateCrew(
  * @throws Error if database deletion fails
  * @note Due to CASCADE DELETE in schema, deleting the crew will automatically delete:
  * - Associated agents (user_agents)
- * - Associated tasks (user_tasks) 
+ * - Associated tasks (user_tasks)
  * - Associated executions (user_crew_executions)
  * - Associated execution steps (user_crew_execution_steps)
  * - Associated crons (user_crons)
  */
 export async function deleteCrew(orm: D1Orm, crewId: number): Promise<CrewResult> {
-    try {
-        userCrewsModel.SetOrm(orm);
-        await userCrewsModel.Delete({
-            where: {
-                id: crewId
-            }
-        });
-        return {
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in deleteCrew: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            success: false,
-            error: `Failed to delete crew: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCrewsModel.SetOrm(orm);
+		await userCrewsModel.Delete({
+			where: {
+				id: crewId,
+			},
+		});
+		return {
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in deleteCrew: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			success: false,
+			error: `Failed to delete crew: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -253,31 +256,31 @@ export async function deleteCrew(orm: D1Orm, crewId: number): Promise<CrewResult
  * @returns Promise containing array of execution steps or error details
  */
 export async function getExecutionSteps(orm: D1Orm, executionId: number): Promise<CrewResult> {
-    try {
-        userCrewExecutionStepsModel.SetOrm(orm);
-        const result = await userCrewExecutionStepsModel.All({
-            where: {
-                execution_id: executionId
-            },
-            orderBy: [
-                {
-                    column: 'created_at',
-                    ascending: true,
-                },
-            ],
-        });
-        return {
-            steps: result.results as unknown as UserCrewExecutionStepsTable[],
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in getExecutionSteps: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            steps: [],
-            success: false,
-            error: `Failed to get execution steps: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCrewExecutionStepsModel.SetOrm(orm);
+		const result = await userCrewExecutionStepsModel.All({
+			where: {
+				execution_id: executionId,
+			},
+			orderBy: [
+				{
+					column: 'created_at',
+					ascending: true,
+				},
+			],
+		});
+		return {
+			steps: result.results as unknown as UserCrewExecutionStepsTable[],
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in getExecutionSteps: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			steps: [],
+			success: false,
+			error: `Failed to get execution steps: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -287,23 +290,23 @@ export async function getExecutionSteps(orm: D1Orm, executionId: number): Promis
  * @returns Promise containing the created step or error details
  */
 export async function createExecutionStep(
-    orm: D1Orm, 
-    stepData: Omit<UserCrewExecutionStepsTable, 'id' | 'created_at' | 'updated_at'>
+	orm: D1Orm,
+	stepData: Omit<UserCrewExecutionStepsTable, 'id' | 'created_at' | 'updated_at'>
 ): Promise<CrewResult> {
-    try {
-        userCrewExecutionStepsModel.SetOrm(orm);
-        const step = await userCrewExecutionStepsModel.InsertOne(stepData);
-        return {
-            step: step as unknown as UserCrewExecutionStepsTable,
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in createExecutionStep: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            success: false,
-            error: `Failed to create execution step: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCrewExecutionStepsModel.SetOrm(orm);
+		const step = await userCrewExecutionStepsModel.InsertOne(stepData);
+		return {
+			step: step as unknown as UserCrewExecutionStepsTable,
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in createExecutionStep: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			success: false,
+			error: `Failed to create execution step: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -313,49 +316,49 @@ export async function createExecutionStep(
  * @returns Promise containing the deletion result or error details
  */
 export async function deleteExecutionSteps(orm: D1Orm, executionId: number): Promise<CrewResult> {
-    try {
-        userCrewExecutionStepsModel.SetOrm(orm);
-        await userCrewExecutionStepsModel.Delete({
-            where: {
-                execution_id: executionId
-            }
-        });
-        return {
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in deleteExecutionSteps: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            success: false,
-            error: `Failed to delete execution steps: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCrewExecutionStepsModel.SetOrm(orm);
+		await userCrewExecutionStepsModel.Delete({
+			where: {
+				execution_id: executionId,
+			},
+		});
+		return {
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in deleteExecutionSteps: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			success: false,
+			error: `Failed to delete execution steps: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 export async function getCrewsByProfile(orm: D1Orm, address: string): Promise<CrewResult> {
-    try {
-        userCrewsModel.SetOrm(orm);
-        const result = await userCrewsModel.All({
-            where: {
-                profile_id: address
-            },
-            orderBy: [
-                {
-                    column: 'created_at',
-                    descending: true,
-                },
-            ],
-        });
-        return {
-            crews: result.results as unknown as UserCrewsTable[],
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in getCrewsByProfile: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            crews: [],
-            success: false,
-            error: `Failed to get crews for profile: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCrewsModel.SetOrm(orm);
+		const result = await userCrewsModel.All({
+			where: {
+				profile_id: address,
+			},
+			orderBy: [
+				{
+					column: 'created_at',
+					descending: true,
+				},
+			],
+		});
+		return {
+			crews: result.results as unknown as UserCrewsTable[],
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in getCrewsByProfile: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			crews: [],
+			success: false,
+			error: `Failed to get crews for profile: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }

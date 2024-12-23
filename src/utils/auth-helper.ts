@@ -1,8 +1,9 @@
 import { Env } from '../../worker-configuration';
 
-type SharedKeyResponse = { success: boolean; error?: string; status?: number };
+type SharedKeySuccess = { success: true };
+type SharedKeyFailure = { success: false; error: string; status: number };
 
-export async function validateSharedKeyAuth(env: Env, request: Request): Promise<SharedKeyResponse> {
+export async function validateSharedKeyAuth(env: Env, request: Request): Promise<SharedKeySuccess | SharedKeyFailure> {
 	if (!request.headers.has('Authorization')) {
 		return { success: false, error: 'Missing Authorization header', status: 401 };
 	}

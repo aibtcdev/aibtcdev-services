@@ -1,6 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Env } from '../../worker-configuration';
-import { createJsonResponse } from '../utils/requests-responses';
+import { createApiResponse, createUnsupportedEndpointResponse } from '../utils/requests-responses';
 import { validateSharedKeyAuth } from '../utils/auth-helper';
 import OpenAI from 'openai';
 
@@ -26,20 +26,30 @@ export class ImageGeneratorDO extends DurableObject<Env> {
 		const path = url.pathname;
 
 		if (!path.startsWith(this.BASE_PATH)) {
-			return createJsonResponse({ error: `Invalid base path: ${path}` }, 404);
+			return createApiResponse(`Invalid base path: ${path}`, 404);
 		}
 
 		const endpoint = path.replace(this.BASE_PATH, '');
 
+		// Handle root path
+		if (endpoint === '' || endpoint === '/') {
+			return createApiResponse({
+				message: 'image generator service',
+				data: {
+					endpoints: this.SUPPORTED_ENDPOINTS,
+				},
+			});
+		}
+
 		// Require auth for all endpoints
 		const authResult = await validateSharedKeyAuth(this.env, request);
 		if (!authResult.success) {
-			return createJsonResponse({ error: authResult.error }, authResult.status);
+			return createApiResponse(authResult.error, authResult.status);
 		}
 
 		if (endpoint === '/generate') {
 			if (request.method !== 'POST') {
-				return createJsonResponse({ error: 'Method not allowed' }, 405);
+				return createApiResponse('Method not allowed', 405);
 			}
 
 			try {
@@ -50,7 +60,7 @@ export class ImageGeneratorDO extends DurableObject<Env> {
 				} = (await request.json()) as { prompt: string; size?: string; n?: number };
 
 				if (!prompt) {
-					return createJsonResponse({ error: 'Prompt is required' }, 400);
+					return createApiResponse('Prompt is required', 400);
 				}
 
 				// Generate image with OpenAI
@@ -89,18 +99,13 @@ export class ImageGeneratorDO extends DurableObject<Env> {
 					})
 				);
 
-				return createJsonResponse({
-					success: true,
-					images: storedImages,
+				return createApiResponse({
+					message: 'Successfully generated images',
+					data: { images: storedImages },
 				});
 			} catch (error) {
 				console.error('Image generation failed:', error);
-				return createJsonResponse(
-					{
-						error: 'Failed to generate or store image',
-					},
-					500
-				);
+				return createApiResponse('Failed to generate or store image', 500);
 			}
 		}
 
@@ -110,7 +115,7 @@ export class ImageGeneratorDO extends DurableObject<Env> {
 				const object = await this.env.AIBTCDEV_SERVICES_BUCKET.get(key);
 
 				if (!object) {
-					return createJsonResponse({ error: 'Image not found' }, 404);
+					return createApiResponse('Image not found', 404);
 				}
 
 				return new Response(object.body, {
@@ -120,7 +125,7 @@ export class ImageGeneratorDO extends DurableObject<Env> {
 					},
 				});
 			} catch (error) {
-				return createJsonResponse({ error: 'Failed to retrieve image' }, 500);
+				return createApiResponse('Failed to retrieve image', 500);
 			}
 		}
 
@@ -134,22 +139,25 @@ export class ImageGeneratorDO extends DurableObject<Env> {
 
 				const objects = await this.env.AIBTCDEV_SERVICES_BUCKET.list(options);
 
-				return createJsonResponse({
-					images: objects.objects.map((obj) => ({
-						key: obj.key,
-						url: `/image/get/${obj.key}`,
-						size: obj.size,
-						uploaded: obj.uploaded,
-						metadata: obj.customMetadata,
-					})),
-					truncated: objects.truncated,
-					cursor: objects.truncated ? objects.cursor : undefined,
+				return createApiResponse({
+					message: 'Successfully retrieved image list',
+					data: {
+						images: objects.objects.map((obj) => ({
+							key: obj.key,
+							url: `/image/get/${obj.key}`,
+							size: obj.size,
+							uploaded: obj.uploaded,
+							metadata: obj.customMetadata,
+						})),
+						truncated: objects.truncated,
+						cursor: objects.truncated ? objects.cursor : undefined,
+					},
 				});
 			} catch (error) {
-				return createJsonResponse({ error: 'Failed to list images' }, 500);
+				return createApiResponse('Failed to list images', 500);
 			}
 		}
 
-		return createJsonResponse({ error: `Unsupported endpoint: ${endpoint}` }, 404);
+		return createUnsupportedEndpointResponse(endpoint, this.SUPPORTED_ENDPOINTS);
 	}
 }

@@ -4,10 +4,10 @@ import { userAgentsModel, userCrewsModel, userCronsModel, userProfilesModel, use
 /** CRON MANAGEMENT */
 
 interface CronResult {
-    cron?: UserCronsTable;
-    crons?: UserCronsTable[];
-    success: boolean;
-    error?: string;
+	cron?: UserCronsTable;
+	crons?: UserCronsTable[];
+	success: boolean;
+	error?: string;
 }
 
 /**
@@ -17,31 +17,31 @@ interface CronResult {
  * @throws Error if database query fails
  */
 export async function getEnabledCrons(orm: D1Orm): Promise<CronResult> {
-    try {
-        userCronsModel.SetOrm(orm);
-        const result = await userCronsModel.All({
-            where: {
-                cron_enabled: 1,
-            },
-            orderBy: [
-                {
-                    column: 'created_at',
-                    descending: true,
-                },
-            ],
-        });
-        return {
-            crons: result.results as unknown as UserCronsTable[],
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in getEnabledCrons: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            crons: [],
-            success: false,
-            error: `Failed to get enabled crons: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCronsModel.SetOrm(orm);
+		const result = await userCronsModel.All({
+			where: {
+				cron_enabled: 1,
+			},
+			orderBy: [
+				{
+					column: 'created_at',
+					descending: true,
+				},
+			],
+		});
+		return {
+			crons: result.results as unknown as UserCronsTable[],
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in getEnabledCrons: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			crons: [],
+			success: false,
+			error: `Failed to get enabled crons: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -52,31 +52,31 @@ export async function getEnabledCrons(orm: D1Orm): Promise<CronResult> {
  * @throws Error if database query fails
  */
 export async function getCronsByCrew(orm: D1Orm, crewId: number): Promise<CronResult> {
-    try {
-        userCronsModel.SetOrm(orm);
-        const result = await userCronsModel.All({
-            where: {
-                crew_id: crewId
-            },
-            orderBy: [
-                {
-                    column: 'created_at',
-                    descending: true,
-                },
-            ],
-        });
-        return {
-            crons: result.results as unknown as UserCronsTable[],
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in getCronsByCrew: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            crons: [],
-            success: false,
-            error: `Failed to get crons for crew: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCronsModel.SetOrm(orm);
+		const result = await userCronsModel.All({
+			where: {
+				crew_id: crewId,
+			},
+			orderBy: [
+				{
+					column: 'created_at',
+					descending: true,
+				},
+			],
+		});
+		return {
+			crons: result.results as unknown as UserCronsTable[],
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in getCronsByCrew: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			crons: [],
+			success: false,
+			error: `Failed to get crons for crew: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -87,20 +87,20 @@ export async function getCronsByCrew(orm: D1Orm, crewId: number): Promise<CronRe
  * @throws Error if database insertion fails
  */
 export async function createCron(orm: D1Orm, cronData: Omit<UserCronsTable, 'id' | 'created_at' | 'updated_at'>): Promise<CronResult> {
-    try {
-        userCronsModel.SetOrm(orm);
-        const cron = await userCronsModel.InsertOne(cronData);
-        return {
-            cron: cron as unknown as UserCronsTable,
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in createCron: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            success: false,
-            error: `Failed to create cron: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCronsModel.SetOrm(orm);
+		const cron = await userCronsModel.InsertOne(cronData);
+		return {
+			cron: cron as unknown as UserCronsTable,
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in createCron: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			success: false,
+			error: `Failed to create cron: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -112,26 +112,26 @@ export async function createCron(orm: D1Orm, cronData: Omit<UserCronsTable, 'id'
  * @throws Error if database update fails
  */
 export async function updateCronInput(orm: D1Orm, cronId: number, cronInput: string): Promise<CronResult> {
-    try {
-        userCronsModel.SetOrm(orm);
-        await userCronsModel.Update({
-            where: {
-                id: cronId
-            },
-            data: {
-                cron_input: cronInput
-            }
-        });
-        return {
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in updateCronInput: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            success: false,
-            error: `Failed to update cron input: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCronsModel.SetOrm(orm);
+		await userCronsModel.Update({
+			where: {
+				id: cronId,
+			},
+			data: {
+				cron_input: cronInput,
+			},
+		});
+		return {
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in updateCronInput: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			success: false,
+			error: `Failed to update cron input: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 /**
@@ -143,33 +143,33 @@ export async function updateCronInput(orm: D1Orm, cronId: number, cronInput: str
  * @throws Error if database update fails
  */
 export async function toggleCronStatus(orm: D1Orm, cronId: number, enabled: 0 | 1): Promise<CronResult> {
-    try {
-        userCronsModel.SetOrm(orm);
-        await userCronsModel.Update({
-            where: {
-                id: cronId
-            },
-            data: {
-                cron_enabled: enabled
-            }
-        });
-        return {
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in toggleCronStatus: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            success: false,
-            error: `Failed to toggle cron status: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+	try {
+		userCronsModel.SetOrm(orm);
+		await userCronsModel.Update({
+			where: {
+				id: cronId,
+			},
+			data: {
+				cron_enabled: enabled,
+			},
+		});
+		return {
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in toggleCronStatus: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			success: false,
+			error: `Failed to toggle cron status: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
 
 interface DetailedCronData {
-    crew: any;
-    agents: any[];
-    tasks: any[];
-    profile: any;
+	crew: any;
+	agents: any[];
+	tasks: any[];
+	profile: any;
 }
 
 /**
@@ -179,84 +179,84 @@ interface DetailedCronData {
  * @throws Error if database query fails
  */
 export async function getEnabledCronsDetailed(orm: D1Orm): Promise<{
-    details?: DetailedCronData[];
-    success: boolean;
-    error?: string;
+	details?: DetailedCronData[];
+	success: boolean;
+	error?: string;
 }> {
-    try {
-        userCronsModel.SetOrm(orm);
-        userCrewsModel.SetOrm(orm);
-        userAgentsModel.SetOrm(orm);
-        userTasksModel.SetOrm(orm);
-        userProfilesModel.SetOrm(orm);
+	try {
+		userCronsModel.SetOrm(orm);
+		userCrewsModel.SetOrm(orm);
+		userAgentsModel.SetOrm(orm);
+		userTasksModel.SetOrm(orm);
+		userProfilesModel.SetOrm(orm);
 
-        const crons = await userCronsModel.All({
-            where: {
-                cron_enabled: 1,
-            },
-            orderBy: [
-                {
-                    column: 'created_at',
-                    descending: true,
-                },
-            ],
-        });
+		const crons = await userCronsModel.All({
+			where: {
+				cron_enabled: 1,
+			},
+			orderBy: [
+				{
+					column: 'created_at',
+					descending: true,
+				},
+			],
+		});
 
-        const details: DetailedCronData[] = [];
+		const details: DetailedCronData[] = [];
 
-        // Iterate through all cron entries returned
-        for (const cron of crons.results) {
-            // Get the related crew info for this cron
-            const crew = await userCrewsModel.First({
-                where: {
-                    id: cron.crew_id,
-                },
-            });
+		// Iterate through all cron entries returned
+		for (const cron of crons.results) {
+			// Get the related crew info for this cron
+			const crew = await userCrewsModel.First({
+				where: {
+					id: cron.crew_id,
+				},
+			});
 
-            // Get all of the agents for the crew
-            const agents = await userAgentsModel.All({
-                where: {
-                    profile_id: cron.profile_id,
-                    crew_id: cron.crew_id,
-                },
-            });
+			// Get all of the agents for the crew
+			const agents = await userAgentsModel.All({
+				where: {
+					profile_id: cron.profile_id,
+					crew_id: cron.crew_id,
+				},
+			});
 
-            // Get all of the tasks for each agent
-            const tasks = [];
-            for (const agent of agents.results) {
-                const agentTasks = await userTasksModel.All({
-                    where: {
-                        profile_id: cron.profile_id,
-                        crew_id: cron.crew_id,
-                        agent_id: agent.id,
-                    },
-                });
-                tasks.push(agentTasks.results);
-            }
+			// Get all of the tasks for each agent
+			const tasks = [];
+			for (const agent of agents.results) {
+				const agentTasks = await userTasksModel.All({
+					where: {
+						profile_id: cron.profile_id,
+						crew_id: cron.crew_id,
+						agent_id: agent.id,
+					},
+				});
+				tasks.push(agentTasks.results);
+			}
 
-            const profile = await userProfilesModel.First({
-                where: {
-                    stx_address: cron.profile_id,
-                },
-            });
+			const profile = await userProfilesModel.First({
+				where: {
+					stx_address: cron.profile_id,
+				},
+			});
 
-            details.push({
-                crew,
-                agents: agents.results,
-                tasks,
-                profile,
-            });
-        }
+			details.push({
+				crew,
+				agents: agents.results,
+				tasks,
+				profile,
+			});
+		}
 
-        return {
-            details,
-            success: true
-        };
-    } catch (error) {
-        console.error(`Error in getEnabledCronsDetailed: ${error instanceof Error ? error.message : String(error)}`);
-        return {
-            success: false,
-            error: `Failed to get detailed cron information: ${error instanceof Error ? error.message : String(error)}`
-        };
-    }
+		return {
+			details,
+			success: true,
+		};
+	} catch (error) {
+		console.error(`Error in getEnabledCronsDetailed: ${error instanceof Error ? error.message : String(error)}`);
+		return {
+			success: false,
+			error: `Failed to get detailed cron information: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
 }
