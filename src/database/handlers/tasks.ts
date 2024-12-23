@@ -1,10 +1,44 @@
-import { Handler } from './types';
+import { Handler, HandlerDefinition } from './types';
 import { createApiResponse } from '../../utils/requests-responses';
 import { validateSessionToken } from '../../utils/auth-helper';
 import { getTask, getTasks, createTask, updateTask, deleteTask, deleteTasks } from '../helpers/tasks';
 import { UserTasksTable } from '../models';
 
-export const handleTasks: Handler = async ({ orm, env, request, url }) => {
+export const tasksHandler: HandlerDefinition = {
+    baseRoute: 'tasks',
+    endpoints: [
+        {
+            path: '/tasks/get',
+            methods: ['GET'],
+            description: 'Get a specific task by ID'
+        },
+        {
+            path: '/tasks/list',
+            methods: ['GET'],
+            description: 'Get all tasks for an agent'
+        },
+        {
+            path: '/tasks/create',
+            methods: ['POST'],
+            description: 'Create a new task'
+        },
+        {
+            path: '/tasks/update',
+            methods: ['PUT'],
+            description: 'Update an existing task'
+        },
+        {
+            path: '/tasks/delete',
+            methods: ['DELETE'],
+            description: 'Delete a specific task'
+        },
+        {
+            path: '/tasks/delete-all',
+            methods: ['DELETE'],
+            description: 'Delete all tasks for an agent'
+        }
+    ],
+    handler: async ({ orm, env, request, url }) => {
 	const endpoint = url.pathname.split('/').pop();
 
 	switch (endpoint) {
