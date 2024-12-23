@@ -11,6 +11,7 @@ export const userCrewExecutionStepsModel = new Model(
 	{
 		id: { type: DataTypes.INTEGER, notNull: true },
 		created_at: { type: DataTypes.STRING },
+		updated_at: { type: DataTypes.STRING },
 		profile_id: { type: DataTypes.STRING, notNull: true },
 		crew_id: { type: DataTypes.INTEGER, notNull: true },
 		execution_id: { type: DataTypes.INTEGER, notNull: true },
@@ -36,5 +37,5 @@ export interface UserCrewExecutionStep {
 
 // Transform functions using generic utility
 export const transformToCamelCase = (step: UserCrewExecutionStepsTable): UserCrewExecutionStep => toCamelCase(step);
-export const transformToSnakeCase = (step: Partial<UserCrewExecutionStep>): Partial<Omit<UserCrewExecutionStepsTable, 'id' | 'created_at'>> => 
+export const transformToSnakeCase = (step: Partial<UserCrewExecutionStep>): Partial<Omit<UserCrewExecutionStepsTable, 'id' | 'created_at' | 'updated_at'>> => 
     toSnakeCase(step);
